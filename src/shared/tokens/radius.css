@@ -1,0 +1,102 @@
+:root {
+  /* =========================================================
+     RADIUS SCALE
+  ========================================================= */
+
+  --radius-none: 0;
+
+  --radius-xs: 0.25rem;    /* 4px */
+  --radius-sm: 0.5rem;     /* 8px */
+  --radius-md: 0.75rem;    /* 12px */
+  --radius-lg: 1rem;       /* 16px */
+  --radius-xl: 1.25rem;    /* 20px */
+  --radius-2xl: 1.5rem;    /* 24px */
+
+  --radius-full: 999px;
+
+  /* =========================================================
+     COMPONENT RADIUS
+  ========================================================= */
+
+  --button-radius: var(--radius-lg);
+  --input-radius: var(--radius-lg);
+
+  --card-radius: var(--radius-xl);
+  --modal-radius: var(--radius-2xl);
+
+  --badge-radius: var(--radius-full);
+}
+
+/* SMALL PHONE (0px - 479px) */
+
+@media (max-width: 479px) {
+  :root {
+    --button-radius: var(--radius-md);
+    --input-radius: var(--radius-md);
+
+    --card-radius: var(--radius-lg);
+    --modal-radius: var(--radius-xl);
+  }
+}
+
+/* PHONE LANDSCAPE (0px - 767px + landscape) */
+
+@media (max-width: 767px) and (orientation: landscape) {
+  :root {
+    --modal-radius: var(--radius-xl);
+  }
+}
+
+/* TABLET PORTRAIT (768px - 1099px) */
+
+@media (min-width: 768px) and (max-width: 1099px) {
+  :root {
+    --card-radius: var(--radius-xl);
+    --modal-radius: var(--radius-2xl);
+  }
+}
+
+/* TABLET LANDSCAPE (1100px - 1199px + landscape) */
+
+@media (min-width: 1100px) and (max-width: 1199px) and (orientation: landscape) {
+  :root {
+    --card-radius: var(--radius-xl);
+    --modal-radius: var(--radius-2xl);
+  }
+}
+
+/* SMALL DESKTOP (1200px - 1439px) */
+
+@media (min-width: 1200px) {
+  :root {
+    --card-radius: var(--radius-2xl);
+    --modal-radius: calc(var(--radius-2xl) + 4px);
+  }
+}
+
+/* LARGE DESKTOP (1440px - 1919px) */
+
+@media (min-width: 1440px) {
+  :root {
+    --card-radius: calc(var(--radius-2xl) + 2px);
+  }
+}
+
+/* ULTRAWIDE (1920px and up) */
+
+@media (min-width: 1920px) {
+  :root {
+    --card-radius: calc(var(--radius-2xl) + 4px);
+    --modal-radius: calc(var(--radius-2xl) + 8px);
+  }
+}
+
+/* BROWSER PHONE */
+
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 767px) {
+    :root {
+      --modal-radius: var(--radius-xl);
+    }
+  }
+}

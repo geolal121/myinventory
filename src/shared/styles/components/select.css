@@ -1,0 +1,171 @@
+/* PHONE APP */
+/* Default mobile styles */
+
+.ui-select-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+/* LABEL */
+
+.ui-select-field__label {
+  color: var(--color-text-secondary);
+
+  font-size: var(--label-font-size);
+  font-weight: var(--label-font-weight);
+}
+
+/* SELECT */
+
+.ui-select {
+  width: 100%;
+  min-height: 56px;
+
+  padding:
+    var(--input-padding-y)
+    var(--input-padding-x);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--input-radius);
+
+  background: var(--color-surface);
+
+  color: var(--color-text-primary);
+
+  font-size: var(--input-font-size);
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  cursor: pointer;
+
+  transition:
+    border-color var(--transition-normal),
+    background-color var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.ui-select:hover {
+  border-color: var(--color-border-strong);
+}
+
+.ui-select:focus {
+  border-color: var(--color-accent);
+
+  background: var(--color-surface-soft);
+
+  box-shadow: var(--glow-accent);
+}
+
+/* OPTION */
+
+.ui-select option {
+  background: var(--color-surface-elevated);
+
+  color: var(--color-text-primary);
+}
+
+/* ERROR */
+
+.ui-select--error {
+  border-color: var(--color-danger);
+
+  box-shadow: var(--glow-danger);
+}
+
+/* HELPER / ERROR TEXT */
+
+.ui-select-field__helper,
+.ui-select-field__error {
+  font-size: var(--font-size-sm);
+}
+
+.ui-select-field__helper {
+  color: var(--color-text-muted);
+}
+
+.ui-select-field__error {
+  color: var(--color-danger);
+}
+
+/* DISABLED */
+
+.ui-select:disabled {
+  opacity: var(--disabled-opacity);
+
+  cursor: not-allowed;
+}
+
+/* SMALL PHONE (0px - 479px) */
+
+@media (max-width: 479px) {
+  .ui-select {
+    min-height: 50px;
+
+    font-size: var(--font-size-sm);
+  }
+
+  .ui-select-field__label {
+    font-size: var(--font-size-sm);
+  }
+}
+
+/* PHONE LANDSCAPE (0px - 767px + landscape) */
+
+@media (max-width: 767px) and (orientation: landscape) {
+  .ui-select {
+    min-height: 48px;
+  }
+}
+
+/* TABLET PORTRAIT (768px - 1099px) */
+
+@media (min-width: 768px) and (max-width: 1099px) {
+  .ui-select {
+    min-height: 54px;
+  }
+}
+
+/* TABLET LANDSCAPE (1100px - 1199px + landscape) */
+
+@media (min-width: 1100px) and (max-width: 1199px) and (orientation: landscape) {
+  .ui-select {
+    min-height: 54px;
+  }
+}
+
+/* SMALL DESKTOP (1200px - 1439px) */
+
+@media (min-width: 1200px) {
+  .ui-select {
+    min-height: 56px;
+  }
+}
+
+/* LARGE DESKTOP (1440px - 1919px) */
+
+@media (min-width: 1440px) {
+  .ui-select {
+    font-size: calc(var(--input-font-size) + 1px);
+  }
+}
+
+/* ULTRAWIDE (1920px and up) */
+
+@media (min-width: 1920px) {
+  .ui-select {
+    min-height: 60px;
+  }
+}
+
+/* BROWSER PHONE */
+
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 767px) {
+    .ui-select {
+      -webkit-tap-highlight-color: transparent;
+    }
+  }
+}

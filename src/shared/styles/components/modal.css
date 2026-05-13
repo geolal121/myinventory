@@ -1,0 +1,242 @@
+/* PHONE APP */
+/* Default mobile styles */
+
+.ui-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-modal);
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  padding: var(--spacing-3);
+
+  background: var(--color-overlay);
+  backdrop-filter: var(--backdrop-blur);
+
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+.ui-modal {
+  width: 100%;
+  max-width: 640px;
+  max-height: calc(100vh - var(--spacing-6));
+
+  display: flex;
+  flex-direction: column;
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--modal-radius) var(--modal-radius) 0 0;
+
+  background: var(--color-surface);
+  box-shadow: var(--modal-shadow);
+
+  overflow: hidden;
+
+  animation: modal-enter var(--transition-normal);
+}
+
+.ui-modal__header {
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+
+  padding: var(--spacing-4);
+
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ui-modal__header h2 {
+  font-size: var(--font-size-xl);
+}
+
+.ui-modal__description {
+  margin-top: var(--spacing-2);
+
+  font-size: var(--font-size-sm);
+}
+
+.ui-modal__body {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--modal-gap);
+
+  padding: var(--spacing-4);
+
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ui-modal__footer {
+  flex-shrink: 0;
+
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-3);
+
+  padding: var(--spacing-4);
+
+  border-top: 1px solid var(--color-border);
+
+  background: var(--color-surface);
+}
+
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: var(--modal-enter-transform);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* SMALL PHONE (0px - 479px) */
+
+@media (max-width: 479px) {
+  .ui-modal-overlay {
+    padding: var(--spacing-2);
+  }
+
+  .ui-modal {
+    max-height: calc(100vh - var(--spacing-8));
+
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+
+  .ui-modal__header,
+  .ui-modal__body,
+  .ui-modal__footer {
+    padding: var(--spacing-3);
+  }
+
+  .ui-modal__header h2 {
+    font-size: var(--font-size-lg);
+  }
+}
+
+/* PHONE LANDSCAPE (0px - 767px + landscape) */
+
+@media (max-width: 767px) and (orientation: landscape) {
+  .ui-modal-overlay {
+    align-items: center;
+
+    padding: var(--spacing-3);
+  }
+
+  .ui-modal {
+    max-height: calc(100vh - var(--spacing-6));
+
+    border-radius: var(--radius-xl);
+  }
+
+  .ui-modal__header,
+  .ui-modal__body,
+  .ui-modal__footer {
+    padding: var(--spacing-3);
+  }
+}
+
+/* TABLET PORTRAIT (768px - 1099px) */
+
+@media (min-width: 768px) and (max-width: 1099px) {
+  .ui-modal-overlay {
+    align-items: center;
+
+    padding: var(--spacing-6);
+  }
+
+  .ui-modal {
+    max-height: calc(100vh - var(--spacing-12));
+
+    border-radius: var(--modal-radius);
+  }
+
+  .ui-modal__footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+/* TABLET LANDSCAPE (1100px - 1199px + landscape) */
+
+@media (min-width: 1100px) and (max-width: 1199px) and (orientation: landscape) {
+  .ui-modal-overlay {
+    align-items: center;
+
+    padding: var(--spacing-6);
+  }
+
+  .ui-modal {
+    max-height: calc(100vh - var(--spacing-12));
+
+    border-radius: var(--modal-radius);
+  }
+
+  .ui-modal__footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+/* SMALL DESKTOP (1200px - 1439px) */
+
+@media (min-width: 1200px) {
+  .ui-modal-overlay {
+    align-items: center;
+
+    padding: var(--spacing-6);
+  }
+
+  .ui-modal {
+    max-height: calc(100vh - var(--spacing-12));
+
+    border-radius: var(--modal-radius);
+  }
+
+  .ui-modal__footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+/* LARGE DESKTOP (1440px - 1919px) */
+
+@media (min-width: 1440px) {
+  .ui-modal {
+    max-width: 680px;
+  }
+}
+
+/* ULTRAWIDE (1920px and up) */
+
+@media (min-width: 1920px) {
+  .ui-modal {
+    max-width: 720px;
+  }
+}
+
+/* BROWSER PHONE */
+
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 767px) {
+    .ui-modal {
+      max-height: calc(100dvh - var(--spacing-4));
+    }
+
+    .ui-modal__body {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+}

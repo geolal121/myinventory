@@ -1,0 +1,117 @@
+:root {
+  /* =========================================================
+     TRANSITION DURATIONS
+  ========================================================= */
+
+  --transition-fast: 120ms ease;
+  --transition-normal: 180ms ease;
+  --transition-slow: 280ms ease;
+
+  /* =========================================================
+     TRANSFORMS
+  ========================================================= */
+
+  --hover-scale-sm: scale(1.02);
+  --hover-scale-md: scale(1.04);
+
+  /* =========================================================
+     OPACITY
+  ========================================================= */
+
+  --disabled-opacity: 0.5;
+  --hover-opacity: 0.92;
+
+  /* =========================================================
+     MODAL ANIMATIONS
+  ========================================================= */
+
+  --modal-enter-transform: translateY(10px);
+  --modal-exit-transform: translateY(16px);
+
+  /* =========================================================
+     BACKDROP
+  ========================================================= */
+
+  --backdrop-blur: blur(10px);
+}
+
+/* SMALL PHONE (0px - 479px) */
+
+@media (max-width: 479px) {
+  :root {
+    --transition-fast: 100ms ease;
+    --transition-normal: 160ms ease;
+
+    --hover-scale-sm: scale(1.01);
+    --hover-scale-md: scale(1.02);
+
+    --modal-enter-transform: translateY(8px);
+    --modal-exit-transform: translateY(12px);
+
+    --backdrop-blur: blur(8px);
+  }
+}
+
+/* PHONE LANDSCAPE (0px - 767px + landscape) */
+
+@media (max-width: 767px) and (orientation: landscape) {
+  :root {
+    --modal-enter-transform: translateY(6px);
+  }
+}
+
+/* TABLET PORTRAIT (768px - 1099px) */
+
+@media (min-width: 768px) and (max-width: 1099px) {
+  :root {
+    --transition-normal: 190ms ease;
+  }
+}
+
+/* TABLET LANDSCAPE (1100px - 1199px + landscape) */
+
+@media (min-width: 1100px) and (max-width: 1199px) and (orientation: landscape) {
+  :root {
+    --transition-normal: 200ms ease;
+  }
+}
+
+/* SMALL DESKTOP (1200px - 1439px) */
+
+@media (min-width: 1200px) {
+  :root {
+    --transition-normal: 200ms ease;
+    --transition-slow: 320ms ease;
+
+    --hover-scale-md: scale(1.05);
+  }
+}
+
+/* LARGE DESKTOP (1440px - 1919px) */
+
+@media (min-width: 1440px) {
+  :root {
+    --backdrop-blur: blur(12px);
+  }
+}
+
+/* ULTRAWIDE (1920px and up) */
+
+@media (min-width: 1920px) {
+  :root {
+    --transition-slow: 360ms ease;
+
+    --backdrop-blur: blur(14px);
+  }
+}
+
+/* BROWSER PHONE */
+
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 767px) {
+    :root {
+      --transition-fast: 90ms ease;
+      --transition-normal: 150ms ease;
+    }
+  }
+}

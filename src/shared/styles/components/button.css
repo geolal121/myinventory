@@ -1,0 +1,213 @@
+/* PHONE APP */
+/* Default mobile styles */
+
+.ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+
+  min-height: 56px;
+
+  padding:
+    var(--button-padding-y)
+    var(--button-padding-x);
+
+  border: 1px solid transparent;
+  border-radius: var(--button-radius);
+
+  font-size: var(--button-font-size);
+  font-weight: var(--button-font-weight);
+
+  transition:
+    background-color var(--transition-normal),
+    border-color var(--transition-normal),
+    color var(--transition-normal),
+    transform var(--transition-fast),
+    box-shadow var(--transition-normal),
+    opacity var(--transition-fast);
+}
+
+/* WIDTH */
+
+.ui-button--full {
+  width: 100%;
+}
+
+/* SIZES */
+
+.ui-button--sm {
+  min-height: 44px;
+
+  padding:
+    var(--spacing-2)
+    var(--spacing-4);
+
+  font-size: var(--font-size-sm);
+}
+
+.ui-button--md {
+  min-height: 56px;
+}
+
+.ui-button--lg {
+  min-height: 64px;
+
+  padding:
+    var(--spacing-4)
+    var(--spacing-6);
+
+  font-size: var(--font-size-lg);
+}
+
+/* PRIMARY */
+
+.ui-button--primary {
+  background: var(--color-accent);
+
+  color: var(--color-text-primary);
+
+  box-shadow: var(--button-shadow);
+}
+
+.ui-button--primary:hover {
+  background: var(--color-accent-hover);
+
+  box-shadow: var(--button-shadow-hover);
+
+  transform: var(--hover-scale-sm);
+}
+
+/* SECONDARY */
+
+.ui-button--secondary {
+  border-color: var(--color-border);
+
+  background: var(--color-surface);
+
+  color: var(--color-text-primary);
+}
+
+.ui-button--secondary:hover {
+  border-color: var(--color-accent);
+
+  background: var(--color-surface-soft);
+}
+
+/* GHOST */
+
+.ui-button--ghost {
+  background: transparent;
+
+  color: var(--color-text-secondary);
+}
+
+.ui-button--ghost:hover {
+  background: var(--color-surface-soft);
+
+  color: var(--color-text-primary);
+}
+
+/* DANGER */
+
+.ui-button--danger {
+  background: var(--color-danger);
+
+  color: var(--color-text-primary);
+
+  box-shadow: var(--glow-danger);
+}
+
+.ui-button--danger:hover {
+  opacity: var(--hover-opacity);
+
+  transform: var(--hover-scale-sm);
+}
+
+/* STATES */
+
+.ui-button:disabled {
+  opacity: var(--disabled-opacity);
+
+  cursor: not-allowed;
+}
+
+.ui-button:active {
+  transform: scale(0.98);
+}
+
+/* SMALL PHONE (0px - 479px) */
+
+@media (max-width: 479px) {
+  .ui-button {
+    min-height: 50px;
+
+    padding:
+      var(--spacing-3)
+      var(--spacing-4);
+
+    font-size: var(--font-size-sm);
+  }
+
+  .ui-button--lg {
+    min-height: 56px;
+  }
+}
+
+/* PHONE LANDSCAPE (0px - 767px + landscape) */
+
+@media (max-width: 767px) and (orientation: landscape) {
+  .ui-button {
+    min-height: 48px;
+  }
+}
+
+/* TABLET PORTRAIT (768px - 1099px) */
+
+@media (min-width: 768px) and (max-width: 1099px) {
+  .ui-button--lg {
+    min-height: 60px;
+  }
+}
+
+/* TABLET LANDSCAPE (1100px - 1199px + landscape) */
+
+@media (min-width: 1100px) and (max-width: 1199px) and (orientation: landscape) {
+  .ui-button--lg {
+    min-height: 60px;
+  }
+}
+
+/* SMALL DESKTOP (1200px - 1439px) */
+
+@media (min-width: 1200px) {
+  .ui-button--lg {
+    min-height: 64px;
+  }
+}
+
+/* LARGE DESKTOP (1440px - 1919px) */
+
+@media (min-width: 1440px) {
+  .ui-button {
+    font-size: calc(var(--button-font-size) + 1px);
+  }
+}
+
+/* ULTRAWIDE (1920px and up) */
+
+@media (min-width: 1920px) {
+  .ui-button--lg {
+    min-height: 68px;
+  }
+}
+
+/* BROWSER PHONE */
+
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 767px) {
+    .ui-button {
+      -webkit-tap-highlight-color: transparent;
+    }
+  }
+}

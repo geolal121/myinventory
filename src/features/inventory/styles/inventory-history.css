@@ -1,0 +1,90 @@
+/* PHONE APP */
+/* Default mobile styles */
+
+.inventory-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.inventory-history-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+
+  padding: var(--spacing-4);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--card-radius);
+
+  background: var(--color-surface-soft);
+}
+
+.inventory-history-card__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.inventory-history-card__header strong {
+  color: var(--color-accent);
+
+  font-size: var(--font-size-sm);
+}
+
+.inventory-history-card__header span {
+  color: var(--color-text-muted);
+
+  font-size: var(--font-size-xs);
+}
+
+.inventory-history-card__body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-2);
+}
+
+.inventory-history-card__body p {
+  font-size: var(--font-size-sm);
+}
+
+.inventory-history-card__body strong {
+  color: var(--color-text-primary);
+}
+
+.inventory-history-empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+
+  padding: var(--spacing-5);
+
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--card-radius);
+
+  text-align: center;
+}
+
+/* SMALL PHONE (0px - 479px) */
+
+@media (max-width: 479px) {
+  .inventory-history-card {
+    padding: var(--spacing-3);
+  }
+}
+
+/* TABLET PORTRAIT (768px - 1099px) */
+
+@media (min-width: 768px) and (max-width: 1099px) {
+  .inventory-history-card__body {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* SMALL DESKTOP (1200px - 1439px) */
+
+@media (min-width: 1200px) {
+  .inventory-history-card__body {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

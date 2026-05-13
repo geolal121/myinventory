@@ -1,0 +1,107 @@
+:root {
+  /* =========================================================
+     SHADOWS
+  ========================================================= */
+
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.45);
+
+  /* =========================================================
+     COMPONENT SHADOWS
+  ========================================================= */
+
+  --card-shadow: var(--shadow-sm);
+  --card-shadow-hover: var(--shadow-md);
+
+  --modal-shadow: var(--shadow-lg);
+
+  --button-shadow: 0 8px 22px rgba(249, 115, 22, 0.22);
+  --button-shadow-hover: 0 10px 30px rgba(249, 115, 22, 0.32);
+
+  /* =========================================================
+     GLOWS
+  ========================================================= */
+
+  --glow-accent: 0 0 24px var(--shadow-accent);
+
+  --glow-danger: 0 0 20px rgba(239, 68, 68, 0.22);
+  --glow-success: 0 0 20px rgba(34, 197, 94, 0.22);
+}
+
+/* SMALL PHONE (0px - 479px) */
+
+@media (max-width: 479px) {
+  :root {
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.22);
+    --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.38);
+
+    --button-shadow: 0 4px 14px rgba(249, 115, 22, 0.18);
+    --button-shadow-hover: 0 6px 18px rgba(249, 115, 22, 0.24);
+
+    --glow-accent: 0 0 18px var(--shadow-accent);
+  }
+}
+
+/* PHONE LANDSCAPE (0px - 767px + landscape) */
+
+@media (max-width: 767px) and (orientation: landscape) {
+  :root {
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* TABLET PORTRAIT (768px - 1099px) */
+
+@media (min-width: 768px) and (max-width: 1099px) {
+  :root {
+    --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.36);
+  }
+}
+
+/* TABLET LANDSCAPE (1100px - 1199px + landscape) */
+
+@media (min-width: 1100px) and (max-width: 1199px) and (orientation: landscape) {
+  :root {
+    --shadow-lg: 0 20px 52px rgba(0, 0, 0, 0.46);
+  }
+}
+
+/* SMALL DESKTOP (1200px - 1439px) */
+
+@media (min-width: 1200px) {
+  :root {
+    --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.5);
+
+    --button-shadow-hover: 0 14px 36px rgba(249, 115, 22, 0.34);
+  }
+}
+
+/* LARGE DESKTOP (1440px - 1919px) */
+
+@media (min-width: 1440px) {
+  :root {
+    --shadow-lg: 0 28px 72px rgba(0, 0, 0, 0.52);
+  }
+}
+
+/* ULTRAWIDE (1920px and up) */
+
+@media (min-width: 1920px) {
+  :root {
+    --shadow-lg: 0 36px 88px rgba(0, 0, 0, 0.56);
+
+    --glow-accent: 0 0 32px var(--shadow-accent);
+  }
+}
+
+/* BROWSER PHONE */
+
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 767px) {
+    :root {
+      --shadow-lg: 0 14px 34px rgba(0, 0, 0, 0.42);
+    }
+  }
+}

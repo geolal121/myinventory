@@ -1,0 +1,186 @@
+:root {
+  /* =========================================================
+     SPACING SCALE
+  ========================================================= */
+
+  --spacing-0: 0;
+
+  --spacing-1: 0.25rem;   /* 4px */
+  --spacing-2: 0.5rem;    /* 8px */
+  --spacing-3: 0.75rem;   /* 12px */
+  --spacing-4: 1rem;      /* 16px */
+  --spacing-5: 1.25rem;   /* 20px */
+  --spacing-6: 1.5rem;    /* 24px */
+  --spacing-7: 1.75rem;   /* 28px */
+  --spacing-8: 2rem;      /* 32px */
+  --spacing-10: 2.5rem;   /* 40px */
+  --spacing-12: 3rem;     /* 48px */
+  --spacing-16: 4rem;     /* 64px */
+  --spacing-20: 5rem;     /* 80px */
+
+  /* =========================================================
+     LAYOUT
+  ========================================================= */
+
+  --layout-max-width-sm: 480px;
+  --layout-max-width-md: 768px;
+  --layout-max-width-lg: 1200px;
+
+  --layout-page-padding-x: var(--spacing-4);
+  --layout-page-padding-y: var(--spacing-5);
+
+  /* =========================================================
+     SECTION SPACING
+  ========================================================= */
+
+  --section-spacing-sm: var(--spacing-6);
+  --section-spacing-md: var(--spacing-8);
+  --section-spacing-lg: var(--spacing-12);
+
+  /* =========================================================
+     CARD SPACING
+  ========================================================= */
+
+  --card-padding-sm: var(--spacing-3);
+  --card-padding-md: var(--spacing-4);
+  --card-padding-lg: var(--spacing-6);
+
+  --card-gap-sm: var(--spacing-2);
+  --card-gap-md: var(--spacing-4);
+  --card-gap-lg: var(--spacing-6);
+
+  /* =========================================================
+     FORM SPACING
+  ========================================================= */
+
+  --form-gap-sm: var(--spacing-3);
+  --form-gap-md: var(--spacing-4);
+  --form-gap-lg: var(--spacing-6);
+
+  --input-padding-x: var(--spacing-4);
+  --input-padding-y: 0.875rem;
+
+  --button-padding-x: var(--spacing-5);
+  --button-padding-y: 0.875rem;
+
+  /* =========================================================
+     GRID / FLEX GAPS
+  ========================================================= */
+
+  --grid-gap-sm: var(--spacing-3);
+  --grid-gap-md: var(--spacing-4);
+  --grid-gap-lg: var(--spacing-6);
+
+  /* =========================================================
+     MODALS
+  ========================================================= */
+
+  --modal-padding: var(--spacing-5);
+  --modal-gap: var(--spacing-5);
+
+  /* =========================================================
+     HEADER / FOOTER
+  ========================================================= */
+
+  --header-height: 64px;
+  --bottom-nav-height: 72px;
+}
+
+/* SMALL PHONE (0px - 479px) */
+
+@media (max-width: 479px) {
+  :root {
+    --layout-page-padding-x: var(--spacing-3);
+    --layout-page-padding-y: var(--spacing-4);
+
+    --section-spacing-sm: var(--spacing-5);
+    --section-spacing-md: var(--spacing-6);
+    --section-spacing-lg: var(--spacing-8);
+
+    --card-padding-lg: var(--spacing-5);
+
+    --modal-padding: var(--spacing-4);
+    --modal-gap: var(--spacing-4);
+
+    --header-height: 60px;
+    --bottom-nav-height: 68px;
+  }
+}
+
+/* PHONE LANDSCAPE (0px - 767px + landscape) */
+
+@media (max-width: 767px) and (orientation: landscape) {
+  :root {
+    --section-spacing-lg: var(--spacing-10);
+
+    --header-height: 56px;
+  }
+}
+
+/* TABLET PORTRAIT (768px - 1099px) */
+
+@media (min-width: 768px) and (max-width: 1099px) {
+  :root {
+    --layout-page-padding-x: var(--spacing-5);
+
+    --section-spacing-lg: var(--spacing-16);
+
+    --card-padding-lg: var(--spacing-7);
+
+    --modal-padding: var(--spacing-6);
+  }
+}
+
+/* TABLET LANDSCAPE (1100px - 1199px + landscape) */
+
+@media (min-width: 1100px) and (max-width: 1199px) and (orientation: landscape) {
+  :root {
+    --layout-page-padding-x: var(--spacing-6);
+
+    --section-spacing-lg: var(--spacing-16);
+
+    --card-padding-lg: var(--spacing-7);
+  }
+}
+
+/* SMALL DESKTOP (1200px - 1439px) */
+
+@media (min-width: 1200px) {
+  :root {
+    --layout-page-padding-x: var(--spacing-6);
+
+    --section-spacing-lg: var(--spacing-20);
+
+    --card-padding-lg: var(--spacing-8);
+
+    --modal-padding: var(--spacing-7);
+  }
+}
+
+/* LARGE DESKTOP (1440px - 1919px) */
+
+@media (min-width: 1440px) {
+  :root {
+    --layout-max-width-lg: 1280px;
+  }
+}
+
+/* ULTRAWIDE (1920px and up) */
+
+@media (min-width: 1920px) {
+  :root {
+    --layout-max-width-lg: 1440px;
+
+    --section-spacing-lg: 6rem;
+  }
+}
+
+/* BROWSER PHONE */
+
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 767px) {
+    :root {
+      --bottom-nav-height: 76px;
+    }
+  }
+}

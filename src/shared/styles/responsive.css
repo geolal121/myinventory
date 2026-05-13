@@ -1,0 +1,142 @@
+/*
+========================================
+RESPONSIVE SYSTEM
+========================================
+
+PHONE APP:
+Default styles. No media query.
+
+SMALL PHONE:
+0px - 479px
+
+PHONE LANDSCAPE:
+0px - 767px + landscape
+
+TABLET PORTRAIT:
+768px - 1099px
+
+TABLET LANDSCAPE:
+1100px - 1199px + landscape
+
+SMALL DESKTOP:
+1200px - 1439px
+
+LARGE DESKTOP:
+1440px - 1919px
+
+ULTRAWIDE:
+1920px+
+
+BROWSER PHONE:
+Safari / mobile browser fixes only.
+*/
+
+
+/* PHONE APP */
+/* Default mobile styles */
+
+.page-shell {
+  min-height: 100vh;
+  padding-top: var(--spacing-4);
+  padding-bottom: var(--spacing-4);
+}
+
+.site-container {
+  width: min(100% - var(--spacing-3) * 2, 100%);
+  margin-inline: auto;
+}
+
+
+/* SMALL PHONE */
+@media (max-width: 479px) {
+  .site-container {
+    width: min(100% - var(--spacing-2) * 2, 100%);
+  }
+}
+
+
+/* PHONE LANDSCAPE */
+@media (max-width: 767px) and (orientation: landscape) {
+  .page-shell {
+    padding-top: var(--spacing-3);
+    padding-bottom: var(--spacing-3);
+  }
+
+  .site-container {
+    width: min(100% - var(--spacing-3) * 2, 100%);
+  }
+}
+
+
+/* TABLET PORTRAIT */
+@media (min-width: 768px) and (max-width: 1099px) {
+  .page-shell {
+    padding-top: var(--spacing-5);
+    padding-bottom: var(--spacing-5);
+  }
+
+  .site-container {
+    width: min(100% - var(--spacing-4) * 2, 920px);
+  }
+}
+
+
+/* TABLET LANDSCAPE */
+@media (min-width: 1100px) and (max-width: 1199px) and (orientation: landscape) {
+  .page-shell {
+    padding-top: var(--spacing-5);
+    padding-bottom: var(--spacing-5);
+  }
+
+  .site-container {
+    width: min(100% - var(--spacing-5) * 2, 1080px);
+  }
+}
+
+
+/* SMALL DESKTOP */
+@media (min-width: 1200px) {
+  .page-shell {
+    padding-top: var(--spacing-6);
+    padding-bottom: var(--spacing-6);
+  }
+
+  .site-container {
+    width: min(100% - var(--spacing-6) * 2, 1200px);
+  }
+}
+
+
+/* LARGE DESKTOP */
+@media (min-width: 1440px) {
+  .site-container {
+    width: min(100% - var(--spacing-6) * 2, 1280px);
+  }
+}
+
+
+/* ULTRAWIDE */
+@media (min-width: 1920px) {
+  .site-container {
+    width: min(100% - var(--spacing-7) * 2, 1440px);
+  }
+}
+
+
+/* BROWSER PHONE */
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 767px) {
+    .page-shell {
+      min-height: 100dvh;
+    }
+
+    .ui-modal {
+      max-height: calc(100dvh - var(--spacing-4));
+    }
+
+    .ui-modal__body {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+}

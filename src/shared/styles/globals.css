@@ -1,0 +1,231 @@
+/* =========================================================
+   IMPORT RESET
+========================================================= */
+
+@import './reset.css';
+
+/* =========================================================
+   IMPORT TOKENS
+========================================================= */
+
+@import '../tokens/colors.css';
+@import '../tokens/typography.css';
+@import '../tokens/spacing.css';
+@import '../tokens/radius.css';
+@import '../tokens/shadows.css';
+@import '../tokens/transitions.css';
+@import '../tokens/z-index.css';
+
+/* =========================================================
+   IMPORT RESPONSIVE SYSTEM
+========================================================= */
+
+@import './responsive.css';
+
+/* =========================================================
+   IMPORT SHARED COMPONENT STYLES
+========================================================= */
+
+@import './components/button.css';
+@import './components/input.css';
+@import './components/select.css';
+@import './components/card.css';
+@import './components/modal.css';
+
+/* PHONE APP */
+/* Default mobile styles */
+
+/* ROOT */
+
+:root {
+  color-scheme: dark;
+}
+
+/* HTML / BODY */
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-text-primary);
+
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size);
+  font-weight: var(--body-font-weight);
+  line-height: var(--body-line-height);
+
+  text-rendering: optimizeLegibility;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* TYPOGRAPHY */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--heading-font-family);
+  font-weight: var(--heading-font-weight);
+  line-height: var(--heading-line-height);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+h1 {
+  font-size: var(--heading-h1-size);
+}
+
+h2 {
+  font-size: var(--heading-h2-size);
+}
+
+h3 {
+  font-size: var(--heading-h3-size);
+}
+
+p {
+  color: var(--color-text-secondary);
+}
+
+/* BUTTONS */
+
+button {
+  transition:
+    background-color var(--transition-normal),
+    border-color var(--transition-normal),
+    color var(--transition-normal),
+    opacity var(--transition-normal);
+}
+
+/* INPUTS */
+
+input,
+textarea,
+select {
+  color: var(--color-text-primary);
+}
+
+/* SCROLLBAR */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background-soft);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-elevated);
+
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-strong);
+}
+
+/* SELECTION */
+
+::selection {
+  background: var(--color-accent);
+
+  color: var(--color-text-primary);
+}
+
+/* UTILITIES */
+
+.hidden {
+  display: none !important;
+}
+
+.visually-hidden {
+  position: absolute;
+
+  width: 1px;
+  height: 1px;
+
+  overflow: hidden;
+
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+
+  white-space: nowrap;
+}
+
+/* SMALL PHONE (0px - 479px) */
+
+@media (max-width: 479px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+}
+
+/* PHONE LANDSCAPE (0px - 767px + landscape) */
+
+@media (max-width: 767px) and (orientation: landscape) {
+  body {
+    min-height: 100vh;
+  }
+}
+
+/* TABLET PORTRAIT (768px - 1099px) */
+
+@media (min-width: 768px) and (max-width: 1099px) {
+  body {
+    overflow-x: hidden;
+  }
+}
+
+/* TABLET LANDSCAPE (1100px - 1199px + landscape) */
+
+@media (min-width: 1100px) and (max-width: 1199px) and (orientation: landscape) {
+  body {
+    overflow-x: hidden;
+  }
+}
+
+/* SMALL DESKTOP (1200px - 1439px) */
+
+@media (min-width: 1200px) {
+  body {
+    overflow-x: hidden;
+  }
+}
+
+/* LARGE DESKTOP (1440px - 1919px) */
+
+@media (min-width: 1440px) {
+  ::-webkit-scrollbar {
+    width: 12px;
+  }
+}
+
+/* ULTRAWIDE (1920px and up) */
+
+@media (min-width: 1920px) {
+  body {
+    letter-spacing: 0.0025em;
+  }
+}
+
+/* BROWSER PHONE */
+
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 767px) {
+    body {
+      min-height: 100dvh;
+    }
+  }
+}
