@@ -59,6 +59,35 @@ export const validateInventoryTransaction = ({
     }
   }
 
+  if (action === INVENTORY_ACTIONS.DELETE) {
+    const cleanLocation = normalizeText(transaction.location)
+
+    if (!cleanLocation) {
+      return {
+        isValid: false,
+        message: 'Location is required.',
+      }
+    }
+
+    const existingItem = getInventoryItem({
+      items,
+      partNumber: cleanPartNumber,
+      location: cleanLocation,
+    })
+
+    if (!existingItem) {
+      return {
+        isValid: false,
+        message: `${cleanPartNumber} was not found in ${cleanLocation}.`,
+      }
+    }
+
+    return {
+      isValid: true,
+      message: '',
+    }
+  }
+
   if (!amount || amount <= 0) {
     return {
       isValid: false,
@@ -178,7 +207,7 @@ export const validateInventoryTransaction = ({
 export const createHistoryRecord = ({
   action,
   partNumber,
-  quantity,
+  quantity = 0,
   location = '',
   fromLocation = '',
   toLocation = '',
@@ -351,6 +380,19 @@ export const moveInventoryQuantity = ({
   })
 }
 
+export const deleteInventoryItem = ({
+  items,
+  partNumber,
+  location,
+}) => {
+  const itemId = createInventoryItemId({
+    partNumber,
+    location,
+  })
+
+  return items.filter((item) => item.id !== itemId)
+}
+
 export const searchInventory = (items = [], searchTerm = '') => {
   const query = normalizeText(searchTerm).toLowerCase()
 
@@ -431,6 +473,13 @@ export const buildInventoryTransaction = ({
 
   if (action === INVENTORY_ACTIONS.MOVE) {
     nextItems = moveInventoryQuantity({
+      items,
+      ...transaction,
+    })
+  }
+
+  if (action === INVENTORY_ACTIONS.DELETE) {
+    nextItems = deleteInventoryItem({
       items,
       ...transaction,
     })

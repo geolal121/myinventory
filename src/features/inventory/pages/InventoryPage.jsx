@@ -6,6 +6,7 @@ import Input from '../../../shared/components/Input.jsx'
 
 import InventoryItemCard from '../components/InventoryItemCard.jsx'
 import AddPartModal from '../components/modals/AddPartModal.jsx'
+import DeletePartModal from '../components/modals/DeletePartModal.jsx'
 import GivePartModal from '../components/modals/GivePartModal.jsx'
 import HistoryModal from '../components/modals/HistoryModal.jsx'
 import MovePartModal from '../components/modals/MovePartModal.jsx'
@@ -123,6 +124,18 @@ function InventoryPage() {
     return runInventoryTransaction(INVENTORY_ACTIONS.MOVE, formData)
   }
 
+  const handleDeletePart = (item) => {
+    if (!item) return false
+
+    return runInventoryTransaction(INVENTORY_ACTIONS.DELETE, {
+      partNumber: item.partNumber,
+      location: item.location,
+      quantity:
+        Number(item.officialQuantity || 0) + Number(item.noiQuantity || 0),
+      notes: 'Inventory item deleted.',
+    })
+  }
+
   const openUseFromCard = (item) => {
     openModalWithItem('use', item)
   }
@@ -133,6 +146,10 @@ function InventoryPage() {
 
   const openMoveFromCard = (item) => {
     openModalWithItem('move', item)
+  }
+
+  const openDeleteFromCard = (item) => {
+    openModalWithItem('delete', item)
   }
 
   return (
@@ -232,6 +249,7 @@ function InventoryPage() {
                   onUse={openUseFromCard}
                   onGive={openGiveFromCard}
                   onMove={openMoveFromCard}
+                  onDelete={openDeleteFromCard}
                 />
               ))}
             </div>
@@ -277,6 +295,13 @@ function InventoryPage() {
         savedLocations={savedLocations}
         selectedItem={selectedInventoryItem}
         errorMessage={transactionError}
+      />
+
+      <DeletePartModal
+        isOpen={activeModal === 'delete'}
+        onClose={closeModal}
+        onConfirm={handleDeletePart}
+        selectedItem={selectedInventoryItem}
       />
 
       <HistoryModal

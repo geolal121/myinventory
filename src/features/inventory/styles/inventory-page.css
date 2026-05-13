@@ -137,10 +137,49 @@
   gap: var(--spacing-3);
 }
 
+/* SWIPE CARD */
+
+.inventory-page__swipe-shell {
+  position: relative;
+  overflow: hidden;
+
+  border-radius: var(--card-radius);
+}
+
+.inventory-page__swipe-delete {
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: 1;
+
+  width: 92px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--color-danger);
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
 .inventory-page__inventory-card {
+  position: relative;
+  z-index: 2;
+
   display: flex;
   flex-direction: column;
   gap: var(--spacing-3);
+
+  background: var(--color-surface);
+
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-normal),
+    box-shadow var(--transition-normal);
+  touch-action: pan-y;
+  will-change: transform;
 }
 
 .inventory-page__inventory-card-main {
@@ -233,6 +272,10 @@
 @media (max-width: 479px) {
   .inventory-page__container {
     gap: var(--spacing-4);
+  }
+
+  .inventory-page__swipe-delete {
+    width: 84px;
   }
 }
 

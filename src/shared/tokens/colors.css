@@ -3,77 +3,154 @@
      BACKGROUNDS
   ========================================================= */
 
-  --color-background: #212730;
-  --color-background-soft: #2f363f;
-  --color-background-elevated: #4b5057;
+  --color-background: #f4f5f1;
+  --color-background-soft: #eef0ea;
+  --color-background-elevated: #e4e8df;
 
   /* =========================================================
      SURFACES
   ========================================================= */
 
-  --color-surface: #2f363f;
-  --color-surface-soft: #4b5057;
-  --color-surface-elevated: #787d85;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f6f7f4;
+  --color-surface-elevated: #edf1ea;
 
   /* =========================================================
      BORDERS
   ========================================================= */
 
-  --color-border: rgba(230, 230, 230, 0.12);
-  --color-border-strong: rgba(230, 230, 230, 0.22);
+  --color-border: rgba(30, 45, 76, 0.10);
+  --color-border-strong: rgba(30, 45, 76, 0.18);
 
   /* =========================================================
      TEXT
   ========================================================= */
 
-  --color-text-primary: #e6e6e6;
-  --color-text-secondary: #c9ced3;
-  --color-text-muted: #9da4aa;
-  --color-text-inverse: #212730;
+  --color-text-primary: #1e2d4c;
+  --color-text-secondary: #5e6675;
+  --color-text-muted: #858585;
+  --color-text-inverse: #ffffff;
 
   /* =========================================================
      ACCENT
   ========================================================= */
 
-  --color-accent: #01acb4;
-  --color-accent-hover: #01969d;
-  --color-accent-soft: rgba(1, 172, 180, 0.14);
+  --color-accent: #1e2d4c;
+  --color-accent-hover: #16233b;
+  --color-accent-soft: rgba(30, 45, 76, 0.10);
+
+  /* =========================================================
+     SECONDARY ACCENT
+  ========================================================= */
+
+  --color-accent-secondary: #acbdaa;
+  --color-accent-secondary-hover: #98ac96;
+  --color-accent-secondary-soft: rgba(172, 189, 170, 0.16);
 
   /* =========================================================
      STATUS
   ========================================================= */
 
-  --color-success: #22c55e;
-  --color-success-soft: rgba(34, 197, 94, 0.12);
+  --color-success: #5fa36a;
+  --color-success-soft: rgba(95, 163, 106, 0.14);
 
-  --color-warning: #f59e0b;
-  --color-warning-soft: rgba(245, 158, 11, 0.12);
+  --color-warning: #d4a24c;
+  --color-warning-soft: rgba(212, 162, 76, 0.14);
 
-  --color-danger: #ef4444;
-  --color-danger-soft: rgba(239, 68, 68, 0.12);
+  --color-danger: #d16b6b;
+  --color-danger-soft: rgba(209, 107, 107, 0.14);
 
-  --color-info: #01acb4;
-  --color-info-soft: rgba(1, 172, 180, 0.12);
+  --color-info: #6f8cb8;
+  --color-info-soft: rgba(111, 140, 184, 0.14);
 
   /* =========================================================
      INVENTORY STATUS
   ========================================================= */
 
-  --color-in-stock: #22c55e;
-  --color-out-of-stock: #ef4444;
-  --color-noi: #f59e0b;
+  --color-in-stock: #5fa36a;
+  --color-out-of-stock: #d16b6b;
+  --color-noi: #d4a24c;
 
   /* =========================================================
      OVERLAYS
   ========================================================= */
 
-  --color-overlay: rgba(33, 39, 48, 0.78);
-  --color-overlay-soft: rgba(33, 39, 48, 0.52);
+  --color-overlay: rgba(30, 45, 76, 0.34);
+  --color-overlay-soft: rgba(30, 45, 76, 0.18);
 
   /* =========================================================
-     SHADOW TINTS
+     SHADOW COLORS
   ========================================================= */
 
-  --shadow-accent: rgba(1, 172, 180, 0.28);
-  --shadow-dark: rgba(0, 0, 0, 0.42);
+  --shadow-dark: rgba(30, 45, 76, 0.12);
+
+  --shadow-accent-color: rgba(30, 45, 76, 0.18);
+
+  --shadow-success-color: rgba(95, 163, 106, 0.22);
+
+  --shadow-danger-color: rgba(209, 107, 107, 0.22);
+
+  /* =========================================================
+     SHADOWS
+  ========================================================= */
+
+  --shadow-sm:
+    0 4px 12px rgba(0, 0, 0, 0.08);
+
+  --shadow-md:
+    0 10px 28px rgba(0, 0, 0, 0.12);
+
+  --shadow-lg:
+    0 18px 48px rgba(0, 0, 0, 0.16);
+
+  --card-shadow: var(--shadow-sm);
+
+  --card-shadow-hover: var(--shadow-md);
+
+  --modal-shadow: var(--shadow-lg);
+
+  --button-shadow:
+    0 8px 22px var(--shadow-accent-color);
+
+  --button-shadow-hover:
+    0 10px 30px rgba(30, 45, 76, 0.24);
+
+  /* =========================================================
+     GLOWS
+  ========================================================= */
+
+  --glow-accent:
+    0 0 12px rgba(30, 45, 76, 0.12);
+
+  --glow-success:
+    0 0 10px var(--shadow-success-color);
+
+  --glow-danger:
+    0 0 10px var(--shadow-danger-color);
+
+  /* =========================================================
+     GRADIENTS
+  ========================================================= */
+
+  --gradient-page:
+    linear-gradient(
+      180deg,
+      #f4f5f1 0%,
+      #eef0ea 55%,
+      #e4e8df 100%
+    );
+
+  --gradient-surface:
+    linear-gradient(
+      180deg,
+      rgba(172, 189, 170, 0.10) 0%,
+      rgba(255, 255, 255, 0.90) 100%
+    );
+
+  --gradient-accent:
+    linear-gradient(
+      135deg,
+      #acbdaa 0%,
+      #cfd9cc 100%
+    );
 }

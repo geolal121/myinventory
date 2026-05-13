@@ -3,6 +3,7 @@ export const INVENTORY_ACTIONS = {
   USE: 'USE',
   GIVE: 'GIVE',
   MOVE: 'MOVE',
+  DELETE: 'DELETE',
 }
 
 export const INVENTORY_ACTION_OPTIONS = [
@@ -24,5 +25,10 @@ export const INVENTORY_ACTION_OPTIONS = [
   {
     label: 'Move Part',
     value: INVENTORY_ACTIONS.MOVE,
+  },
+
+  {
+    label: 'Delete Part',
+    value: INVENTORY_ACTIONS.DELETE,
   },
 ]

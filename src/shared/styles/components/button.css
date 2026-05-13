@@ -19,6 +19,9 @@
   font-size: var(--button-font-size);
   font-weight: var(--button-font-weight);
 
+  text-align: center;
+  white-space: nowrap;
+
   transition:
     background-color var(--transition-normal),
     border-color var(--transition-normal),
@@ -65,7 +68,7 @@
 .ui-button--primary {
   background: var(--color-accent);
 
-  color: var(--color-text-primary);
+  color: var(--color-text-inverse);
 
   box-shadow: var(--button-shadow);
 }
@@ -113,7 +116,7 @@
 .ui-button--danger {
   background: var(--color-danger);
 
-  color: var(--color-text-primary);
+  color: var(--color-text-inverse);
 
   box-shadow: var(--glow-danger);
 }
