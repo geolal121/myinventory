@@ -26,6 +26,10 @@ import {
   saveInventoryItems,
   saveSavedLocations,
 } from '../utils/inventoryStorage.js'
+import {
+  loadInventoryCloudData,
+  syncInventoryTransactionToCloud,
+} from '../services/inventorySyncService.js'
 
 import '../styles/inventory-page.css'
 import '../styles/inventory-forms.css'
@@ -39,6 +43,7 @@ function InventoryPage() {
   const [activeModal, setActiveModal] = useState(null)
   const [transactionError, setTransactionError] = useState('')
   const [selectedInventoryItem, setSelectedInventoryItem] = useState(null)
+  const [syncStatus, setSyncStatus] = useState('Offline Ready')
 
   const inventorySummary = useMemo(() => {
     return getInventorySummary(inventoryItems)
@@ -47,6 +52,35 @@ function InventoryPage() {
   const filteredInventoryItems = useMemo(() => {
     return searchInventory(inventoryItems, searchTerm)
   }, [inventoryItems, searchTerm])
+
+  useEffect(() => {
+    const loadCloudData = async () => {
+      try {
+        setSyncStatus('Syncing...')
+
+        const cloudData = await loadInventoryCloudData()
+
+        if (cloudData.inventoryItems.length > 0) {
+          setInventoryItems(cloudData.inventoryItems)
+        }
+
+        if (cloudData.inventoryHistory.length > 0) {
+          setInventoryHistory(cloudData.inventoryHistory)
+        }
+
+        if (cloudData.savedLocations.length > 0) {
+          setSavedLocations(cloudData.savedLocations)
+        }
+
+        setSyncStatus('Cloud Synced')
+      } catch (error) {
+        console.error('Failed to load cloud inventory data:', error)
+        setSyncStatus('Offline Ready')
+      }
+    }
+
+    loadCloudData()
+  }, [])
 
   useEffect(() => {
     saveInventoryItems(inventoryItems)
@@ -78,10 +112,23 @@ function InventoryPage() {
     setActiveModal(modalName)
   }
 
-  const saveNewLocation = (location) => {
-    if (!location || savedLocations.includes(location)) return
+  const getNewLocations = (formData) => {
+    return [
+      formData.location,
+      formData.fromLocation,
+      formData.toLocation,
+    ].filter((location) => location && !savedLocations.includes(location))
+  }
 
-    setSavedLocations((currentLocations) => [...currentLocations, location])
+  const saveNewLocations = (locations = []) => {
+    if (locations.length === 0) return
+
+    setSavedLocations((currentLocations) => [
+      ...new Set([
+        ...currentLocations,
+        ...locations,
+      ]),
+    ])
   }
 
   const runInventoryTransaction = (action, formData) => {
@@ -97,14 +144,33 @@ function InventoryPage() {
       return false
     }
 
+    const newLocations = getNewLocations(formData)
+    const deletedItemId =
+      action === INVENTORY_ACTIONS.DELETE && selectedInventoryItem
+        ? selectedInventoryItem.id
+        : ''
+
     setInventoryItems(transactionResult.items)
     setInventoryHistory(transactionResult.history)
-
-    saveNewLocation(formData.location)
-    saveNewLocation(formData.fromLocation)
-    saveNewLocation(formData.toLocation)
+    saveNewLocations(newLocations)
 
     setTransactionError('')
+    setSyncStatus('Syncing...')
+
+    syncInventoryTransactionToCloud({
+      items: transactionResult.items,
+      historyRecord: transactionResult.historyRecord,
+      locations: newLocations,
+      deletedItemId,
+    })
+      .then(() => {
+        setSyncStatus('Cloud Synced')
+      })
+      .catch((error) => {
+        console.error('Failed to sync inventory transaction:', error)
+        setSyncStatus('Offline Ready')
+      })
+
     return true
   }
 
@@ -166,7 +232,7 @@ function InventoryPage() {
 
           <div className="inventory-page__sync-status">
             <span className="inventory-page__sync-dot"></span>
-            <span>Offline Ready</span>
+            <span>{syncStatus}</span>
           </div>
         </header>
 
