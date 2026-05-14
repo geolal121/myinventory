@@ -6,7 +6,10 @@ import Modal from '../../../../shared/components/Modal.jsx'
 import Select from '../../../../shared/components/Select.jsx'
 
 import { getLocationOptions } from '../../data/inventoryLocations.js'
-import { INVENTORY_STATUS } from '../../utils/inventoryHelpers.js'
+import {
+  formatPartNumberInput,
+  INVENTORY_STATUS,
+} from '../../utils/inventoryHelpers.js'
 
 const INVENTORY_STATUS_OPTIONS = [
   {
@@ -57,6 +60,15 @@ function UsePartModal({
 
   const handleChange = (event) => {
     const { name, value } = event.target
+
+    if (name === 'partNumber') {
+      setFormData((currentFormData) => ({
+        ...currentFormData,
+        partNumber: formatPartNumberInput(value),
+      }))
+
+      return
+    }
 
     setFormData((currentFormData) => ({
       ...currentFormData,
@@ -114,7 +126,7 @@ function UsePartModal({
             label="Part Number"
             value={formData.partNumber}
             onChange={handleChange}
-            placeholder="Example: 123456"
+            placeholder="Example: 123-4567-89"
             required
           />
 

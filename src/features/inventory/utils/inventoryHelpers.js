@@ -9,6 +9,31 @@ export const normalizePartNumber = (partNumber = '') => {
   return partNumber.trim().toUpperCase()
 }
 
+export const normalizePartNumberSearch = (partNumber = '') => {
+  return normalizePartNumber(partNumber).replace(/-/g, '')
+}
+
+export const formatPartNumberInput = (value = '') => {
+  const cleanedValue = value
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '')
+    .slice(0, 9)
+
+  const firstSection = cleanedValue.slice(0, 3)
+  const secondSection = cleanedValue.slice(3, 7)
+  const thirdSection = cleanedValue.slice(7, 9)
+
+  if (cleanedValue.length <= 3) {
+    return firstSection
+  }
+
+  if (cleanedValue.length <= 7) {
+    return `${firstSection}-${secondSection}`
+  }
+
+  return `${firstSection}-${secondSection}-${thirdSection}`
+}
+
 export const normalizeText = (text = '') => {
   return text.trim()
 }
@@ -79,6 +104,45 @@ export const validateInventoryTransaction = ({
       return {
         isValid: false,
         message: `${cleanPartNumber} was not found in ${cleanLocation}.`,
+      }
+    }
+
+    return {
+      isValid: true,
+      message: '',
+    }
+  }
+
+  if (action === INVENTORY_ACTIONS.EDIT) {
+    const cleanLocation = normalizeText(transaction.location)
+    const officialQuantity = Number(transaction.officialQuantity)
+    const noiQuantity = Number(transaction.noiQuantity)
+
+    if (!transaction.originalItem) {
+      return {
+        isValid: false,
+        message: 'Original item is required.',
+      }
+    }
+
+    if (!cleanLocation) {
+      return {
+        isValid: false,
+        message: 'Location is required.',
+      }
+    }
+
+    if (Number.isNaN(officialQuantity) || officialQuantity < 0) {
+      return {
+        isValid: false,
+        message: 'Official quantity must be 0 or higher.',
+      }
+    }
+
+    if (Number.isNaN(noiQuantity) || noiQuantity < 0) {
+      return {
+        isValid: false,
+        message: 'NOI quantity must be 0 or higher.',
       }
     }
 
@@ -218,6 +282,7 @@ export const createHistoryRecord = ({
   customer = '',
   ticketNumber = '',
   notes = '',
+  originalItem = null,
 }) => {
   const now = new Date()
 
@@ -237,6 +302,8 @@ export const createHistoryRecord = ({
     customer: normalizeText(customer),
     ticketNumber: normalizeText(ticketNumber),
     notes: normalizeText(notes),
+    originalPartNumber: originalItem?.partNumber || '',
+    originalLocation: originalItem?.location || '',
     synced: false,
   }
 }
@@ -393,14 +460,126 @@ export const deleteInventoryItem = ({
   return items.filter((item) => item.id !== itemId)
 }
 
+export const editInventoryItem = ({
+  items,
+  originalItem,
+  partNumber,
+  location,
+  officialQuantity = 0,
+  noiQuantity = 0,
+  notes = '',
+}) => {
+  if (!originalItem) return items
+
+  const originalItemId = originalItem.id
+
+  const cleanPartNumber = normalizePartNumber(partNumber)
+  const cleanLocation = normalizeText(location)
+
+  const nextItemId = createInventoryItemId({
+    partNumber: cleanPartNumber,
+    location: cleanLocation,
+  })
+
+  const officialAmount = Number(officialQuantity || 0)
+  const noiAmount = Number(noiQuantity || 0)
+
+  const itemsWithoutOriginal = items.filter((item) => item.id !== originalItemId)
+
+  const matchingItem = itemsWithoutOriginal.find((item) => item.id === nextItemId)
+
+  if (matchingItem) {
+    return itemsWithoutOriginal.map((item) => {
+      if (item.id !== nextItemId) return item
+
+      return {
+        ...item,
+        officialQuantity: Number(item.officialQuantity || 0) + officialAmount,
+        noiQuantity: Number(item.noiQuantity || 0) + noiAmount,
+        knownMachines: [
+          ...new Set([
+            ...(item.knownMachines || []),
+            ...(originalItem.knownMachines || []),
+          ]),
+        ],
+        knownCustomers: [
+          ...new Set([
+            ...(item.knownCustomers || []),
+            ...(originalItem.knownCustomers || []),
+          ]),
+        ],
+        notes: normalizeText(notes) || item.notes || originalItem.notes || '',
+      }
+    })
+  }
+
+  return [
+    ...itemsWithoutOriginal,
+    {
+      ...originalItem,
+      id: nextItemId,
+      partNumber: cleanPartNumber,
+      location: cleanLocation,
+      officialQuantity: officialAmount,
+      noiQuantity: noiAmount,
+      notes: normalizeText(notes),
+    },
+  ]
+}
+
+export const groupInventoryByLocation = (items = []) => {
+  const locationMap = new Map()
+
+  items.forEach((item) => {
+    const location = normalizeText(item.location) || 'No Location'
+    const officialQuantity = Number(item.officialQuantity || 0)
+    const noiQuantity = Number(item.noiQuantity || 0)
+    const totalQuantity = officialQuantity + noiQuantity
+
+    if (!locationMap.has(location)) {
+      locationMap.set(location, {
+        id: location.toUpperCase(),
+        location,
+        items: [],
+        partCount: 0,
+        totalQuantity: 0,
+        officialQuantity: 0,
+        noiQuantity: 0,
+        outOfStockCount: 0,
+      })
+    }
+
+    const locationGroup = locationMap.get(location)
+
+    locationGroup.items.push(item)
+    locationGroup.partCount += 1
+    locationGroup.totalQuantity += totalQuantity
+    locationGroup.officialQuantity += officialQuantity
+    locationGroup.noiQuantity += noiQuantity
+
+    if (isOutOfStock(item)) {
+      locationGroup.outOfStockCount += 1
+    }
+  })
+
+  return Array.from(locationMap.values()).sort((firstLocation, secondLocation) => {
+    return firstLocation.location.localeCompare(secondLocation.location, undefined, {
+      numeric: true,
+      sensitivity: 'base',
+    })
+  })
+}
+
 export const searchInventory = (items = [], searchTerm = '') => {
   const query = normalizeText(searchTerm).toLowerCase()
+  const normalizedQuery = normalizePartNumberSearch(searchTerm).toLowerCase()
 
   if (!query) return items
 
   return items.filter((item) => {
     const searchableText = [
       item.partNumber,
+      normalizePartNumberSearch(item.partNumber),
       item.location,
       item.notes,
       ...(item.knownMachines || []),
@@ -409,7 +588,10 @@ export const searchInventory = (items = [], searchTerm = '') => {
       .join(' ')
       .toLowerCase()
 
-    return searchableText.includes(query)
+    return (
+      searchableText.includes(query) ||
+      searchableText.includes(normalizedQuery)
+    )
   })
 }
 
@@ -478,6 +660,13 @@ export const buildInventoryTransaction = ({
     })
   }
 
+  if (action === INVENTORY_ACTIONS.EDIT) {
+    nextItems = editInventoryItem({
+      items,
+      ...transaction,
+    })
+  }
+
   if (action === INVENTORY_ACTIONS.DELETE) {
     nextItems = deleteInventoryItem({
       items,
@@ -492,4 +681,16 @@ export const buildInventoryTransaction = ({
     history: [historyRecord, ...history],
     historyRecord,
   }
+}
+export const findInventoryItemsByPartNumber = ({
+  items = [],
+  partNumber = '',
+}) => {
+  const cleanPartNumber = normalizePartNumber(partNumber)
+
+  if (!cleanPartNumber) return []
+
+  return items.filter((item) => {
+    return normalizePartNumber(item.partNumber) === cleanPartNumber
+  })
 }

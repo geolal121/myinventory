@@ -3,105 +3,113 @@
      BACKGROUNDS
   ========================================================= */
 
-  --color-background: #f4f5f1;
-  --color-background-soft: #eef0ea;
-  --color-background-elevated: #e4e8df;
+  --color-background: #0f1113;
+  --color-background-soft: #15181c;
+  --color-background-elevated: #1b2026;
 
   /* =========================================================
      SURFACES
   ========================================================= */
 
-  --color-surface: #ffffff;
-  --color-surface-soft: #f6f7f4;
-  --color-surface-elevated: #edf1ea;
+  --color-surface: #171b20;
+  --color-surface-soft: #1d2329;
+  --color-surface-elevated: #242b33;
 
   /* =========================================================
      BORDERS
   ========================================================= */
 
-  --color-border: rgba(30, 45, 76, 0.10);
-  --color-border-strong: rgba(30, 45, 76, 0.18);
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.14);
 
   /* =========================================================
      TEXT
   ========================================================= */
 
-  --color-text-primary: #1e2d4c;
-  --color-text-secondary: #5e6675;
-  --color-text-muted: #858585;
-  --color-text-inverse: #ffffff;
+  --color-text-primary: #f5f7fa;
+  --color-text-secondary: #b6bec8;
+  --color-text-muted: #7e8792;
+  --color-text-inverse: #111111;
 
   /* =========================================================
      ACCENT
   ========================================================= */
 
-  --color-accent: #1e2d4c;
-  --color-accent-hover: #16233b;
-  --color-accent-soft: rgba(30, 45, 76, 0.10);
+  --color-accent: #2ea192;
+  --color-accent-hover: #2b7773;
+  --color-accent-soft: rgba(126, 179, 223, 0.14);
 
   /* =========================================================
      SECONDARY ACCENT
   ========================================================= */
 
-  --color-accent-secondary: #acbdaa;
-  --color-accent-secondary-hover: #98ac96;
-  --color-accent-secondary-soft: rgba(172, 189, 170, 0.16);
+  --color-accent-secondary: #d8deb0;
+  --color-accent-secondary-hover: #e4e9c2;
+  --color-accent-secondary-soft: rgba(216, 222, 176, 0.12);
+
+  /* =========================================================
+     CARD COLORS
+  ========================================================= */
+
+  --color-card: #1c2229;
+  --color-card-hover: #252d36;
+  --color-card-text: #f5f7fa;
 
   /* =========================================================
      STATUS
   ========================================================= */
 
-  --color-success: #5fa36a;
-  --color-success-soft: rgba(95, 163, 106, 0.14);
+  --color-success: #79c08e;
+  --color-success-soft: rgba(121, 192, 142, 0.14);
 
-  --color-warning: #d4a24c;
-  --color-warning-soft: rgba(212, 162, 76, 0.14);
+  --color-warning: #d8b46b;
+  --color-warning-soft: rgba(216, 180, 107, 0.14);
 
-  --color-danger: #d16b6b;
-  --color-danger-soft: rgba(209, 107, 107, 0.14);
+  --color-danger: #d62020;
+  --color-danger-soft: rgba(222, 114, 114, 0.14);
 
-  --color-info: #6f8cb8;
-  --color-info-soft: rgba(111, 140, 184, 0.14);
+  --color-info: #7eb3df;
+  --color-info-soft: rgba(126, 179, 223, 0.14);
 
   /* =========================================================
      INVENTORY STATUS
   ========================================================= */
 
-  --color-in-stock: #5fa36a;
-  --color-out-of-stock: #d16b6b;
-  --color-noi: #d4a24c;
+  --color-in-stock: #79c08e;
+  --color-out-of-stock: #de7272;
+  --color-noi: #d8b46b;
 
   /* =========================================================
      OVERLAYS
   ========================================================= */
 
-  --color-overlay: rgba(30, 45, 76, 0.34);
-  --color-overlay-soft: rgba(30, 45, 76, 0.18);
+  --color-overlay: rgba(0, 0, 0, 0.62);
+  --color-overlay-soft: rgba(0, 0, 0, 0.32);
 
   /* =========================================================
      SHADOW COLORS
   ========================================================= */
 
-  --shadow-dark: rgba(30, 45, 76, 0.12);
+  --shadow-dark: rgba(0, 0, 0, 0.48);
 
-  --shadow-accent-color: rgba(30, 45, 76, 0.18);
+  --shadow-accent-color: rgba(126, 179, 223, 0.16);
 
-  --shadow-success-color: rgba(95, 163, 106, 0.22);
+  --shadow-success-color: rgba(121, 192, 142, 0.18);
 
-  --shadow-danger-color: rgba(209, 107, 107, 0.22);
+  --shadow-danger-color: rgba(222, 114, 114, 0.18);
 
   /* =========================================================
      SHADOWS
   ========================================================= */
 
   --shadow-sm:
-    0 4px 12px rgba(0, 0, 0, 0.08);
+    0 8px 20px rgba(0, 0, 0, 0.28);
 
   --shadow-md:
-    0 10px 28px rgba(0, 0, 0, 0.12);
+    0 18px 42px rgba(0, 0, 0, 0.38);
 
   --shadow-lg:
-    0 18px 48px rgba(0, 0, 0, 0.16);
+    0 34px 80px rgba(0, 0, 0, 0.52);
 
   --card-shadow: var(--shadow-sm);
 
@@ -110,23 +118,23 @@
   --modal-shadow: var(--shadow-lg);
 
   --button-shadow:
-    0 8px 22px var(--shadow-accent-color);
+    0 8px 24px rgba(126, 179, 223, 0.12);
 
   --button-shadow-hover:
-    0 10px 30px rgba(30, 45, 76, 0.24);
+    0 14px 34px rgba(126, 179, 223, 0.18);
 
   /* =========================================================
      GLOWS
   ========================================================= */
 
   --glow-accent:
-    0 0 12px rgba(30, 45, 76, 0.12);
+    0 0 18px rgba(126, 179, 223, 0.10);
 
   --glow-success:
-    0 0 10px var(--shadow-success-color);
+    0 0 14px rgba(121, 192, 142, 0.14);
 
   --glow-danger:
-    0 0 10px var(--shadow-danger-color);
+    0 0 14px rgba(222, 114, 114, 0.14);
 
   /* =========================================================
      GRADIENTS
@@ -135,22 +143,29 @@
   --gradient-page:
     linear-gradient(
       180deg,
-      #f4f5f1 0%,
-      #eef0ea 55%,
-      #e4e8df 100%
+      #0f1113 0%,
+      #15181c 52%,
+      #1b2026 100%
     );
 
   --gradient-surface:
     linear-gradient(
-      180deg,
-      rgba(172, 189, 170, 0.10) 0%,
-      rgba(255, 255, 255, 0.90) 100%
+      145deg,
+      rgba(29, 35, 41, 0.98) 0%,
+      rgba(20, 24, 28, 0.98) 100%
+    );
+
+  --gradient-card:
+    linear-gradient(
+      145deg,
+      #1c2229 0%,
+      #252d36 100%
     );
 
   --gradient-accent:
     linear-gradient(
       135deg,
-      #acbdaa 0%,
-      #cfd9cc 100%
+      #bd6e46 0%,
+      #965938 100%
     );
 }

@@ -4,9 +4,12 @@ import Button from '../../../shared/components/Button.jsx'
 import Card from '../../../shared/components/Card.jsx'
 import Input from '../../../shared/components/Input.jsx'
 
-import InventoryItemCard from '../components/InventoryItemCard.jsx'
+import InventoryLocationCard from '../components/InventoryLocationCard.jsx'
 import AddPartModal from '../components/modals/AddPartModal.jsx'
+import BoxInventoryModal from '../components/modals/BoxInventoryModal.jsx'
 import DeletePartModal from '../components/modals/DeletePartModal.jsx'
+import DuplicatePartModal from '../components/modals/DuplicatePartModal.jsx'
+import EditPartModal from '../components/modals/EditPartModal.jsx'
 import GivePartModal from '../components/modals/GivePartModal.jsx'
 import HistoryModal from '../components/modals/HistoryModal.jsx'
 import MovePartModal from '../components/modals/MovePartModal.jsx'
@@ -15,8 +18,11 @@ import UsePartModal from '../components/modals/UsePartModal.jsx'
 import { INVENTORY_ACTIONS } from '../data/inventoryActions.js'
 import {
   buildInventoryTransaction,
+  findInventoryItemsByPartNumber,
+  formatPartNumberInput,
   getInventorySummary,
-  searchInventory,
+  groupInventoryByLocation,
+  normalizePartNumberSearch,
 } from '../utils/inventoryHelpers.js'
 import {
   loadInventoryHistory,
@@ -43,15 +49,42 @@ function InventoryPage() {
   const [activeModal, setActiveModal] = useState(null)
   const [transactionError, setTransactionError] = useState('')
   const [selectedInventoryItem, setSelectedInventoryItem] = useState(null)
+  const [selectedLocationGroup, setSelectedLocationGroup] = useState(null)
+  const [pendingDuplicatePart, setPendingDuplicatePart] = useState(null)
+  const [duplicateExistingItems, setDuplicateExistingItems] = useState([])
   const [syncStatus, setSyncStatus] = useState('Offline Ready')
+
+  const isSearching = searchTerm.trim().length > 0
 
   const inventorySummary = useMemo(() => {
     return getInventorySummary(inventoryItems)
   }, [inventoryItems])
 
   const filteredInventoryItems = useMemo(() => {
-    return searchInventory(inventoryItems, searchTerm)
-  }, [inventoryItems, searchTerm])
+    if (!isSearching) return inventoryItems
+
+    const normalizedSearchTerm = normalizePartNumberSearch(searchTerm).toLowerCase()
+
+    return inventoryItems.filter((item) => {
+      const normalizedPartNumber = normalizePartNumberSearch(
+        item.partNumber,
+      ).toLowerCase()
+
+      return normalizedPartNumber.includes(normalizedSearchTerm)
+    })
+  }, [inventoryItems, isSearching, searchTerm])
+
+  const inventoryLocationGroups = useMemo(() => {
+    return groupInventoryByLocation(filteredInventoryItems)
+  }, [filteredInventoryItems])
+
+  const selectedLocationGroupWithCurrentItems = useMemo(() => {
+    if (!selectedLocationGroup) return null
+
+    return inventoryLocationGroups.find(
+      (locationGroup) => locationGroup.id === selectedLocationGroup.id,
+    ) || selectedLocationGroup
+  }, [inventoryLocationGroups, selectedLocationGroup])
 
   useEffect(() => {
     const loadCloudData = async () => {
@@ -98,18 +131,44 @@ function InventoryPage() {
     setActiveModal(null)
     setTransactionError('')
     setSelectedInventoryItem(null)
+    setSelectedLocationGroup(null)
+    setPendingDuplicatePart(null)
+    setDuplicateExistingItems([])
+  }
+
+  const closeActionModal = () => {
+    setActiveModal('box')
+    setTransactionError('')
+    setSelectedInventoryItem(null)
   }
 
   const openModal = (modalName) => {
     setTransactionError('')
     setSelectedInventoryItem(null)
+    setSelectedLocationGroup(null)
+    setPendingDuplicatePart(null)
+    setDuplicateExistingItems([])
     setActiveModal(modalName)
+  }
+
+  const openLocationModal = (locationGroup) => {
+    setTransactionError('')
+    setSelectedInventoryItem(null)
+    setSelectedLocationGroup(locationGroup)
+    setActiveModal('box')
   }
 
   const openModalWithItem = (modalName, item) => {
     setTransactionError('')
     setSelectedInventoryItem(item)
     setActiveModal(modalName)
+  }
+
+  const handleSearchChange = (event) => {
+    const { value } = event.target
+    const isPartNumberSearch = /^[a-zA-Z0-9-]*$/.test(value)
+
+    setSearchTerm(isPartNumberSearch ? formatPartNumberInput(value) : value)
   }
 
   const getNewLocations = (formData) => {
@@ -145,8 +204,11 @@ function InventoryPage() {
     }
 
     const newLocations = getNewLocations(formData)
+
     const deletedItemId =
-      action === INVENTORY_ACTIONS.DELETE && selectedInventoryItem
+      (action === INVENTORY_ACTIONS.DELETE ||
+        action === INVENTORY_ACTIONS.EDIT) &&
+      selectedInventoryItem
         ? selectedInventoryItem.id
         : ''
 
@@ -175,7 +237,61 @@ function InventoryPage() {
   }
 
   const handleAddPart = (formData) => {
+    const existingItems = findInventoryItemsByPartNumber({
+      items: inventoryItems,
+      partNumber: formData.partNumber,
+    })
+
+    const existingDifferentLocations = existingItems.filter((item) => {
+      return item.location.toUpperCase() !== formData.location.toUpperCase()
+    })
+
+    if (existingDifferentLocations.length > 0) {
+      setPendingDuplicatePart(formData)
+      setDuplicateExistingItems(existingDifferentLocations)
+      setActiveModal('duplicate')
+      return false
+    }
+
     return runInventoryTransaction(INVENTORY_ACTIONS.ADD, formData)
+  }
+
+  const handleAddDuplicateToExistingLocation = () => {
+    if (!pendingDuplicatePart || duplicateExistingItems.length === 0) return
+
+    const existingItem = duplicateExistingItems[0]
+
+    const wasSaved = runInventoryTransaction(INVENTORY_ACTIONS.ADD, {
+      ...pendingDuplicatePart,
+      location: existingItem.location,
+    })
+
+    if (!wasSaved) return
+
+    setPendingDuplicatePart(null)
+    setDuplicateExistingItems([])
+    closeModal()
+  }
+
+  const handleKeepDuplicateNewLocation = () => {
+    if (!pendingDuplicatePart) return
+
+    const wasSaved = runInventoryTransaction(
+      INVENTORY_ACTIONS.ADD,
+      pendingDuplicatePart,
+    )
+
+    if (!wasSaved) return
+
+    setPendingDuplicatePart(null)
+    setDuplicateExistingItems([])
+    closeModal()
+  }
+
+  const handleCancelDuplicatePart = () => {
+    setActiveModal('add')
+    setPendingDuplicatePart(null)
+    setDuplicateExistingItems([])
   }
 
   const handleUsePart = (formData) => {
@@ -190,6 +306,10 @@ function InventoryPage() {
     return runInventoryTransaction(INVENTORY_ACTIONS.MOVE, formData)
   }
 
+  const handleEditPart = (formData) => {
+    return runInventoryTransaction(INVENTORY_ACTIONS.EDIT, formData)
+  }
+
   const handleDeletePart = (item) => {
     if (!item) return false
 
@@ -202,19 +322,23 @@ function InventoryPage() {
     })
   }
 
-  const openUseFromCard = (item) => {
+  const openUseFromItem = (item) => {
     openModalWithItem('use', item)
   }
 
-  const openGiveFromCard = (item) => {
+  const openGiveFromItem = (item) => {
     openModalWithItem('give', item)
   }
 
-  const openMoveFromCard = (item) => {
+  const openMoveFromItem = (item) => {
     openModalWithItem('move', item)
   }
 
-  const openDeleteFromCard = (item) => {
+  const openEditFromItem = (item) => {
+    openModalWithItem('edit', item)
+  }
+
+  const openDeleteFromItem = (item) => {
     openModalWithItem('delete', item)
   }
 
@@ -246,11 +370,11 @@ function InventoryPage() {
         <section className="inventory-page__search-section">
           <Input
             id="inventory-search"
-            label="Search"
+            label="Search Part Number"
             type="search"
             value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Part, machine, customer, ticket, box..."
+            onChange={handleSearchChange}
+            placeholder="Example: 123-4567-89"
           />
         </section>
 
@@ -296,7 +420,8 @@ function InventoryPage() {
 
         <section className="inventory-page__content">
           <div className="inventory-page__section-heading">
-            <h2>Inventory</h2>
+            <h2>{isSearching ? 'Part Location' : 'Boxes'}</h2>
+
             <Button
               variant="secondary"
               size="sm"
@@ -306,23 +431,24 @@ function InventoryPage() {
             </Button>
           </div>
 
-          {filteredInventoryItems.length > 0 ? (
-            <div className="inventory-page__inventory-list">
-              {filteredInventoryItems.map((item) => (
-                <InventoryItemCard
-                  key={item.id}
-                  item={item}
-                  onUse={openUseFromCard}
-                  onGive={openGiveFromCard}
-                  onMove={openMoveFromCard}
-                  onDelete={openDeleteFromCard}
+          {inventoryLocationGroups.length > 0 ? (
+            <div className="inventory-page__location-list">
+              {inventoryLocationGroups.map((locationGroup) => (
+                <InventoryLocationCard
+                  key={locationGroup.id}
+                  locationGroup={locationGroup}
+                  onOpen={openLocationModal}
                 />
               ))}
             </div>
           ) : (
             <Card className="inventory-page__empty-state">
-              <h3>No parts found</h3>
-              <p>Add your first part or adjust your search.</p>
+              <h3>{isSearching ? 'No part found' : 'No boxes found'}</h3>
+              <p>
+                {isSearching
+                  ? 'No box contains that part number.'
+                  : 'Add your first part or adjust your search.'}
+              </p>
             </Card>
           )}
         </section>
@@ -336,9 +462,18 @@ function InventoryPage() {
         errorMessage={transactionError}
       />
 
+      <DuplicatePartModal
+        isOpen={activeModal === 'duplicate'}
+        onClose={handleCancelDuplicatePart}
+        pendingPart={pendingDuplicatePart}
+        existingItems={duplicateExistingItems}
+        onAddToExistingLocation={handleAddDuplicateToExistingLocation}
+        onKeepNewLocation={handleKeepDuplicateNewLocation}
+      />
+
       <UsePartModal
         isOpen={activeModal === 'use'}
-        onClose={closeModal}
+        onClose={selectedLocationGroup ? closeActionModal : closeModal}
         onSubmit={handleUsePart}
         savedLocations={savedLocations}
         selectedItem={selectedInventoryItem}
@@ -347,7 +482,7 @@ function InventoryPage() {
 
       <GivePartModal
         isOpen={activeModal === 'give'}
-        onClose={closeModal}
+        onClose={selectedLocationGroup ? closeActionModal : closeModal}
         onSubmit={handleGivePart}
         savedLocations={savedLocations}
         selectedItem={selectedInventoryItem}
@@ -356,8 +491,17 @@ function InventoryPage() {
 
       <MovePartModal
         isOpen={activeModal === 'move'}
-        onClose={closeModal}
+        onClose={selectedLocationGroup ? closeActionModal : closeModal}
         onSubmit={handleMovePart}
+        savedLocations={savedLocations}
+        selectedItem={selectedInventoryItem}
+        errorMessage={transactionError}
+      />
+
+      <EditPartModal
+        isOpen={activeModal === 'edit'}
+        onClose={selectedLocationGroup ? closeActionModal : closeModal}
+        onSubmit={handleEditPart}
         savedLocations={savedLocations}
         selectedItem={selectedInventoryItem}
         errorMessage={transactionError}
@@ -365,9 +509,20 @@ function InventoryPage() {
 
       <DeletePartModal
         isOpen={activeModal === 'delete'}
-        onClose={closeModal}
+        onClose={selectedLocationGroup ? closeActionModal : closeModal}
         onConfirm={handleDeletePart}
         selectedItem={selectedInventoryItem}
+      />
+
+      <BoxInventoryModal
+        isOpen={activeModal === 'box'}
+        onClose={closeModal}
+        locationGroup={selectedLocationGroupWithCurrentItems}
+        onUse={openUseFromItem}
+        onGive={openGiveFromItem}
+        onMove={openMoveFromItem}
+        onEdit={openEditFromItem}
+        onDelete={openDeleteFromItem}
       />
 
       <HistoryModal

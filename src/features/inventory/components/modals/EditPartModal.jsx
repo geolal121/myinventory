@@ -1,40 +1,26 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import Button from '../../../../shared/components/Button.jsx'
 import Input from '../../../../shared/components/Input.jsx'
 import Modal from '../../../../shared/components/Modal.jsx'
-import Select from '../../../../shared/components/Select.jsx'
 
 import { getLocationOptions } from '../../data/inventoryLocations.js'
-import {
-  formatPartNumberInput,
-  INVENTORY_STATUS,
-} from '../../utils/inventoryHelpers.js'
-
-const INVENTORY_STATUS_OPTIONS = [
-  {
-    label: 'Official Inventory',
-    value: INVENTORY_STATUS.OFFICIAL,
-  },
-  {
-    label: 'NOI / Ghost Part',
-    value: INVENTORY_STATUS.NOI,
-  },
-]
+import { formatPartNumberInput } from '../../utils/inventoryHelpers.js'
 
 const getInitialFormData = () => ({
   partNumber: '',
-  quantity: '',
   location: '',
-  inventoryStatus: INVENTORY_STATUS.OFFICIAL,
+  officialQuantity: '',
+  noiQuantity: '',
   notes: '',
 })
 
-function AddPartModal({
+function EditPartModal({
   isOpen,
   onClose,
   onSubmit,
   savedLocations = [],
+  selectedItem = null,
   errorMessage = '',
 }) {
   const [formData, setFormData] = useState(getInitialFormData)
@@ -43,9 +29,17 @@ function AddPartModal({
     return getLocationOptions(savedLocations)
   }, [savedLocations])
 
-  const resetForm = () => {
-    setFormData(getInitialFormData())
-  }
+  useEffect(() => {
+    if (!isOpen || !selectedItem) return
+
+    setFormData({
+      partNumber: selectedItem.partNumber || '',
+      location: selectedItem.location || '',
+      officialQuantity: String(selectedItem.officialQuantity ?? 0),
+      noiQuantity: String(selectedItem.noiQuantity ?? 0),
+      notes: selectedItem.notes || '',
+    })
+  }, [isOpen, selectedItem])
 
   const handleChange = (event) => {
     const { name, value } = event.target
@@ -65,12 +59,20 @@ function AddPartModal({
     }))
   }
 
+  const resetForm = () => {
+    setFormData(getInitialFormData())
+  }
+
   const handleSubmit = (event) => {
     event.preventDefault()
 
     const wasSaved = onSubmit({
-      ...formData,
-      quantity: Number(formData.quantity),
+      originalItem: selectedItem,
+      partNumber: formData.partNumber,
+      location: formData.location,
+      officialQuantity: Number(formData.officialQuantity),
+      noiQuantity: Number(formData.noiQuantity),
+      notes: formData.notes,
     })
 
     if (!wasSaved) return
@@ -82,8 +84,8 @@ function AddPartModal({
   return (
     <Modal
       isOpen={isOpen}
-      title="Add Part"
-      description="Add official inventory or NOI / ghost parts to your truck stock."
+      title="Edit Part"
+      description="Correct the part number, location, quantity, or notes."
       onClose={onClose}
       footer={
         <>
@@ -91,16 +93,16 @@ function AddPartModal({
             Cancel
           </Button>
 
-          <Button type="submit" form="add-part-form">
-            Save Part
+          <Button type="submit" form="edit-part-form">
+            Save Changes
           </Button>
         </>
       }
     >
-      <form id="add-part-form" className="inventory-form" onSubmit={handleSubmit}>
+      <form id="edit-part-form" className="inventory-form" onSubmit={handleSubmit}>
         {errorMessage && (
           <div className="inventory-form__error">
-            <strong>Check entry</strong>
+            <strong>Check edit</strong>
             <p>{errorMessage}</p>
           </div>
         )}
@@ -115,40 +117,44 @@ function AddPartModal({
         />
 
         <Input
-          name="quantity"
-          label="Quantity"
-          type="number"
-          min="1"
-          value={formData.quantity}
-          onChange={handleChange}
-          placeholder="Example: 4"
-          required
-        />
-
-        <Input
           name="location"
           label="Location"
           value={formData.location}
           onChange={handleChange}
-          placeholder="Box 1, Slide Box, Inside Backpack..."
-          list="inventory-location-options"
+          placeholder="Box 1, Box 2, Slide Box..."
+          list="edit-part-location-options"
           required
         />
 
-        <datalist id="inventory-location-options">
+        <datalist id="edit-part-location-options">
           {locationOptions.map((location) => (
             <option key={location.value} value={location.value} />
           ))}
         </datalist>
 
-        <Select
-          name="inventoryStatus"
-          label="Inventory Type"
-          value={formData.inventoryStatus}
-          onChange={handleChange}
-          options={INVENTORY_STATUS_OPTIONS}
-          required
-        />
+        <div className="inventory-form__row">
+          <Input
+            name="officialQuantity"
+            label="Official Quantity"
+            type="number"
+            min="0"
+            value={formData.officialQuantity}
+            onChange={handleChange}
+            placeholder="0"
+            required
+          />
+
+          <Input
+            name="noiQuantity"
+            label="NOI / Ghost Quantity"
+            type="number"
+            min="0"
+            value={formData.noiQuantity}
+            onChange={handleChange}
+            placeholder="0"
+            required
+          />
+        </div>
 
         <Input
           name="notes"
@@ -162,4 +168,4 @@ function AddPartModal({
   )
 }
 
-export default AddPartModal
+export default EditPartModal
