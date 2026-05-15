@@ -6,15 +6,46 @@
 }
 
 .inventory-page__container {
+  position: relative;
+
   display: flex;
   flex-direction: column;
   gap: var(--spacing-5);
 }
 
+/* HISTORY BUTTON */
+
+.inventory-page__history-button-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 20;
+
+  width: auto;
+}
+
+.inventory-page__history-button {
+  width: auto !important;
+  min-width: unset !important;
+  min-height: 42px !important;
+
+  padding:
+    var(--spacing-2)
+    var(--spacing-4) !important;
+
+  border-radius: var(--radius-full);
+
+  font-size: var(--font-size-sm);
+}
+
+/* HEADER */
+
 .inventory-page__header {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-4);
+
+  padding-right: 8rem;
 }
 
 .inventory-page__eyebrow {
@@ -31,6 +62,8 @@
 .inventory-page__subtitle {
   margin-top: var(--spacing-2);
   max-width: 32rem;
+
+  color: var(--color-text-secondary);
 }
 
 .inventory-page__sync-status {
@@ -67,6 +100,8 @@
   box-shadow: var(--glow-success);
 }
 
+/* ERROR */
+
 .inventory-page__error-card {
   display: flex;
   flex-direction: column;
@@ -90,6 +125,8 @@
 
   font-size: var(--font-size-sm);
 }
+
+/* SEARCH */
 
 .inventory-page__search-section {
   display: flex;
@@ -153,6 +190,98 @@
   font-weight: var(--font-weight-bold);
 }
 
+/* TABS */
+
+.inventory-page__tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+
+  overflow: hidden;
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--card-radius);
+
+  background: var(--gradient-surface);
+
+  box-shadow: var(--card-shadow);
+}
+
+.inventory-page__tab {
+  position: relative;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+
+  min-height: 54px;
+
+  padding: var(--spacing-3);
+
+  border: 0;
+  border-right: 1px solid var(--color-border);
+
+  background: transparent;
+
+  color: var(--color-text-secondary);
+
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+
+  cursor: pointer;
+
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.inventory-page__tab:last-child {
+  border-right: none;
+}
+
+.inventory-page__tab::after {
+  content: '';
+
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  height: 3px;
+
+  background: transparent;
+
+  transition: background var(--transition-fast);
+}
+
+.inventory-page__tab:hover {
+  background: var(--color-accent-soft);
+
+  color: var(--color-accent);
+}
+
+.inventory-page__tab--active {
+  background: var(--color-surface);
+
+  color: var(--color-accent);
+}
+
+.inventory-page__tab--active::after {
+  background: var(--color-accent);
+}
+
+.inventory-page__tab-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: var(--font-size-lg);
+  line-height: 1;
+}
+
+/* CONTENT */
+
 .inventory-page__content {
   display: flex;
   flex-direction: column;
@@ -162,21 +291,22 @@
 .inventory-page__section-heading {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: var(--spacing-3);
 }
 
 /* LOCATION LIST */
 
 .inventory-page__location-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-4);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-3);
 }
 
 /* LOCATION CARD */
 
-.inventory-page__location-card {
+.inventory-page__location-card,
+.inventory-page__location-card.ui-card {
   position: relative;
 
   display: flex;
@@ -184,15 +314,18 @@
   gap: var(--spacing-4);
 
   width: 100%;
+  aspect-ratio: 1 / 1;
 
-  padding: var(--spacing-5);
+  padding: var(--spacing-4);
 
   overflow: hidden;
 
   border: 1px solid var(--color-border);
   border-radius: calc(var(--card-radius) + 4px);
 
-  background: var(--gradient-surface);
+  background: var(--gradient-card) !important;
+
+  color: var(--color-card-text);
 
   text-align: left;
 
@@ -210,9 +343,7 @@
   position: absolute;
   inset: 0;
 
-  background: var(--color-accent-soft);
-
-  opacity: var(--disabled-opacity);
+  background: transparent;
 
   pointer-events: none;
 }
@@ -220,66 +351,108 @@
 .inventory-page__location-card:hover {
   border-color: var(--color-border-strong);
 
-  box-shadow:
-    var(--card-shadow-hover),
-    var(--glow-accent);
+  background: var(--gradient-card) !important;
+
+  box-shadow: var(--card-shadow-hover);
 
   transform: translateY(-2px);
 }
 
-.inventory-page__location-card h3 {
+.inventory-page__location-card-header {
   position: relative;
 
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+}
+
+.inventory-page__location-card h3 {
   margin-bottom: var(--spacing-1);
 
-  color: var(--color-text-primary);
+  color: var(--color-card-text);
 
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
 
   line-height: 1.2;
 }
 
 .inventory-page__location-card p {
-  position: relative;
-
   color: var(--color-text-secondary);
 
   font-size: var(--font-size-sm);
 }
 
+.inventory-page__location-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+
+  width: 42px;
+  height: 42px;
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--button-radius);
+
+  background: var(--color-accent-soft);
+
+  color: var(--color-accent);
+
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.inventory-page__location-card-divider {
+  position: relative;
+
+  width: 100%;
+  height: 1px;
+
+  margin-top: auto;
+
+  background: var(--color-border);
+}
+
 .inventory-page__location-card-stats {
   position: relative;
 
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
 }
 
-.inventory-page__location-card-stats span {
-  display: flex;
+.inventory-page__location-card-stat {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--spacing-3);
+
+  color: var(--color-card-text);
+
+  font-size: var(--font-size-sm);
+}
+
+.inventory-page__location-card-stat-icon {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  min-height: 42px;
+  width: 1.5rem;
+  height: 1.5rem;
 
-  padding: var(--spacing-2);
+  color: var(--color-accent);
 
-  border: 1px solid var(--color-border);
-  border-radius: var(--badge-radius);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+}
 
-  background: var(--color-surface-soft);
+.inventory-page__location-card-stat strong {
+  color: var(--color-accent);
 
-  color: var(--color-text-primary);
-
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-
-  text-align: center;
-
-  box-shadow: var(--shadow-sm);
-
-  backdrop-filter: blur(8px);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
 }
 
 /* BOX MODAL */
@@ -413,19 +586,89 @@
   color: var(--color-text-secondary);
 }
 
-/* SMALL PHONE */
+/* PHONE APP */
+/* 0px - 767px */
 
-@media (max-width: 479px) {
+@media (max-width: 767px) {
   .inventory-page__container {
-    gap: var(--spacing-4);
+    gap: var(--spacing-5);
   }
 
-  .inventory-page__location-card {
-    padding: var(--spacing-4);
+  .inventory-page__history-button-wrapper {
+    top: 0;
+    right: 0;
+  }
+
+  .inventory-page__history-button {
+    min-height: 40px !important;
+
+    padding:
+      var(--spacing-2)
+      var(--spacing-3) !important;
+  }
+
+  .inventory-page__header {
+    padding-right: 7rem;
+  }
+
+  .inventory-page__tab {
+    min-height: 48px;
+
+    padding: var(--spacing-2);
+
+    font-size: var(--font-size-xs);
+  }
+
+  .inventory-page__tab-icon {
+    font-size: var(--font-size-md);
+  }
+
+  .inventory-page__location-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-3);
+  }
+
+  .inventory-page__location-card,
+  .inventory-page__location-card.ui-card {
+    aspect-ratio: 1 / 1;
+
+    padding: var(--spacing-3);
+  }
+
+  .inventory-page__location-card h3 {
+    font-size: var(--font-size-md);
+  }
+
+  .inventory-page__location-card p {
+    font-size: var(--font-size-xs);
+  }
+
+  .inventory-page__location-card-icon {
+    width: 34px;
+    height: 34px;
+
+    font-size: var(--font-size-md);
   }
 
   .inventory-page__location-card-stats {
-    grid-template-columns: 1fr;
+    gap: var(--spacing-2);
+  }
+
+  .inventory-page__location-card-stat {
+    gap: var(--spacing-2);
+
+    font-size: var(--font-size-xs);
+  }
+
+  .inventory-page__location-card-stat-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+
+    font-size: var(--font-size-sm);
+  }
+
+  .inventory-page__location-card-stat strong {
+    font-size: var(--font-size-sm);
   }
 
   .inventory-page__box-modal-actions {
@@ -433,27 +676,120 @@
   }
 }
 
+/* SMALL PHONE */
+/* 0px - 374px */
+
+@media (max-width: 374px) {
+  .inventory-page__header {
+    padding-right: 0;
+  }
+
+  .inventory-page__history-button-wrapper {
+    position: static;
+    align-self: flex-end;
+  }
+
+  .inventory-page__tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-page__tab {
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .inventory-page__tab:last-child {
+    border-bottom: none;
+  }
+
+  .inventory-page__location-list {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-page__location-card,
+  .inventory-page__location-card.ui-card {
+    aspect-ratio: auto;
+    min-height: 260px;
+  }
+}
+
 /* PHONE LANDSCAPE */
+/* 0px - 767px + landscape */
 
 @media (max-width: 767px) and (orientation: landscape) {
   .inventory-page__actions,
   .inventory-page__summary {
     grid-template-columns: repeat(4, 1fr);
   }
+
+  .inventory-page__location-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .inventory-page__location-card,
+  .inventory-page__location-card.ui-card {
+    aspect-ratio: 1 / 1;
+    min-height: auto;
+  }
 }
 
-/* TABLET */
+/* TABLET PORTRAIT */
+/* 768px - 1099px */
 
 @media (min-width: 768px) and (max-width: 1099px) {
   .inventory-page__header {
     flex-direction: row;
     align-items: flex-start;
     justify-content: space-between;
+
+    padding-right: 8rem;
   }
 
   .inventory-page__actions,
   .inventory-page__summary {
     grid-template-columns: repeat(4, 1fr);
+  }
+
+  .inventory-page__location-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .inventory-page__location-card,
+  .inventory-page__location-card.ui-card {
+    aspect-ratio: 1 / 1;
+    min-height: auto;
+  }
+
+  .inventory-page__box-modal-actions {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* TABLET LANDSCAPE */
+/* 1100px - 1199px + landscape */
+
+@media (min-width: 1100px) and (max-width: 1199px) and (orientation: landscape) {
+  .inventory-page__header {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    padding-right: 8rem;
+  }
+
+  .inventory-page__actions,
+  .inventory-page__summary {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .inventory-page__location-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .inventory-page__location-card,
+  .inventory-page__location-card.ui-card {
+    aspect-ratio: 1 / 1;
+    min-height: auto;
   }
 
   .inventory-page__box-modal-actions {
@@ -462,10 +798,15 @@
 }
 
 /* DESKTOP */
+/* 1200px - 1439px */
 
-@media (min-width: 1200px) {
+@media (min-width: 1200px) and (max-width: 1439px) {
   .inventory-page__container {
     gap: var(--spacing-6);
+  }
+
+  .inventory-page__header {
+    padding-right: 8rem;
   }
 
   .inventory-page__actions,
@@ -474,8 +815,13 @@
   }
 
   .inventory-page__location-list {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .inventory-page__location-card,
+  .inventory-page__location-card.ui-card {
+    aspect-ratio: 1 / 1;
+    min-height: auto;
   }
 
   .inventory-page__box-modal-actions {
@@ -484,18 +830,48 @@
 }
 
 /* LARGE DESKTOP */
+/* 1440px - 1919px */
 
-@media (min-width: 1440px) {
+@media (min-width: 1440px) and (max-width: 1919px) {
+  .inventory-page__container {
+    gap: var(--spacing-7);
+  }
+
+  .inventory-page__header {
+    padding-right: 8rem;
+  }
+
   .inventory-page__location-list {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .inventory-page__location-card,
+  .inventory-page__location-card.ui-card {
+    aspect-ratio: 1 / 1;
+    min-height: auto;
   }
 }
 
 /* ULTRAWIDE */
+/* 1920px and up */
 
 @media (min-width: 1920px) {
   .inventory-page__container {
     gap: var(--spacing-8);
+  }
+
+  .inventory-page__header {
+    padding-right: 8rem;
+  }
+
+  .inventory-page__location-list {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .inventory-page__location-card,
+  .inventory-page__location-card.ui-card {
+    aspect-ratio: 1 / 1;
+    min-height: auto;
   }
 }
 

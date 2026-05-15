@@ -1,171 +1,113 @@
 :root {
-  /* =========================================================
-     BACKGROUNDS
-  ========================================================= */
+  /* BACKGROUNDS */
+  --color-background: hsl(210, 18%, 91%);
+  --color-background-soft: hsl(210, 18%, 94%);
+  --color-background-elevated: hsl(210, 18%, 86%);
 
-  --color-background: #0f1113;
-  --color-background-soft: #15181c;
-  --color-background-elevated: #1b2026;
+  /* SURFACES */
+  --color-surface: #ffffff;
+  --color-surface-soft: hsl(210, 18%, 97%);
+  --color-surface-elevated: hsl(210, 18%, 92%);
 
-  /* =========================================================
-     SURFACES
-  ========================================================= */
+  /* BORDERS */
+  --color-border: rgba(36, 51, 69, 0.10);
+  --color-border-strong: rgba(36, 51, 69, 0.18);
 
-  --color-surface: #171b20;
-  --color-surface-soft: #1d2329;
-  --color-surface-elevated: #242b33;
+  /* TEXT */
+  --color-text-primary: #243345;
+  --color-text-secondary: #5f6f82;
+  --color-text-muted: #8794a3;
+  --color-text-inverse: #ffffff;
 
-  /* =========================================================
-     BORDERS
-  ========================================================= */
+  /* PRIMARY ACCENT */
+  --color-accent: #255a96;
+  --color-accent-hover: #1b8dbe;
+  --color-accent-soft: rgba(37, 90, 150, 0.12);
 
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-strong: rgba(255, 255, 255, 0.14);
+  /* SECONDARY ACCENT */
+  --color-accent-secondary: #d7e1ec;
+  --color-accent-secondary-hover: #c7d5e4;
+  --color-accent-secondary-soft: rgba(37, 90, 150, 0.08);
 
-  /* =========================================================
-     TEXT
-  ========================================================= */
+  /* CARD COLORS */
+  --color-card: #ffffff;
+  --color-card-hover: hsl(210, 18%, 97%);
+  --color-card-text: #243345;
 
-  --color-text-primary: #f5f7fa;
-  --color-text-secondary: #b6bec8;
-  --color-text-muted: #7e8792;
-  --color-text-inverse: #111111;
+  /* STATUS COLORS */
+  --color-success: #3f8f68;
+  --color-success-soft: rgba(63, 143, 104, 0.14);
 
-  /* =========================================================
-     ACCENT
-  ========================================================= */
+  --color-warning: #b7791f;
+  --color-warning-soft: rgba(183, 121, 31, 0.14);
 
-  --color-accent: #2ea192;
-  --color-accent-hover: #2b7773;
-  --color-accent-soft: rgba(126, 179, 223, 0.14);
+  --color-danger: #d9574f;
+  --color-danger-soft: rgba(217, 87, 79, 0.13);
 
-  /* =========================================================
-     SECONDARY ACCENT
-  ========================================================= */
+  --color-info: #255a96;
+  --color-info-soft: rgba(37, 90, 150, 0.14);
 
-  --color-accent-secondary: #d8deb0;
-  --color-accent-secondary-hover: #e4e9c2;
-  --color-accent-secondary-soft: rgba(216, 222, 176, 0.12);
+  /* INVENTORY STATUS */
+  --color-in-stock: var(--color-success);
+  --color-out-of-stock: var(--color-danger);
+  --color-noi: var(--color-warning);
 
-  /* =========================================================
-     CARD COLORS
-  ========================================================= */
+  /* OVERLAYS */
+  --color-overlay: rgba(36, 51, 69, 0.40);
+  --color-overlay-soft: rgba(36, 51, 69, 0.16);
 
-  --color-card: #1c2229;
-  --color-card-hover: #252d36;
-  --color-card-text: #f5f7fa;
+  /* SHADOW COLORS */
+  --shadow-dark: rgba(36, 51, 69, 0.12);
+  --shadow-accent-color: rgba(37, 90, 150, 0.14);
+  --shadow-success-color: rgba(63, 143, 104, 0.14);
+  --shadow-warning-color: rgba(183, 121, 31, 0.14);
+  --shadow-danger-color: rgba(217, 87, 79, 0.14);
 
-  /* =========================================================
-     STATUS
-  ========================================================= */
-
-  --color-success: #79c08e;
-  --color-success-soft: rgba(121, 192, 142, 0.14);
-
-  --color-warning: #d8b46b;
-  --color-warning-soft: rgba(216, 180, 107, 0.14);
-
-  --color-danger: #d62020;
-  --color-danger-soft: rgba(222, 114, 114, 0.14);
-
-  --color-info: #7eb3df;
-  --color-info-soft: rgba(126, 179, 223, 0.14);
-
-  /* =========================================================
-     INVENTORY STATUS
-  ========================================================= */
-
-  --color-in-stock: #79c08e;
-  --color-out-of-stock: #de7272;
-  --color-noi: #d8b46b;
-
-  /* =========================================================
-     OVERLAYS
-  ========================================================= */
-
-  --color-overlay: rgba(0, 0, 0, 0.62);
-  --color-overlay-soft: rgba(0, 0, 0, 0.32);
-
-  /* =========================================================
-     SHADOW COLORS
-  ========================================================= */
-
-  --shadow-dark: rgba(0, 0, 0, 0.48);
-
-  --shadow-accent-color: rgba(126, 179, 223, 0.16);
-
-  --shadow-success-color: rgba(121, 192, 142, 0.18);
-
-  --shadow-danger-color: rgba(222, 114, 114, 0.18);
-
-  /* =========================================================
-     SHADOWS
-  ========================================================= */
-
-  --shadow-sm:
-    0 8px 20px rgba(0, 0, 0, 0.28);
-
-  --shadow-md:
-    0 18px 42px rgba(0, 0, 0, 0.38);
-
-  --shadow-lg:
-    0 34px 80px rgba(0, 0, 0, 0.52);
+  /* SHADOWS */
+  --shadow-sm: 0 8px 20px rgba(36, 51, 69, 0.06);
+  --shadow-md: 0 18px 42px rgba(36, 51, 69, 0.10);
+  --shadow-lg: 0 34px 80px rgba(36, 51, 69, 0.16);
 
   --card-shadow: var(--shadow-sm);
-
   --card-shadow-hover: var(--shadow-md);
-
   --modal-shadow: var(--shadow-lg);
 
-  --button-shadow:
-    0 8px 24px rgba(126, 179, 223, 0.12);
+  --button-shadow: 0 8px 24px rgba(37, 90, 150, 0.16);
+  --button-shadow-hover: 0 14px 34px rgba(37, 90, 150, 0.22);
 
-  --button-shadow-hover:
-    0 14px 34px rgba(126, 179, 223, 0.18);
+  /* GLOWS */
+  --glow-accent: 0 0 18px rgba(37, 90, 150, 0.10);
+  --glow-success: 0 0 14px rgba(63, 143, 104, 0.12);
+  --glow-warning: 0 0 14px rgba(183, 121, 31, 0.12);
+  --glow-danger: 0 0 14px rgba(217, 87, 79, 0.12);
 
-  /* =========================================================
-     GLOWS
-  ========================================================= */
-
-  --glow-accent:
-    0 0 18px rgba(126, 179, 223, 0.10);
-
-  --glow-success:
-    0 0 14px rgba(121, 192, 142, 0.14);
-
-  --glow-danger:
-    0 0 14px rgba(222, 114, 114, 0.14);
-
-  /* =========================================================
-     GRADIENTS
-  ========================================================= */
-
+  /* GRADIENTS */
   --gradient-page:
     linear-gradient(
       180deg,
-      #0f1113 0%,
-      #15181c 52%,
-      #1b2026 100%
+      var(--color-background) 0%,
+      var(--color-background-soft) 52%,
+      var(--color-background-elevated) 100%
     );
 
   --gradient-surface:
     linear-gradient(
       145deg,
-      rgba(29, 35, 41, 0.98) 0%,
-      rgba(20, 24, 28, 0.98) 100%
+      var(--color-surface) 0%,
+      var(--color-surface-soft) 100%
     );
 
   --gradient-card:
     linear-gradient(
       145deg,
-      #1c2229 0%,
-      #252d36 100%
+      var(--color-card) 0%,
+      var(--color-card-hover) 100%
     );
 
   --gradient-accent:
     linear-gradient(
       135deg,
-      #bd6e46 0%,
-      #965938 100%
+      var(--color-accent) 0%,
+      var(--color-accent-hover) 100%
     );
 }

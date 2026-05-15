@@ -1,7 +1,12 @@
-import Modal from '../../../../shared/components/Modal.jsx'
+import { useMemo, useState } from 'react'
+
 import Button from '../../../../shared/components/Button.jsx'
+import Input from '../../../../shared/components/Input.jsx'
+import Modal from '../../../../shared/components/Modal.jsx'
 
 function HistoryModal({ isOpen, onClose, history = [] }) {
+  const [searchTerm, setSearchTerm] = useState('')
+
   const formatDate = (dateString) => {
     if (!dateString) return 'No date'
 
@@ -13,6 +18,38 @@ function HistoryModal({ isOpen, onClose, history = [] }) {
       minute: '2-digit',
     }).format(new Date(dateString))
   }
+
+  const filteredHistory = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase()
+
+    if (!query) return history
+
+    return history.filter((record) => {
+      const searchableText = [
+        record.action,
+        record.partNumber,
+        record.quantity,
+        record.location,
+        record.fromLocation,
+        record.toLocation,
+        record.inventoryStatus,
+        record.person,
+        record.coworker,
+        record.machine,
+        record.customer,
+        record.ticketNumber,
+        record.notes,
+        record.originalPartNumber,
+        record.originalLocation,
+        formatDate(record.createdAt),
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+
+      return searchableText.includes(query)
+    })
+  }, [history, searchTerm])
 
   return (
     <Modal
@@ -26,9 +63,20 @@ function HistoryModal({ isOpen, onClose, history = [] }) {
         </Button>
       }
     >
-      {history.length > 0 ? (
+      <div className="inventory-history-search">
+        <Input
+          id="inventory-history-search"
+          label="Search History"
+          type="search"
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+          placeholder="Part, box, customer, machine, ticket, notes..."
+        />
+      </div>
+
+      {filteredHistory.length > 0 ? (
         <div className="inventory-history-list">
-          {history.map((record) => (
+          {filteredHistory.map((record) => (
             <article key={record.id} className="inventory-history-card">
               <div className="inventory-history-card__header">
                 <strong>{record.action}</strong>
@@ -98,6 +146,18 @@ function HistoryModal({ isOpen, onClose, history = [] }) {
                   </p>
                 )}
 
+                {record.originalPartNumber && (
+                  <p>
+                    <strong>Original Part:</strong> {record.originalPartNumber}
+                  </p>
+                )}
+
+                {record.originalLocation && (
+                  <p>
+                    <strong>Original Location:</strong> {record.originalLocation}
+                  </p>
+                )}
+
                 {record.notes && (
                   <p>
                     <strong>Notes:</strong> {record.notes}
@@ -109,8 +169,12 @@ function HistoryModal({ isOpen, onClose, history = [] }) {
         </div>
       ) : (
         <div className="inventory-history-empty">
-          <h3>No history yet</h3>
-          <p>Inventory actions will show here after you add, use, give, or move parts.</p>
+          <h3>{searchTerm ? 'No history found' : 'No history yet'}</h3>
+          <p>
+            {searchTerm
+              ? 'Try a different part number, box, customer, machine, or ticket.'
+              : 'Inventory actions will show here after you add, use, give, or move parts.'}
+          </p>
         </div>
       )}
     </Modal>

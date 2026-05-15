@@ -18,9 +18,11 @@ import UsePartModal from '../components/modals/UsePartModal.jsx'
 import { INVENTORY_ACTIONS } from '../data/inventoryActions.js'
 import {
   buildInventoryTransaction,
+  downloadInventoryCsv,
   findInventoryItemsByPartNumber,
   formatPartNumberInput,
   getInventorySummary,
+  getMostUsedParts,
   groupInventoryByLocation,
   normalizePartNumberSearch,
 } from '../utils/inventoryHelpers.js'
@@ -41,11 +43,20 @@ import '../styles/inventory-page.css'
 import '../styles/inventory-forms.css'
 import '../styles/inventory-history.css'
 
+const INVENTORY_VIEW_TABS = {
+  BOXES: 'BOXES',
+  MOST_USED: 'MOST_USED',
+  EXPORT: 'EXPORT',
+}
+
 function InventoryPage() {
   const [inventoryItems, setInventoryItems] = useState(() => loadInventoryItems())
   const [inventoryHistory, setInventoryHistory] = useState(() => loadInventoryHistory())
   const [savedLocations, setSavedLocations] = useState(() => loadSavedLocations())
   const [searchTerm, setSearchTerm] = useState('')
+  const [activeInventoryView, setActiveInventoryView] = useState(
+    INVENTORY_VIEW_TABS.BOXES,
+  )
   const [activeModal, setActiveModal] = useState(null)
   const [transactionError, setTransactionError] = useState('')
   const [selectedInventoryItem, setSelectedInventoryItem] = useState(null)
@@ -59,6 +70,14 @@ function InventoryPage() {
   const inventorySummary = useMemo(() => {
     return getInventorySummary(inventoryItems)
   }, [inventoryItems])
+
+  const mostUsedParts = useMemo(() => {
+    return getMostUsedParts({
+      history: inventoryHistory,
+      items: inventoryItems,
+      limit: 10,
+    })
+  }, [inventoryHistory, inventoryItems])
 
   const filteredInventoryItems = useMemo(() => {
     if (!isSearching) return inventoryItems
@@ -322,6 +341,10 @@ function InventoryPage() {
     })
   }
 
+  const handleExportInventory = () => {
+    downloadInventoryCsv(inventoryItems)
+  }
+
   const openUseFromItem = (item) => {
     openModalWithItem('use', item)
   }
@@ -345,6 +368,17 @@ function InventoryPage() {
   return (
     <main className="inventory-page page-shell">
       <div className="inventory-page__container site-container">
+        <div className="inventory-page__history-button-wrapper">
+          <Button
+            className="inventory-page__history-button"
+            variant="secondary"
+            size="sm"
+            onClick={() => openModal('history')}
+          >
+            History
+          </Button>
+        </div>
+
         <header className="inventory-page__header">
           <div>
             <p className="inventory-page__eyebrow">Truck Inventory</p>
@@ -418,38 +452,148 @@ function InventoryPage() {
           </Card>
         </section>
 
+        <section className="inventory-page__tabs" aria-label="Inventory views">
+          <button
+            type="button"
+            className={`inventory-page__tab ${
+              activeInventoryView === INVENTORY_VIEW_TABS.BOXES
+                ? 'inventory-page__tab--active'
+                : ''
+            }`}
+            onClick={() => setActiveInventoryView(INVENTORY_VIEW_TABS.BOXES)}
+          >
+            <span className="inventory-page__tab-icon" aria-hidden="true">
+              ▣
+            </span>
+            <span>Locations</span>
+          </button>
+
+          <button
+            type="button"
+            className={`inventory-page__tab ${
+              activeInventoryView === INVENTORY_VIEW_TABS.MOST_USED
+                ? 'inventory-page__tab--active'
+                : ''
+            }`}
+            onClick={() => setActiveInventoryView(INVENTORY_VIEW_TABS.MOST_USED)}
+          >
+            <span className="inventory-page__tab-icon" aria-hidden="true">
+              ↗
+            </span>
+            <span>Most Used</span>
+          </button>
+
+          <button
+            type="button"
+            className={`inventory-page__tab ${
+              activeInventoryView === INVENTORY_VIEW_TABS.EXPORT
+                ? 'inventory-page__tab--active'
+                : ''
+            }`}
+            onClick={() => setActiveInventoryView(INVENTORY_VIEW_TABS.EXPORT)}
+          >
+            <span className="inventory-page__tab-icon" aria-hidden="true">
+              ⇩
+            </span>
+            <span>Export</span>
+          </button>
+        </section>
+
         <section className="inventory-page__content">
-          <div className="inventory-page__section-heading">
-            <h2>{isSearching ? 'Part Location' : 'Boxes'}</h2>
+          {activeInventoryView === INVENTORY_VIEW_TABS.BOXES && (
+            <>
+              <div className="inventory-page__section-heading">
+                <h2>{isSearching ? 'Part Location' : 'Boxes'}</h2>
+              </div>
 
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => openModal('history')}
-            >
-              History
-            </Button>
-          </div>
+              {inventoryLocationGroups.length > 0 ? (
+                <div className="inventory-page__location-list">
+                  {inventoryLocationGroups.map((locationGroup) => (
+                    <InventoryLocationCard
+                      key={locationGroup.id}
+                      locationGroup={locationGroup}
+                      onOpen={openLocationModal}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <Card className="inventory-page__empty-state">
+                  <h3>{isSearching ? 'No part found' : 'No boxes found'}</h3>
+                  <p>
+                    {isSearching
+                      ? 'No box contains that part number.'
+                      : 'Add your first part or adjust your search.'}
+                  </p>
+                </Card>
+              )}
+            </>
+          )}
 
-          {inventoryLocationGroups.length > 0 ? (
-            <div className="inventory-page__location-list">
-              {inventoryLocationGroups.map((locationGroup) => (
-                <InventoryLocationCard
-                  key={locationGroup.id}
-                  locationGroup={locationGroup}
-                  onOpen={openLocationModal}
-                />
-              ))}
-            </div>
-          ) : (
-            <Card className="inventory-page__empty-state">
-              <h3>{isSearching ? 'No part found' : 'No boxes found'}</h3>
-              <p>
-                {isSearching
-                  ? 'No box contains that part number.'
-                  : 'Add your first part or adjust your search.'}
-              </p>
-            </Card>
+          {activeInventoryView === INVENTORY_VIEW_TABS.MOST_USED && (
+            <>
+              <div className="inventory-page__section-heading">
+                <h2>Most Used</h2>
+              </div>
+
+              {mostUsedParts.length > 0 ? (
+                <div className="inventory-page__most-used-list">
+                  {mostUsedParts.map((part, index) => (
+                    <Card
+                      key={part.partNumber}
+                      as="article"
+                      className="inventory-page__most-used-card"
+                    >
+                      <div className="inventory-page__most-used-rank">
+                        #{index + 1}
+                      </div>
+
+                      <div className="inventory-page__most-used-content">
+                        <h3>{part.partNumber}</h3>
+                        <p>Last used: {part.lastUsedAt || 'No date'}</p>
+                      </div>
+
+                      <div className="inventory-page__most-used-stats">
+                        <span>
+                          Used <strong>{part.usedQuantity}</strong>
+                        </span>
+                        <span>
+                          Stock <strong>{part.currentStock}</strong>
+                        </span>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card className="inventory-page__empty-state">
+                  <h3>No used parts yet</h3>
+                  <p>
+                    Parts will appear here after you save Use Part transactions.
+                  </p>
+                </Card>
+              )}
+            </>
+          )}
+
+          {activeInventoryView === INVENTORY_VIEW_TABS.EXPORT && (
+            <>
+              <div className="inventory-page__section-heading">
+                <h2>Export</h2>
+              </div>
+
+              <Card className="inventory-page__export-card">
+                <div>
+                  <h3>Export Inventory CSV</h3>
+                  <p>
+                    Download your current inventory sorted by part number and
+                    location.
+                  </p>
+                </div>
+
+                <Button onClick={handleExportInventory}>
+                  Export CSV
+                </Button>
+              </Card>
+            </>
           )}
         </section>
       </div>

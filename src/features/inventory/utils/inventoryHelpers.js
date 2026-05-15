@@ -610,6 +610,160 @@ export const getInventorySummary = (items = []) => {
   }
 }
 
+export const getCurrentStockByPartNumber = (items = []) => {
+  const stockMap = new Map()
+
+  items.forEach((item) => {
+    const partNumber = normalizePartNumber(item.partNumber)
+
+    if (!partNumber) return
+
+    const officialQuantity = Number(item.officialQuantity || 0)
+    const noiQuantity = Number(item.noiQuantity || 0)
+    const totalQuantity = officialQuantity + noiQuantity
+
+    stockMap.set(partNumber, {
+      partNumber,
+      totalQuantity: Number(stockMap.get(partNumber)?.totalQuantity || 0) + totalQuantity,
+      officialQuantity:
+        Number(stockMap.get(partNumber)?.officialQuantity || 0) + officialQuantity,
+      noiQuantity: Number(stockMap.get(partNumber)?.noiQuantity || 0) + noiQuantity,
+    })
+  })
+
+  return stockMap
+}
+
+export const getMostUsedParts = ({
+  history = [],
+  items = [],
+  limit = 10,
+} = {}) => {
+  const stockMap = getCurrentStockByPartNumber(items)
+  const usageMap = new Map()
+
+  history.forEach((record) => {
+    if (record.action !== INVENTORY_ACTIONS.USE) return
+
+    const partNumber = normalizePartNumber(record.partNumber)
+    const quantity = Number(record.quantity || 0)
+
+    if (!partNumber || quantity <= 0) return
+
+    const existingRecord = usageMap.get(partNumber)
+
+    usageMap.set(partNumber, {
+      partNumber,
+      usedQuantity: Number(existingRecord?.usedQuantity || 0) + quantity,
+      currentStock: Number(stockMap.get(partNumber)?.totalQuantity || 0),
+      officialQuantity: Number(stockMap.get(partNumber)?.officialQuantity || 0),
+      noiQuantity: Number(stockMap.get(partNumber)?.noiQuantity || 0),
+      lastUsedAt:
+        !existingRecord?.lastUsedAt ||
+        new Date(record.createdAt).getTime() >
+          new Date(existingRecord.lastUsedAt).getTime()
+          ? record.createdAt
+          : existingRecord.lastUsedAt,
+    })
+  })
+
+  return Array.from(usageMap.values())
+    .sort((firstPart, secondPart) => {
+      if (secondPart.usedQuantity !== firstPart.usedQuantity) {
+        return secondPart.usedQuantity - firstPart.usedQuantity
+      }
+
+      return firstPart.partNumber.localeCompare(secondPart.partNumber, undefined, {
+        numeric: true,
+        sensitivity: 'base',
+      })
+    })
+    .slice(0, limit)
+}
+
+export const escapeCsvValue = (value = '') => {
+  const stringValue = String(value ?? '')
+
+  if (
+    stringValue.includes(',') ||
+    stringValue.includes('"') ||
+    stringValue.includes('\n')
+  ) {
+    return `"${stringValue.replace(/"/g, '""')}"`
+  }
+
+  return stringValue
+}
+
+export const buildInventoryCsv = (items = []) => {
+  const headers = [
+    'Part Number',
+    'Location',
+    'Official Quantity',
+    'NOI Quantity',
+    'Total Quantity',
+    'Notes',
+  ]
+
+  const sortedItems = [...items].sort((firstItem, secondItem) => {
+    const partComparison = normalizePartNumber(firstItem.partNumber).localeCompare(
+      normalizePartNumber(secondItem.partNumber),
+      undefined,
+      {
+        numeric: true,
+        sensitivity: 'base',
+      },
+    )
+
+    if (partComparison !== 0) return partComparison
+
+    return normalizeText(firstItem.location).localeCompare(
+      normalizeText(secondItem.location),
+      undefined,
+      {
+        numeric: true,
+        sensitivity: 'base',
+      },
+    )
+  })
+
+  const rows = sortedItems.map((item) => {
+    const officialQuantity = Number(item.officialQuantity || 0)
+    const noiQuantity = Number(item.noiQuantity || 0)
+
+    return [
+      item.partNumber,
+      item.location,
+      officialQuantity,
+      noiQuantity,
+      officialQuantity + noiQuantity,
+      item.notes || '',
+    ].map(escapeCsvValue)
+  })
+
+  return [
+    headers.map(escapeCsvValue).join(','),
+    ...rows.map((row) => row.join(',')),
+  ].join('\n')
+}
+
+export const downloadInventoryCsv = (items = []) => {
+  const csvContent = buildInventoryCsv(items)
+  const blob = new Blob([csvContent], {
+    type: 'text/csv;charset=utf-8;',
+  })
+  const url = URL.createObjectURL(blob)
+  const now = new Date()
+  const fileName = `inventory-${now.toISOString().slice(0, 10)}.csv`
+  const link = document.createElement('a')
+
+  link.href = url
+  link.download = fileName
+  link.click()
+
+  URL.revokeObjectURL(url)
+}
+
 export const buildInventoryTransaction = ({
   action,
   items,
@@ -682,6 +836,7 @@ export const buildInventoryTransaction = ({
     historyRecord,
   }
 }
+
 export const findInventoryItemsByPartNumber = ({
   items = [],
   partNumber = '',
