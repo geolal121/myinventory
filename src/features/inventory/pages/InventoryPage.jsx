@@ -166,6 +166,43 @@ function InventoryPage() {
     )
   }, [allInventoryLocationGroups, removedLocations, savedLocations])
 
+  const activeLocationGroups = useMemo(() => {
+    const groupsByLocation = new Map(
+      allInventoryLocationGroups.map((locationGroup) => [
+        locationGroup.location.trim().toUpperCase(),
+        locationGroup,
+      ]),
+    )
+
+    availableLocations.forEach((location) => {
+      const normalizedLocation = location.trim().toUpperCase()
+
+      if (!groupsByLocation.has(normalizedLocation)) {
+        groupsByLocation.set(normalizedLocation, {
+          id: normalizedLocation,
+          location,
+          items: [],
+          partCount: 0,
+          totalQuantity: 0,
+          officialQuantity: 0,
+          noiQuantity: 0,
+          outOfStockCount: 0,
+        })
+      }
+    })
+
+    return Array.from(groupsByLocation.values()).sort((first, second) =>
+      first.location.localeCompare(second.location, undefined, {
+        numeric: true,
+        sensitivity: 'base',
+      }),
+    )
+  }, [allInventoryLocationGroups, availableLocations])
+
+  const visibleLocationGroups = isSearching
+    ? inventoryLocationGroups
+    : activeLocationGroups
+
   const deletedLocations = useMemo(() => {
     const archivesByLocation = new Map(
       archivedLocations.map((archive) => [
@@ -198,10 +235,12 @@ function InventoryPage() {
   const selectedLocationGroupWithCurrentItems = useMemo(() => {
     if (!selectedLocationGroup) return null
 
-    return allInventoryLocationGroups.find(
-      (locationGroup) => locationGroup.id === selectedLocationGroup.id,
-    ) || null
-  }, [allInventoryLocationGroups, selectedLocationGroup])
+    return (
+      activeLocationGroups.find(
+        (locationGroup) => locationGroup.id === selectedLocationGroup.id,
+      ) || selectedLocationGroup
+    )
+  }, [activeLocationGroups, selectedLocationGroup])
 
   useEffect(() => {
     const loadCloudData = async () => {
@@ -876,7 +915,6 @@ function InventoryPage() {
             onChange={handleSearchChange}
             onClear={() => setSearchTerm('')}
             clearLabel="Clear part number search"
-            inputMode="numeric"
             enterKeyHint="search"
             autoComplete="off"
             autoCapitalize="characters"
@@ -1038,9 +1076,9 @@ function InventoryPage() {
                 )}
               </div>
 
-              {inventoryLocationGroups.length > 0 ? (
+              {visibleLocationGroups.length > 0 ? (
                 <div className="inventory-page__location-list">
-                  {inventoryLocationGroups.map((locationGroup) => (
+                  {visibleLocationGroups.map((locationGroup) => (
                     <InventoryLocationCard
                       key={locationGroup.id}
                       locationGroup={locationGroup}
@@ -1219,7 +1257,7 @@ function InventoryPage() {
         isOpen={activeModal === 'manageLocations'}
         onClose={closeModal}
         locations={availableLocations}
-        locationGroups={allInventoryLocationGroups}
+        locationGroups={activeLocationGroups}
         deletedLocations={deletedLocations}
         onAdd={handleAddLocation}
         onRename={handleRenameLocation}
