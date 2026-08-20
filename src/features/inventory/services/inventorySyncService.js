@@ -1,13 +1,16 @@
 import {
+  deleteArchivedLocationFromFirebase,
   deleteInventoryItemFromFirebase,
   deleteLocationFromFirebase,
   deleteRemovedLocationFromFirebase,
   getInventoryHistoryFromFirebase,
   getInventoryItemsFromFirebase,
+  getArchivedLocationsFromFirebase,
   getSavedLocationsFromFirebase,
   getRemovedLocationsFromFirebase,
   saveInventoryHistoryToFirebase,
   saveInventoryItemToFirebase,
+  saveArchivedLocationToFirebase,
   saveLocationToFirebase,
   saveRemovedLocationToFirebase,
 } from './inventoryService.js'
@@ -18,12 +21,17 @@ export const loadInventoryCloudData = async () => {
     inventoryHistory,
     savedLocations,
     removedLocations,
+    archivedLocations,
   ] = await Promise.all([
     getInventoryItemsFromFirebase(),
     getInventoryHistoryFromFirebase(),
     getSavedLocationsFromFirebase(),
     getRemovedLocationsFromFirebase().catch((error) => {
       console.warn('Failed to load removed inventory locations:', error)
+      return []
+    }),
+    getArchivedLocationsFromFirebase().catch((error) => {
+      console.warn('Failed to load archived inventory locations:', error)
       return []
     }),
   ])
@@ -33,6 +41,7 @@ export const loadInventoryCloudData = async () => {
     inventoryHistory,
     savedLocations,
     removedLocations,
+    archivedLocations,
   }
 }
 
@@ -88,11 +97,62 @@ export const syncInventoryTransactionToCloud = async ({
 
 export const deleteInventoryLocationFromCloud = async ({
   location,
-  itemIds = [],
+  items = [],
+  deletedAt = '',
 }) => {
+  await saveArchivedLocationToFirebase({
+    location,
+    items,
+    deletedAt,
+  })
+
   await Promise.all([
-    ...itemIds.map((itemId) => deleteInventoryItemFromFirebase(itemId)),
+    ...items.map((item) => deleteInventoryItemFromFirebase(item.id)),
     deleteLocationFromFirebase(location),
     saveRemovedLocationToFirebase(location),
   ])
+}
+
+export const addInventoryLocationToCloud = async (location) => {
+  await Promise.all([
+    saveLocationToFirebase(location),
+    deleteRemovedLocationFromFirebase(location),
+  ])
+}
+
+export const restoreInventoryLocationToCloud = async ({
+  location,
+  items = [],
+}) => {
+  await Promise.all([
+    ...items.map((item) => saveInventoryItemToFirebase(item)),
+    saveLocationToFirebase(location),
+    deleteRemovedLocationFromFirebase(location),
+    deleteArchivedLocationFromFirebase(location),
+  ])
+}
+
+export const renameInventoryLocationInCloud = async ({
+  fromLocation,
+  toLocation,
+  items = [],
+  deletedItemIds = [],
+}) => {
+  const isDifferentLocation =
+    fromLocation.trim().toUpperCase() !== toLocation.trim().toUpperCase()
+  const syncTasks = [
+    ...items.map((item) => saveInventoryItemToFirebase(item)),
+    ...deletedItemIds.map((itemId) => deleteInventoryItemFromFirebase(itemId)),
+    saveLocationToFirebase(toLocation),
+    deleteLocationFromFirebase(fromLocation),
+    deleteRemovedLocationFromFirebase(toLocation),
+  ]
+
+  if (isDifferentLocation) {
+    syncTasks.push(saveRemovedLocationToFirebase(fromLocation))
+  } else {
+    syncTasks.push(deleteRemovedLocationFromFirebase(fromLocation))
+  }
+
+  await Promise.all(syncTasks)
 }

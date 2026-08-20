@@ -15,6 +15,7 @@ const INVENTORY_COLLECTION = 'inventoryItems'
 const HISTORY_COLLECTION = 'inventoryHistory'
 const LOCATIONS_COLLECTION = 'savedLocations'
 const REMOVED_LOCATIONS_COLLECTION = 'removedLocations'
+const ARCHIVED_LOCATIONS_COLLECTION = 'archivedLocations'
 
 export const getInventoryItemsFromFirebase = async () => {
   const snapshot = await getDocs(collection(database, INVENTORY_COLLECTION))
@@ -114,4 +115,44 @@ export const deleteRemovedLocationFromFirebase = async (location) => {
   const locationRef = doc(database, REMOVED_LOCATIONS_COLLECTION, location)
 
   await deleteDoc(locationRef)
+}
+
+export const getArchivedLocationsFromFirebase = async () => {
+  const snapshot = await getDocs(
+    collection(database, ARCHIVED_LOCATIONS_COLLECTION),
+  )
+
+  return snapshot.docs
+    .map((document) => document.data())
+    .filter((archive) => archive.name)
+    .map((archive) => ({
+      location: archive.name,
+      items: Array.isArray(archive.items) ? archive.items : [],
+      deletedAt: archive.deletedAt || '',
+    }))
+}
+
+export const saveArchivedLocationToFirebase = async ({
+  location,
+  items = [],
+  deletedAt = '',
+}) => {
+  if (!location) return
+
+  const archiveRef = doc(database, ARCHIVED_LOCATIONS_COLLECTION, location)
+
+  await setDoc(archiveRef, {
+    name: location,
+    items,
+    deletedAt,
+    updatedAt: serverTimestamp(),
+  })
+}
+
+export const deleteArchivedLocationFromFirebase = async (location) => {
+  if (!location) return
+
+  const archiveRef = doc(database, ARCHIVED_LOCATIONS_COLLECTION, location)
+
+  await deleteDoc(archiveRef)
 }

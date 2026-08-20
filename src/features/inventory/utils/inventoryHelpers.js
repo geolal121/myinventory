@@ -536,6 +536,66 @@ export const editInventoryItem = ({
   ]
 }
 
+export const renameInventoryLocation = ({
+  items = [],
+  fromLocation,
+  toLocation,
+}) => {
+  const cleanFromLocation = normalizeText(fromLocation)
+  const cleanToLocation = normalizeText(toLocation)
+
+  if (!cleanFromLocation || !cleanToLocation) return items
+
+  const normalizedFromLocation = cleanFromLocation.toUpperCase()
+  const nextItemsById = new Map()
+
+  items.forEach((item) => {
+    const isRenamedLocation =
+      normalizeText(item.location).toUpperCase() === normalizedFromLocation
+    const nextItem = isRenamedLocation
+      ? {
+          ...item,
+          id: createInventoryItemId({
+            partNumber: item.partNumber,
+            location: cleanToLocation,
+          }),
+          location: cleanToLocation,
+        }
+      : item
+    const existingItem = nextItemsById.get(nextItem.id)
+
+    if (!existingItem) {
+      nextItemsById.set(nextItem.id, nextItem)
+      return
+    }
+
+    nextItemsById.set(nextItem.id, {
+      ...existingItem,
+      officialQuantity:
+        Number(existingItem.officialQuantity || 0) +
+        Number(nextItem.officialQuantity || 0),
+      noiQuantity:
+        Number(existingItem.noiQuantity || 0) +
+        Number(nextItem.noiQuantity || 0),
+      knownMachines: [
+        ...new Set([
+          ...(existingItem.knownMachines || []),
+          ...(nextItem.knownMachines || []),
+        ]),
+      ],
+      knownCustomers: [
+        ...new Set([
+          ...(existingItem.knownCustomers || []),
+          ...(nextItem.knownCustomers || []),
+        ]),
+      ],
+      notes: existingItem.notes || nextItem.notes || '',
+    })
+  })
+
+  return Array.from(nextItemsById.values())
+}
+
 export const groupInventoryByLocation = (items = []) => {
   const locationMap = new Map()
 

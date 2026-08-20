@@ -101,6 +101,8 @@ function EditPartModal({
         <Input
           name="partNumber"
           label="Part Number"
+          type="text"
+          inputMode="numeric"
           value={formData.partNumber}
           onChange={handleChange}
           placeholder="Example: 123-4567-89"

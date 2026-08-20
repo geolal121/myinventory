@@ -31,7 +31,7 @@ function BoxInventoryModal({
             onClick={() => onDeleteLocation(locationGroup)}
           >
             <Trash2 size={17} aria-hidden="true" />
-            Delete Location
+            Remove Location
           </Button>
 
           <Button type="button" variant="secondary" onClick={onClose}>

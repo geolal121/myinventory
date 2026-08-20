@@ -19,8 +19,8 @@ function DeleteLocationModal({
   return (
     <Modal
       isOpen={isOpen}
-      title="Delete Location"
-      description="Confirm before removing this location from your truck."
+      title="Remove Location"
+      description="Removed locations can be restored later from Manage Locations."
       onClose={onClose}
       footer={
         <>
@@ -29,21 +29,21 @@ function DeleteLocationModal({
           </Button>
 
           <Button type="button" variant="danger" onClick={handleConfirmDelete}>
-            Delete Location
+            Remove Location
           </Button>
         </>
       }
     >
       <div className="inventory-form">
         <div className="inventory-form__error">
-          <strong>Delete {locationGroup?.location || 'this location'}?</strong>
+          <strong>Remove {locationGroup?.location || 'this location'}?</strong>
           <p>
-            This removes the location from your choices
+            This hides the location from your choices
             {itemCount > 0
-              ? ` and permanently deletes its ${itemCount} part ${
+              ? ` and archives its ${itemCount} part ${
                   itemCount === 1 ? 'record' : 'records'
-                }.`
-              : '.'}
+                } so you can restore them later.`
+              : '. You can restore the location later.'}
           </p>
         </div>
       </div>

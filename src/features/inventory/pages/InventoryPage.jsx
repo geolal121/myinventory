@@ -45,20 +45,26 @@ import {
   getMostUsedParts,
   groupInventoryByLocation,
   normalizePartNumberSearch,
+  renameInventoryLocation,
 } from '../utils/inventoryHelpers.js'
 import {
+  loadArchivedLocations,
   loadInventoryHistory,
   loadInventoryItems,
   loadRemovedLocations,
   loadSavedLocations,
+  saveArchivedLocations,
   saveInventoryHistory,
   saveInventoryItems,
   saveRemovedLocations,
   saveSavedLocations,
 } from '../utils/inventoryStorage.js'
 import {
+  addInventoryLocationToCloud,
   deleteInventoryLocationFromCloud,
   loadInventoryCloudData,
+  renameInventoryLocationInCloud,
+  restoreInventoryLocationToCloud,
   syncInventoryTransactionToCloud,
 } from '../services/inventorySyncService.js'
 
@@ -78,6 +84,9 @@ function InventoryPage() {
   const [savedLocations, setSavedLocations] = useState(() => loadSavedLocations())
   const [removedLocations, setRemovedLocations] = useState(() =>
     loadRemovedLocations(),
+  )
+  const [archivedLocations, setArchivedLocations] = useState(() =>
+    loadArchivedLocations(),
   )
   const [searchTerm, setSearchTerm] = useState('')
   const [activeInventoryView, setActiveInventoryView] = useState(
@@ -157,6 +166,35 @@ function InventoryPage() {
     )
   }, [allInventoryLocationGroups, removedLocations, savedLocations])
 
+  const deletedLocations = useMemo(() => {
+    const archivesByLocation = new Map(
+      archivedLocations.map((archive) => [
+        archive.location.trim().toUpperCase(),
+        archive,
+      ]),
+    )
+
+    return removedLocations
+      .map((location) => {
+        const archive = archivesByLocation.get(location.trim().toUpperCase())
+
+        return archive
+          ? { ...archive, hasSnapshot: true }
+          : {
+              location,
+              items: [],
+              deletedAt: '',
+              hasSnapshot: false,
+            }
+      })
+      .sort((first, second) =>
+        first.location.localeCompare(second.location, undefined, {
+          numeric: true,
+          sensitivity: 'base',
+        }),
+      )
+  }, [archivedLocations, removedLocations])
+
   const selectedLocationGroupWithCurrentItems = useMemo(() => {
     if (!selectedLocationGroup) return null
 
@@ -172,6 +210,7 @@ function InventoryPage() {
 
         const cloudData = await loadInventoryCloudData()
         const localRemovedLocations = loadRemovedLocations()
+        const localArchivedLocations = loadArchivedLocations()
         const removedLocationMap = new Map(
           [...localRemovedLocations, ...cloudData.removedLocations].map(
             (location) => [location.trim().toUpperCase(), location],
@@ -179,6 +218,11 @@ function InventoryPage() {
         )
         const combinedRemovedLocations = Array.from(
           removedLocationMap.values(),
+        )
+        const archivedLocationMap = new Map(
+          [...localArchivedLocations, ...cloudData.archivedLocations].map(
+            (archive) => [archive.location.trim().toUpperCase(), archive],
+          ),
         )
 
         if (cloudData.inventoryItems.length > 0) {
@@ -208,6 +252,10 @@ function InventoryPage() {
           setRemovedLocations(combinedRemovedLocations)
         }
 
+        if (archivedLocationMap.size > 0) {
+          setArchivedLocations(Array.from(archivedLocationMap.values()))
+        }
+
         setSyncStatus('Cloud Synced')
       } catch (error) {
         console.error('Failed to load cloud inventory data:', error)
@@ -233,6 +281,10 @@ function InventoryPage() {
   useEffect(() => {
     saveRemovedLocations(removedLocations)
   }, [removedLocations])
+
+  useEffect(() => {
+    saveArchivedLocations(archivedLocations)
+  }, [archivedLocations])
 
   const closeModal = () => {
     returnToLocationAfterAction.current = true
@@ -340,6 +392,22 @@ function InventoryPage() {
   }
 
   const runInventoryTransaction = (action, formData) => {
+    const removedLocationNames = new Set(
+      removedLocations.map((location) => location.trim().toUpperCase()),
+    )
+    const requestedDestination = [formData.location, formData.toLocation]
+      .filter(Boolean)
+      .find((location) =>
+        removedLocationNames.has(location.trim().toUpperCase()),
+      )
+
+    if (requestedDestination) {
+      setTransactionError(
+        `${requestedDestination} is deleted. Restore it in Manage Locations first.`,
+      )
+      return false
+    }
+
     const transactionResult = buildInventoryTransaction({
       action,
       items: inventoryItems,
@@ -359,9 +427,6 @@ function InventoryPage() {
     const deletedItemIds = inventoryItems
       .filter((item) => !nextItemIds.has(item.id))
       .map((item) => item.id)
-    const removedLocationNames = new Set(
-      removedLocations.map((location) => location.trim().toUpperCase()),
-    )
     const restoredLocations = newLocations.filter((location) =>
       removedLocationNames.has(location.trim().toUpperCase()),
     )
@@ -488,6 +553,205 @@ function InventoryPage() {
     })
   }
 
+  const handleAddLocation = (locationName) => {
+    const cleanLocation = locationName.trim()
+    const normalizedLocation = cleanLocation.toUpperCase()
+
+    if (!cleanLocation) {
+      return {
+        isValid: false,
+        errorMessage: 'Location name is required.',
+      }
+    }
+
+    if (
+      availableLocations.some(
+        (location) => location.trim().toUpperCase() === normalizedLocation,
+      )
+    ) {
+      return {
+        isValid: false,
+        errorMessage: `${cleanLocation} already exists.`,
+      }
+    }
+
+    if (
+      removedLocations.some(
+        (location) => location.trim().toUpperCase() === normalizedLocation,
+      )
+    ) {
+      return {
+        isValid: false,
+        errorMessage: `${cleanLocation} is deleted. Restore it instead of adding it again.`,
+      }
+    }
+
+    setSavedLocations((currentLocations) => [
+      ...currentLocations,
+      cleanLocation,
+    ])
+    setSyncStatus('Syncing...')
+
+    addInventoryLocationToCloud(cleanLocation)
+      .then(() => {
+        setSyncStatus('Cloud Synced')
+      })
+      .catch((error) => {
+        console.error('Failed to add inventory location:', error)
+        setSyncStatus('Offline Ready')
+      })
+
+    return { isValid: true, errorMessage: '' }
+  }
+
+  const handleRenameLocation = (fromLocation, toLocation) => {
+    const cleanFromLocation = fromLocation.trim()
+    const cleanToLocation = toLocation.trim()
+    const normalizedFromLocation = cleanFromLocation.toUpperCase()
+    const normalizedToLocation = cleanToLocation.toUpperCase()
+
+    if (!cleanToLocation) {
+      return {
+        isValid: false,
+        errorMessage: 'New location name is required.',
+      }
+    }
+
+    if (cleanFromLocation === cleanToLocation) {
+      return { isValid: true, errorMessage: '' }
+    }
+
+    if (
+      availableLocations.some(
+        (location) =>
+          location.trim().toUpperCase() === normalizedToLocation &&
+          location.trim().toUpperCase() !== normalizedFromLocation,
+      )
+    ) {
+      return {
+        isValid: false,
+        errorMessage: `${cleanToLocation} already exists.`,
+      }
+    }
+
+    if (
+      removedLocations.some(
+        (location) => location.trim().toUpperCase() === normalizedToLocation,
+      )
+    ) {
+      return {
+        isValid: false,
+        errorMessage: `${cleanToLocation} is deleted. Restore it before renaming another location to that name.`,
+      }
+    }
+
+    const renamedItems = renameInventoryLocation({
+      items: inventoryItems,
+      fromLocation: cleanFromLocation,
+      toLocation: cleanToLocation,
+    })
+    const originalItemIds = inventoryItems
+      .filter(
+        (item) =>
+          item.location.trim().toUpperCase() === normalizedFromLocation,
+      )
+      .map((item) => item.id)
+    const renamedLocationItems = renamedItems.filter(
+      (item) => item.location.trim().toUpperCase() === normalizedToLocation,
+    )
+    const renamedItemIds = new Set(renamedLocationItems.map((item) => item.id))
+    const deletedItemIds = originalItemIds.filter(
+      (itemId) => !renamedItemIds.has(itemId),
+    )
+
+    setInventoryItems(renamedItems)
+    setSavedLocations((currentLocations) => [
+      ...currentLocations.filter(
+        (location) =>
+          location.trim().toUpperCase() !== normalizedFromLocation &&
+          location.trim().toUpperCase() !== normalizedToLocation,
+      ),
+      cleanToLocation,
+    ])
+    setRemovedLocations((currentLocations) => {
+      const nextLocations = currentLocations.filter(
+        (location) =>
+          location.trim().toUpperCase() !== normalizedToLocation &&
+          location.trim().toUpperCase() !== normalizedFromLocation,
+      )
+
+      return normalizedFromLocation === normalizedToLocation
+        ? nextLocations
+        : [...nextLocations, cleanFromLocation]
+    })
+
+    setSyncStatus('Syncing...')
+
+    renameInventoryLocationInCloud({
+      fromLocation: cleanFromLocation,
+      toLocation: cleanToLocation,
+      items: renamedLocationItems,
+      deletedItemIds,
+    })
+      .then(() => {
+        setSyncStatus('Cloud Synced')
+      })
+      .catch((error) => {
+        console.error('Failed to rename inventory location:', error)
+        setSyncStatus('Offline Ready')
+      })
+
+    return { isValid: true, errorMessage: '' }
+  }
+
+  const handleRestoreLocation = (archive) => {
+    if (!archive?.location) return
+
+    const normalizedLocation = archive.location.trim().toUpperCase()
+    const restoredItemsById = new Map(
+      inventoryItems.map((item) => [item.id, item]),
+    )
+
+    archive.items.forEach((item) => {
+      restoredItemsById.set(item.id, item)
+    })
+
+    const restoredItems = Array.from(restoredItemsById.values())
+
+    setInventoryItems(restoredItems)
+    setSavedLocations((currentLocations) => [
+      ...currentLocations.filter(
+        (location) => location.trim().toUpperCase() !== normalizedLocation,
+      ),
+      archive.location,
+    ])
+    setRemovedLocations((currentLocations) =>
+      currentLocations.filter(
+        (location) => location.trim().toUpperCase() !== normalizedLocation,
+      ),
+    )
+    setArchivedLocations((currentArchives) =>
+      currentArchives.filter(
+        (currentArchive) =>
+          currentArchive.location.trim().toUpperCase() !== normalizedLocation,
+      ),
+    )
+
+    setSyncStatus('Syncing...')
+
+    restoreInventoryLocationToCloud({
+      location: archive.location,
+      items: archive.items,
+    })
+      .then(() => {
+        setSyncStatus('Cloud Synced')
+      })
+      .catch((error) => {
+        console.error('Failed to restore inventory location:', error)
+        setSyncStatus('Offline Ready')
+      })
+  }
+
   const handleDeleteLocation = (locationGroup) => {
     if (!locationGroup?.location) return
 
@@ -495,6 +759,12 @@ function InventoryPage() {
     const deletedItems = inventoryItems.filter(
       (item) => item.location.trim().toUpperCase() === normalizedLocation,
     )
+    const deletedAt = new Date().toISOString()
+    const archivedLocation = {
+      location: locationGroup.location,
+      items: deletedItems,
+      deletedAt,
+    }
 
     setInventoryItems((currentItems) =>
       currentItems.filter(
@@ -512,12 +782,20 @@ function InventoryPage() {
       ),
       locationGroup.location,
     ])
+    setArchivedLocations((currentArchives) => [
+      ...currentArchives.filter(
+        (archive) =>
+          archive.location.trim().toUpperCase() !== normalizedLocation,
+      ),
+      archivedLocation,
+    ])
 
     setSyncStatus('Syncing...')
 
     deleteInventoryLocationFromCloud({
       location: locationGroup.location,
-      itemIds: deletedItems.map((item) => item.id),
+      items: deletedItems,
+      deletedAt,
     })
       .then(() => {
         setSyncStatus('Cloud Synced')
@@ -942,6 +1220,10 @@ function InventoryPage() {
         onClose={closeModal}
         locations={availableLocations}
         locationGroups={allInventoryLocationGroups}
+        deletedLocations={deletedLocations}
+        onAdd={handleAddLocation}
+        onRename={handleRenameLocation}
+        onRestore={handleRestoreLocation}
         onDelete={openDeleteLocationModal}
       />
 

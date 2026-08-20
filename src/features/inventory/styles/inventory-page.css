@@ -446,6 +446,55 @@
 
 /* MANAGE LOCATIONS */
 
+.inventory-page__location-editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--spacing-3);
+
+  padding: var(--spacing-3);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+
+  background: var(--color-surface-soft);
+}
+
+.inventory-page__location-editor .ui-button {
+  min-height: 48px;
+}
+
+.inventory-page__manage-location-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+
+  margin-top: var(--spacing-2);
+}
+
+.inventory-page__manage-location-heading h3 {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-md);
+}
+
+.inventory-page__manage-location-heading span {
+  min-width: 28px;
+
+  padding: var(--spacing-1) var(--spacing-2);
+
+  border-radius: var(--badge-radius);
+
+  background: var(--color-surface-soft);
+
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+}
+
 .inventory-page__manage-location-card {
   display: flex;
   align-items: center;
@@ -462,7 +511,25 @@
 .inventory-page__manage-location-card p {
   margin-top: var(--spacing-1);
 
+  color: var(--color-text-secondary);
+
   font-size: var(--font-size-sm);
+}
+
+.inventory-page__manage-location-actions,
+.inventory-page__rename-location-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--spacing-2);
+}
+
+.inventory-page__rename-location-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--spacing-3);
+
+  width: 100%;
 }
 
 /* LOCATION LIST */
@@ -896,7 +963,24 @@
   }
 
   .inventory-page__manage-location-card {
+    flex-direction: column;
     align-items: flex-start;
+  }
+
+  .inventory-page__location-editor,
+  .inventory-page__rename-location-form {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-page__location-editor .ui-button,
+  .inventory-page__manage-location-actions,
+  .inventory-page__rename-location-actions {
+    width: 100%;
+  }
+
+  .inventory-page__manage-location-actions .ui-button,
+  .inventory-page__rename-location-actions .ui-button {
+    flex: 1 1 0;
   }
 
   .inventory-page__manage-location-card .ui-button {
