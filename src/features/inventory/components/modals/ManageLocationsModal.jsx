@@ -1,3 +1,5 @@
+import { Trash2 } from 'lucide-react'
+
 import Button from '../../../../shared/components/Button.jsx'
 import Card from '../../../../shared/components/Card.jsx'
 import Modal from '../../../../shared/components/Modal.jsx'
@@ -47,6 +49,7 @@ function ManageLocationsModal({
                   size="sm"
                   onClick={() => onDelete(location, locationGroup)}
                 >
+                  <Trash2 size={16} aria-hidden="true" />
                   Delete
                 </Button>
               </Card>

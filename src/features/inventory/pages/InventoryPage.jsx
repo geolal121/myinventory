@@ -1,4 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  ArrowRightLeft,
+  Boxes,
+  CircleCheck,
+  Download,
+  Ghost,
+  HandHelping,
+  History as HistoryIcon,
+  MapPin,
+  Package,
+  PackageMinus,
+  PackagePlus,
+  TrendingUp,
+  TriangleAlert,
+} from 'lucide-react'
 
 import Button from '../../../shared/components/Button.jsx'
 import Card from '../../../shared/components/Card.jsx'
@@ -547,6 +562,7 @@ function InventoryPage() {
             size="sm"
             onClick={() => openModal('history')}
           >
+            <HistoryIcon size={17} aria-hidden="true" />
             History
           </Button>
         </div>
@@ -582,27 +598,33 @@ function InventoryPage() {
             onChange={handleSearchChange}
             onClear={() => setSearchTerm('')}
             clearLabel="Clear part number search"
-            inputMode="numeric"
+            inputMode="text"
             enterKeyHint="search"
             autoComplete="off"
+            autoCapitalize="characters"
+            spellCheck="false"
             placeholder="Example: 123-4567-89"
           />
         </section>
 
         <section className="inventory-page__actions" aria-label="Inventory actions">
           <Button fullWidth onClick={() => openModal('add')}>
+            <PackagePlus size={19} aria-hidden="true" />
             Add Part
           </Button>
 
           <Button fullWidth onClick={() => openModal('use')}>
+            <PackageMinus size={19} aria-hidden="true" />
             Use Part
           </Button>
 
           <Button fullWidth onClick={() => openModal('give')}>
+            <HandHelping size={19} aria-hidden="true" />
             Give Part
           </Button>
 
           <Button fullWidth onClick={() => openModal('move')}>
+            <ArrowRightLeft size={19} aria-hidden="true" />
             Move Part
           </Button>
         </section>
@@ -615,7 +637,10 @@ function InventoryPage() {
             onClick={() => openSummaryModal(INVENTORY_SUMMARY_VIEWS.TOTAL)}
             aria-haspopup="dialog"
           >
-            <span>Total Parts</span>
+            <span className="inventory-page__summary-card-heading">
+              <span>Total Parts</span>
+              <Package size={18} aria-hidden="true" />
+            </span>
             <strong>{inventorySummary.totalParts}</strong>
           </Card>
 
@@ -626,7 +651,10 @@ function InventoryPage() {
             onClick={() => openSummaryModal(INVENTORY_SUMMARY_VIEWS.OFFICIAL)}
             aria-haspopup="dialog"
           >
-            <span>Official</span>
+            <span className="inventory-page__summary-card-heading">
+              <span>Official</span>
+              <CircleCheck size={18} aria-hidden="true" />
+            </span>
             <strong>{inventorySummary.officialQuantity}</strong>
           </Card>
 
@@ -637,7 +665,10 @@ function InventoryPage() {
             onClick={() => openSummaryModal(INVENTORY_SUMMARY_VIEWS.NOI)}
             aria-haspopup="dialog"
           >
-            <span>NOI / Ghost</span>
+            <span className="inventory-page__summary-card-heading">
+              <span>NOI / Ghost</span>
+              <Ghost size={18} aria-hidden="true" />
+            </span>
             <strong>{inventorySummary.noiQuantity}</strong>
           </Card>
 
@@ -650,7 +681,10 @@ function InventoryPage() {
             }
             aria-haspopup="dialog"
           >
-            <span>Out of Stock</span>
+            <span className="inventory-page__summary-card-heading">
+              <span>Out of Stock</span>
+              <TriangleAlert size={18} aria-hidden="true" />
+            </span>
             <strong>{inventorySummary.outOfStock}</strong>
           </Card>
         </section>
@@ -665,9 +699,11 @@ function InventoryPage() {
             }`}
             onClick={() => setActiveInventoryView(INVENTORY_VIEW_TABS.BOXES)}
           >
-            <span className="inventory-page__tab-icon" aria-hidden="true">
-              ▣
-            </span>
+            <Boxes
+              className="inventory-page__tab-icon"
+              size={18}
+              aria-hidden="true"
+            />
             <span>Locations</span>
           </button>
 
@@ -680,9 +716,11 @@ function InventoryPage() {
             }`}
             onClick={() => setActiveInventoryView(INVENTORY_VIEW_TABS.MOST_USED)}
           >
-            <span className="inventory-page__tab-icon" aria-hidden="true">
-              ↗
-            </span>
+            <TrendingUp
+              className="inventory-page__tab-icon"
+              size={18}
+              aria-hidden="true"
+            />
             <span>Most Used</span>
           </button>
 
@@ -695,9 +733,11 @@ function InventoryPage() {
             }`}
             onClick={() => setActiveInventoryView(INVENTORY_VIEW_TABS.EXPORT)}
           >
-            <span className="inventory-page__tab-icon" aria-hidden="true">
-              ⇩
-            </span>
+            <Download
+              className="inventory-page__tab-icon"
+              size={18}
+              aria-hidden="true"
+            />
             <span>Export</span>
           </button>
         </section>
@@ -714,6 +754,7 @@ function InventoryPage() {
                     size="sm"
                     onClick={() => openModal('manageLocations')}
                   >
+                    <MapPin size={16} aria-hidden="true" />
                     Manage Locations
                   </Button>
                 )}
@@ -803,6 +844,7 @@ function InventoryPage() {
                 </div>
 
                 <Button onClick={handleExportInventory}>
+                  <Download size={18} aria-hidden="true" />
                   Export CSV
                 </Button>
               </Card>
@@ -856,6 +898,7 @@ function InventoryPage() {
         isOpen={activeModal === 'move'}
         onClose={selectedLocationGroup ? closeActionModal : closeModal}
         onSubmit={handleMovePart}
+        items={inventoryItems}
         savedLocations={savedLocations}
         removedLocations={removedLocations}
         selectedItem={selectedInventoryItem}

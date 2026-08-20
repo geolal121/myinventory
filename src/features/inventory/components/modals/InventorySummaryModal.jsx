@@ -1,29 +1,29 @@
 import Card from '../../../../shared/components/Card.jsx'
 import Modal from '../../../../shared/components/Modal.jsx'
 
-import { isOutOfStock } from '../../utils/inventoryHelpers.js'
 import { INVENTORY_SUMMARY_VIEWS } from '../../data/inventorySummaryViews.js'
+import { groupInventoryByPartNumber } from '../../utils/inventoryHelpers.js'
 
 const SUMMARY_VIEW_DETAILS = {
   [INVENTORY_SUMMARY_VIEWS.TOTAL]: {
     title: 'All Parts',
-    description: 'Every part in your truck inventory, grouped by location.',
+    description: 'Every part in your truck, combined across all locations.',
     filter: () => true,
   },
   [INVENTORY_SUMMARY_VIEWS.OFFICIAL]: {
     title: 'Official Inventory',
     description: 'Parts with official inventory available.',
-    filter: (item) => Number(item.officialQuantity || 0) > 0,
+    filter: (part) => part.officialQuantity > 0,
   },
   [INVENTORY_SUMMARY_VIEWS.NOI]: {
     title: 'NOI / Ghost Parts',
     description: 'Parts with NOI or ghost inventory available.',
-    filter: (item) => Number(item.noiQuantity || 0) > 0,
+    filter: (part) => part.noiQuantity > 0,
   },
   [INVENTORY_SUMMARY_VIEWS.OUT_OF_STOCK]: {
     title: 'Out of Stock Parts',
     description: 'Parts with no official or NOI quantity remaining.',
-    filter: isOutOfStock,
+    filter: (part) => part.totalQuantity === 0,
   },
 }
 
@@ -37,48 +37,37 @@ function InventorySummaryModal({
     SUMMARY_VIEW_DETAILS[summaryView] ||
     SUMMARY_VIEW_DETAILS[INVENTORY_SUMMARY_VIEWS.TOTAL]
 
-  const visibleItems = items
-    .filter(viewDetails.filter)
-    .sort((firstItem, secondItem) => {
-      const partComparison = firstItem.partNumber.localeCompare(
-        secondItem.partNumber,
-        undefined,
-        { numeric: true, sensitivity: 'base' },
-      )
-
-      if (partComparison !== 0) return partComparison
-
-      return firstItem.location.localeCompare(secondItem.location, undefined, {
-        numeric: true,
-        sensitivity: 'base',
-      })
-    })
+  const visibleParts = groupInventoryByPartNumber(items).filter(
+    viewDetails.filter,
+  )
 
   return (
     <Modal
       isOpen={isOpen}
       title={viewDetails.title}
-      description={`${viewDetails.description} ${visibleItems.length} result${
-        visibleItems.length === 1 ? '' : 's'
+      description={`${viewDetails.description} ${visibleParts.length} result${
+        visibleParts.length === 1 ? '' : 's'
       }.`}
       onClose={onClose}
     >
-      {visibleItems.length > 0 ? (
+      {visibleParts.length > 0 ? (
         <div className="inventory-page__summary-modal-list">
-          {visibleItems.map((item) => {
-            const officialQuantity = Number(item.officialQuantity || 0)
-            const noiQuantity = Number(item.noiQuantity || 0)
-            const totalQuantity = officialQuantity + noiQuantity
-
+          {visibleParts.map((part) => {
             return (
-              <Card key={item.id} className="inventory-page__summary-modal-card">
+              <Card
+                key={part.partNumber}
+                className="inventory-page__summary-modal-card"
+              >
                 <div className="inventory-page__summary-modal-card-heading">
                   <div>
-                    <h3>{item.partNumber}</h3>
-                    <p>{item.location}</p>
+                    <h3>{part.partNumber}</h3>
+                    <p>
+                      {part.locations.length} location
+                      {part.locations.length === 1 ? '' : 's'}
+                    </p>
                   </div>
 
-                  {totalQuantity === 0 && (
+                  {part.totalQuantity === 0 && (
                     <span className="inventory-page__stock-badge">
                       Out of Stock
                     </span>
@@ -87,17 +76,27 @@ function InventorySummaryModal({
 
                 <div className="inventory-page__summary-modal-quantities">
                   <span>
-                    Total <strong>{totalQuantity}</strong>
+                    Total <strong>{part.totalQuantity}</strong>
                   </span>
                   <span>
-                    Official <strong>{officialQuantity}</strong>
+                    Official <strong>{part.officialQuantity}</strong>
                   </span>
                   <span>
-                    NOI <strong>{noiQuantity}</strong>
+                    NOI <strong>{part.noiQuantity}</strong>
                   </span>
                 </div>
 
-                {item.notes && <p className="inventory-page__part-notes">{item.notes}</p>}
+                <div className="inventory-page__part-location-list">
+                  {part.locations.map((location) => (
+                    <div
+                      key={location.id}
+                      className="inventory-page__part-location-row"
+                    >
+                      <span>{location.location}</span>
+                      <strong>{location.totalQuantity}</strong>
+                    </div>
+                  ))}
+                </div>
               </Card>
             )
           })}

@@ -50,7 +50,7 @@ Safari / mobile browser fixes only.
 /* SMALL PHONE */
 @media (max-width: 479px) {
   .site-container {
-    width: min(100% - var(--spacing-2) * 2, 100%);
+    width: min(100% - var(--spacing-3) * 2, 100%);
   }
 }
 

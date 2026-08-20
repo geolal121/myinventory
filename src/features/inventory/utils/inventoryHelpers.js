@@ -579,6 +579,63 @@ export const groupInventoryByLocation = (items = []) => {
   })
 }
 
+export const groupInventoryByPartNumber = (items = []) => {
+  const partMap = new Map()
+
+  items.forEach((item) => {
+    const partNumber = normalizePartNumber(item.partNumber)
+
+    if (!partNumber) return
+
+    const officialQuantity = Number(item.officialQuantity || 0)
+    const noiQuantity = Number(item.noiQuantity || 0)
+    const totalQuantity = officialQuantity + noiQuantity
+    const existingPart = partMap.get(partNumber)
+
+    if (!existingPart) {
+      partMap.set(partNumber, {
+        partNumber,
+        officialQuantity: 0,
+        noiQuantity: 0,
+        totalQuantity: 0,
+        locations: [],
+      })
+    }
+
+    const part = partMap.get(partNumber)
+
+    part.officialQuantity += officialQuantity
+    part.noiQuantity += noiQuantity
+    part.totalQuantity += totalQuantity
+    part.locations.push({
+      id: item.id,
+      location: normalizeText(item.location) || 'No Location',
+      officialQuantity,
+      noiQuantity,
+      totalQuantity,
+      notes: normalizeText(item.notes),
+    })
+  })
+
+  return Array.from(partMap.values())
+    .map((part) => ({
+      ...part,
+      locations: part.locations.sort((firstLocation, secondLocation) =>
+        firstLocation.location.localeCompare(
+          secondLocation.location,
+          undefined,
+          { numeric: true, sensitivity: 'base' },
+        ),
+      ),
+    }))
+    .sort((firstPart, secondPart) =>
+      firstPart.partNumber.localeCompare(secondPart.partNumber, undefined, {
+        numeric: true,
+        sensitivity: 'base',
+      }),
+    )
+}
+
 export const searchInventory = (items = [], searchTerm = '') => {
   const query = normalizeText(searchTerm).toLowerCase()
   const normalizedQuery = normalizePartNumberSearch(searchTerm).toLowerCase()
@@ -605,17 +662,19 @@ export const searchInventory = (items = [], searchTerm = '') => {
 }
 
 export const getInventorySummary = (items = []) => {
+  const parts = groupInventoryByPartNumber(items)
+
   return {
-    totalParts: items.length,
-    officialQuantity: items.reduce(
-      (total, item) => total + Number(item.officialQuantity || 0),
+    totalParts: parts.length,
+    officialQuantity: parts.reduce(
+      (total, part) => total + part.officialQuantity,
       0,
     ),
-    noiQuantity: items.reduce(
-      (total, item) => total + Number(item.noiQuantity || 0),
+    noiQuantity: parts.reduce(
+      (total, part) => total + part.noiQuantity,
       0,
     ),
-    outOfStock: items.filter(isOutOfStock).length,
+    outOfStock: parts.filter((part) => part.totalQuantity === 0).length,
   }
 }
 

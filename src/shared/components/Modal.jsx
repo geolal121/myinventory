@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { X } from 'lucide-react'
 
 import Button from './Button.jsx'
 
@@ -48,10 +49,12 @@ function Modal({
             type="button"
             variant="ghost"
             size="sm"
+            className="ui-modal__close"
             onClick={onClose}
             aria-label="Close modal"
+            title="Close"
           >
-            Close
+            <X size={20} aria-hidden="true" />
           </Button>
         </header>
 

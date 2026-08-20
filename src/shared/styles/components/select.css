@@ -102,13 +102,19 @@
 
 @media (max-width: 479px) {
   .ui-select {
-    min-height: 50px;
+    min-height: 52px;
 
-    font-size: var(--font-size-sm);
+    font-size: 16px;
   }
 
   .ui-select-field__label {
     font-size: var(--font-size-sm);
+  }
+}
+
+@media (min-width: 480px) and (max-width: 767px) {
+  .ui-select {
+    font-size: 16px;
   }
 }
 

@@ -70,6 +70,13 @@ function HistoryModal({ isOpen, onClose, history = [] }) {
           type="search"
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
+          onClear={() => setSearchTerm('')}
+          clearLabel="Clear history search"
+          inputMode="text"
+          enterKeyHint="search"
+          autoComplete="off"
+          autoCapitalize="characters"
+          spellCheck="false"
           placeholder="Part, box, customer, machine, ticket, notes..."
         />
       </div>

@@ -1,3 +1,5 @@
+import { Search, X } from 'lucide-react'
+
 function Input({
   id,
   label,
@@ -14,11 +16,14 @@ function Input({
 }) {
   const inputId = id || props.name
   const hasError = Boolean(error)
+  const isSearch = type === 'search'
+  const hasClearButton = Boolean(onClear && value)
 
   const classes = [
     'ui-input',
     hasError ? 'ui-input--error' : '',
-    onClear && value ? 'ui-input--clearable' : '',
+    isSearch ? 'ui-input--search' : '',
+    hasClearButton ? 'ui-input--clearable' : '',
     className,
   ]
     .filter(Boolean)
@@ -33,6 +38,15 @@ function Input({
       )}
 
       <div className="ui-input-field__control">
+        {isSearch && (
+          <Search
+            className="ui-input-field__search-icon"
+            size={19}
+            strokeWidth={2}
+            aria-hidden="true"
+          />
+        )}
+
         <input
           id={inputId}
           className={classes}
@@ -44,14 +58,15 @@ function Input({
           {...props}
         />
 
-        {onClear && value && (
+        {hasClearButton && (
           <button
             className="ui-input-field__clear"
             type="button"
             onClick={onClear}
             aria-label={clearLabel}
+            title={clearLabel}
           >
-            Clear
+            <X size={18} strokeWidth={2.25} aria-hidden="true" />
           </button>
         )}
       </div>

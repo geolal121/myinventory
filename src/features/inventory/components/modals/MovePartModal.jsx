@@ -8,6 +8,7 @@ import Select from '../../../../shared/components/Select.jsx'
 import { getLocationOptions } from '../../data/inventoryLocations.js'
 import {
   formatPartNumberInput,
+  getAvailableQuantity,
   INVENTORY_STATUS,
 } from '../../utils/inventoryHelpers.js'
 
@@ -25,7 +26,10 @@ const INVENTORY_STATUS_OPTIONS = [
 const getInitialFormData = (selectedItem = null) => ({
   partNumber: selectedItem?.partNumber || '',
   quantity: '',
-  inventoryStatus: INVENTORY_STATUS.OFFICIAL,
+  inventoryStatus:
+    !selectedItem || Number(selectedItem.officialQuantity || 0) > 0
+      ? INVENTORY_STATUS.OFFICIAL
+      : INVENTORY_STATUS.NOI,
   fromLocation: selectedItem?.location || '',
   toLocation: '',
   notes: '',
@@ -35,6 +39,7 @@ function MovePartModal({
   isOpen,
   onClose,
   onSubmit,
+  items = [],
   savedLocations = [],
   removedLocations = [],
   selectedItem = null,
@@ -47,6 +52,17 @@ function MovePartModal({
   const locationOptions = useMemo(() => {
     return getLocationOptions(savedLocations, removedLocations)
   }, [removedLocations, savedLocations])
+
+  const availableQuantity = useMemo(() => {
+    if (!formData.partNumber || !formData.fromLocation) return 0
+
+    return getAvailableQuantity({
+      items,
+      partNumber: formData.partNumber,
+      location: formData.fromLocation,
+      inventoryStatus: formData.inventoryStatus,
+    })
+  }, [formData.fromLocation, formData.inventoryStatus, formData.partNumber, items])
 
   const handleChange = (event) => {
     const { name, value } = event.target
@@ -125,9 +141,15 @@ function MovePartModal({
             label="Quantity"
             type="number"
             min="1"
+            max={availableQuantity > 0 ? availableQuantity : undefined}
             value={formData.quantity}
             onChange={handleChange}
             placeholder="Example: 2"
+            helperText={
+              availableQuantity > 0
+                ? `${availableQuantity} available. Move any amount from 1 to ${availableQuantity}.`
+                : ''
+            }
             required
           />
         </div>
