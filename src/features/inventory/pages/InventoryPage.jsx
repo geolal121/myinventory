@@ -598,7 +598,7 @@ function InventoryPage() {
             onChange={handleSearchChange}
             onClear={() => setSearchTerm('')}
             clearLabel="Clear part number search"
-            inputMode="text"
+            inputMode="numeric"
             enterKeyHint="search"
             autoComplete="off"
             autoCapitalize="characters"
