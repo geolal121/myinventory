@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import Button from '../../../shared/components/Button.jsx'
 import Card from '../../../shared/components/Card.jsx'
@@ -7,15 +7,20 @@ import Input from '../../../shared/components/Input.jsx'
 import InventoryLocationCard from '../components/InventoryLocationCard.jsx'
 import AddPartModal from '../components/modals/AddPartModal.jsx'
 import BoxInventoryModal from '../components/modals/BoxInventoryModal.jsx'
+import DeleteLocationModal from '../components/modals/DeleteLocationModal.jsx'
 import DeletePartModal from '../components/modals/DeletePartModal.jsx'
 import DuplicatePartModal from '../components/modals/DuplicatePartModal.jsx'
 import EditPartModal from '../components/modals/EditPartModal.jsx'
 import GivePartModal from '../components/modals/GivePartModal.jsx'
 import HistoryModal from '../components/modals/HistoryModal.jsx'
+import InventorySummaryModal from '../components/modals/InventorySummaryModal.jsx'
+import ManageLocationsModal from '../components/modals/ManageLocationsModal.jsx'
 import MovePartModal from '../components/modals/MovePartModal.jsx'
 import UsePartModal from '../components/modals/UsePartModal.jsx'
 
 import { INVENTORY_ACTIONS } from '../data/inventoryActions.js'
+import { getLocationOptions } from '../data/inventoryLocations.js'
+import { INVENTORY_SUMMARY_VIEWS } from '../data/inventorySummaryViews.js'
 import {
   buildInventoryTransaction,
   downloadInventoryCsv,
@@ -29,12 +34,15 @@ import {
 import {
   loadInventoryHistory,
   loadInventoryItems,
+  loadRemovedLocations,
   loadSavedLocations,
   saveInventoryHistory,
   saveInventoryItems,
+  saveRemovedLocations,
   saveSavedLocations,
 } from '../utils/inventoryStorage.js'
 import {
+  deleteInventoryLocationFromCloud,
   loadInventoryCloudData,
   syncInventoryTransactionToCloud,
 } from '../services/inventorySyncService.js'
@@ -53,6 +61,9 @@ function InventoryPage() {
   const [inventoryItems, setInventoryItems] = useState(() => loadInventoryItems())
   const [inventoryHistory, setInventoryHistory] = useState(() => loadInventoryHistory())
   const [savedLocations, setSavedLocations] = useState(() => loadSavedLocations())
+  const [removedLocations, setRemovedLocations] = useState(() =>
+    loadRemovedLocations(),
+  )
   const [searchTerm, setSearchTerm] = useState('')
   const [activeInventoryView, setActiveInventoryView] = useState(
     INVENTORY_VIEW_TABS.BOXES,
@@ -63,7 +74,11 @@ function InventoryPage() {
   const [selectedLocationGroup, setSelectedLocationGroup] = useState(null)
   const [pendingDuplicatePart, setPendingDuplicatePart] = useState(null)
   const [duplicateExistingItems, setDuplicateExistingItems] = useState([])
+  const [selectedSummaryView, setSelectedSummaryView] = useState(
+    INVENTORY_SUMMARY_VIEWS.TOTAL,
+  )
   const [syncStatus, setSyncStatus] = useState('Offline Ready')
+  const returnToLocationAfterAction = useRef(true)
 
   const isSearching = searchTerm.trim().length > 0
 
@@ -97,13 +112,43 @@ function InventoryPage() {
     return groupInventoryByLocation(filteredInventoryItems)
   }, [filteredInventoryItems])
 
+  const allInventoryLocationGroups = useMemo(() => {
+    return groupInventoryByLocation(inventoryItems)
+  }, [inventoryItems])
+
+  const availableLocations = useMemo(() => {
+    const activeLocations = getLocationOptions(
+      savedLocations,
+      removedLocations,
+    ).map((location) => location.value)
+
+    const locationsByName = new Map(
+      activeLocations.map((location) => [location.trim().toUpperCase(), location]),
+    )
+
+    allInventoryLocationGroups.forEach((locationGroup) => {
+      const normalizedLocation = locationGroup.location.trim().toUpperCase()
+
+      if (!locationsByName.has(normalizedLocation)) {
+        locationsByName.set(normalizedLocation, locationGroup.location)
+      }
+    })
+
+    return Array.from(locationsByName.values()).sort((first, second) =>
+      first.localeCompare(second, undefined, {
+        numeric: true,
+        sensitivity: 'base',
+      }),
+    )
+  }, [allInventoryLocationGroups, removedLocations, savedLocations])
+
   const selectedLocationGroupWithCurrentItems = useMemo(() => {
     if (!selectedLocationGroup) return null
 
-    return inventoryLocationGroups.find(
+    return allInventoryLocationGroups.find(
       (locationGroup) => locationGroup.id === selectedLocationGroup.id,
-    ) || selectedLocationGroup
-  }, [inventoryLocationGroups, selectedLocationGroup])
+    ) || null
+  }, [allInventoryLocationGroups, selectedLocationGroup])
 
   useEffect(() => {
     const loadCloudData = async () => {
@@ -111,9 +156,29 @@ function InventoryPage() {
         setSyncStatus('Syncing...')
 
         const cloudData = await loadInventoryCloudData()
+        const localRemovedLocations = loadRemovedLocations()
+        const removedLocationMap = new Map(
+          [...localRemovedLocations, ...cloudData.removedLocations].map(
+            (location) => [location.trim().toUpperCase(), location],
+          ),
+        )
+        const combinedRemovedLocations = Array.from(
+          removedLocationMap.values(),
+        )
 
         if (cloudData.inventoryItems.length > 0) {
-          setInventoryItems(cloudData.inventoryItems)
+          const removedLocationNames = new Set(
+            combinedRemovedLocations.map((location) =>
+              location.trim().toUpperCase(),
+            ),
+          )
+
+          setInventoryItems(
+            cloudData.inventoryItems.filter(
+              (item) =>
+                !removedLocationNames.has(item.location.trim().toUpperCase()),
+            ),
+          )
         }
 
         if (cloudData.inventoryHistory.length > 0) {
@@ -122,6 +187,10 @@ function InventoryPage() {
 
         if (cloudData.savedLocations.length > 0) {
           setSavedLocations(cloudData.savedLocations)
+        }
+
+        if (combinedRemovedLocations.length > 0) {
+          setRemovedLocations(combinedRemovedLocations)
         }
 
         setSyncStatus('Cloud Synced')
@@ -146,19 +215,31 @@ function InventoryPage() {
     saveSavedLocations(savedLocations)
   }, [savedLocations])
 
+  useEffect(() => {
+    saveRemovedLocations(removedLocations)
+  }, [removedLocations])
+
   const closeModal = () => {
+    returnToLocationAfterAction.current = true
     setActiveModal(null)
     setTransactionError('')
     setSelectedInventoryItem(null)
     setSelectedLocationGroup(null)
     setPendingDuplicatePart(null)
     setDuplicateExistingItems([])
+    setSelectedSummaryView(INVENTORY_SUMMARY_VIEWS.TOTAL)
   }
 
   const closeActionModal = () => {
-    setActiveModal('box')
+    setActiveModal(returnToLocationAfterAction.current ? 'box' : null)
     setTransactionError('')
     setSelectedInventoryItem(null)
+
+    if (!returnToLocationAfterAction.current) {
+      setSelectedLocationGroup(null)
+    }
+
+    returnToLocationAfterAction.current = true
   }
 
   const openModal = (modalName) => {
@@ -171,6 +252,7 @@ function InventoryPage() {
   }
 
   const openLocationModal = (locationGroup) => {
+    returnToLocationAfterAction.current = true
     setTransactionError('')
     setSelectedInventoryItem(null)
     setSelectedLocationGroup(locationGroup)
@@ -181,6 +263,29 @@ function InventoryPage() {
     setTransactionError('')
     setSelectedInventoryItem(item)
     setActiveModal(modalName)
+  }
+
+  const openSummaryModal = (summaryView) => {
+    setSelectedSummaryView(summaryView)
+    setActiveModal('summary')
+  }
+
+  const openDeleteLocationModal = (location, locationGroup = null) => {
+    const normalizedLocation = location.trim().toUpperCase()
+    const currentLocationGroup =
+      allInventoryLocationGroups.find(
+        (group) => group.location.trim().toUpperCase() === normalizedLocation,
+      ) ||
+      locationGroup || {
+        id: normalizedLocation,
+        location,
+        items: [],
+        partCount: 0,
+        totalQuantity: 0,
+      }
+
+    setSelectedLocationGroup(currentLocationGroup)
+    setActiveModal('deleteLocation')
   }
 
   const handleSearchChange = (event) => {
@@ -207,6 +312,16 @@ function InventoryPage() {
         ...locations,
       ]),
     ])
+
+    const newLocationNames = new Set(
+      locations.map((location) => location.trim().toUpperCase()),
+    )
+
+    setRemovedLocations((currentLocations) =>
+      currentLocations.filter(
+        (location) => !newLocationNames.has(location.trim().toUpperCase()),
+      ),
+    )
   }
 
   const runInventoryTransaction = (action, formData) => {
@@ -223,13 +338,29 @@ function InventoryPage() {
     }
 
     const newLocations = getNewLocations(formData)
+    const nextItemIds = new Set(
+      transactionResult.items.map((item) => item.id),
+    )
+    const deletedItemIds = inventoryItems
+      .filter((item) => !nextItemIds.has(item.id))
+      .map((item) => item.id)
+    const removedLocationNames = new Set(
+      removedLocations.map((location) => location.trim().toUpperCase()),
+    )
+    const restoredLocations = newLocations.filter((location) =>
+      removedLocationNames.has(location.trim().toUpperCase()),
+    )
 
-    const deletedItemId =
-      (action === INVENTORY_ACTIONS.DELETE ||
-        action === INVENTORY_ACTIONS.EDIT) &&
-      selectedInventoryItem
-        ? selectedInventoryItem.id
-        : ''
+    if (selectedLocationGroup) {
+      const selectedLocationName = selectedLocationGroup.location
+        .trim()
+        .toUpperCase()
+
+      returnToLocationAfterAction.current = transactionResult.items.some(
+        (item) =>
+          item.location.trim().toUpperCase() === selectedLocationName,
+      )
+    }
 
     setInventoryItems(transactionResult.items)
     setInventoryHistory(transactionResult.history)
@@ -242,7 +373,8 @@ function InventoryPage() {
       items: transactionResult.items,
       historyRecord: transactionResult.historyRecord,
       locations: newLocations,
-      deletedItemId,
+      deletedItemIds,
+      restoredLocations,
     })
       .then(() => {
         setSyncStatus('Cloud Synced')
@@ -341,6 +473,46 @@ function InventoryPage() {
     })
   }
 
+  const handleDeleteLocation = (locationGroup) => {
+    if (!locationGroup?.location) return
+
+    const normalizedLocation = locationGroup.location.trim().toUpperCase()
+    const deletedItems = inventoryItems.filter(
+      (item) => item.location.trim().toUpperCase() === normalizedLocation,
+    )
+
+    setInventoryItems((currentItems) =>
+      currentItems.filter(
+        (item) => item.location.trim().toUpperCase() !== normalizedLocation,
+      ),
+    )
+    setSavedLocations((currentLocations) =>
+      currentLocations.filter(
+        (location) => location.trim().toUpperCase() !== normalizedLocation,
+      ),
+    )
+    setRemovedLocations((currentLocations) => [
+      ...currentLocations.filter(
+        (location) => location.trim().toUpperCase() !== normalizedLocation,
+      ),
+      locationGroup.location,
+    ])
+
+    setSyncStatus('Syncing...')
+
+    deleteInventoryLocationFromCloud({
+      location: locationGroup.location,
+      itemIds: deletedItems.map((item) => item.id),
+    })
+      .then(() => {
+        setSyncStatus('Cloud Synced')
+      })
+      .catch((error) => {
+        console.error('Failed to delete inventory location:', error)
+        setSyncStatus('Offline Ready')
+      })
+  }
+
   const handleExportInventory = () => {
     downloadInventoryCsv(inventoryItems)
   }
@@ -408,6 +580,11 @@ function InventoryPage() {
             type="search"
             value={searchTerm}
             onChange={handleSearchChange}
+            onClear={() => setSearchTerm('')}
+            clearLabel="Clear part number search"
+            inputMode="numeric"
+            enterKeyHint="search"
+            autoComplete="off"
             placeholder="Example: 123-4567-89"
           />
         </section>
@@ -431,22 +608,48 @@ function InventoryPage() {
         </section>
 
         <section className="inventory-page__summary" aria-label="Inventory summary">
-          <Card as="article" className="inventory-page__summary-card">
+          <Card
+            as="button"
+            type="button"
+            className="inventory-page__summary-card"
+            onClick={() => openSummaryModal(INVENTORY_SUMMARY_VIEWS.TOTAL)}
+            aria-haspopup="dialog"
+          >
             <span>Total Parts</span>
             <strong>{inventorySummary.totalParts}</strong>
           </Card>
 
-          <Card as="article" className="inventory-page__summary-card">
+          <Card
+            as="button"
+            type="button"
+            className="inventory-page__summary-card"
+            onClick={() => openSummaryModal(INVENTORY_SUMMARY_VIEWS.OFFICIAL)}
+            aria-haspopup="dialog"
+          >
             <span>Official</span>
             <strong>{inventorySummary.officialQuantity}</strong>
           </Card>
 
-          <Card as="article" className="inventory-page__summary-card">
+          <Card
+            as="button"
+            type="button"
+            className="inventory-page__summary-card"
+            onClick={() => openSummaryModal(INVENTORY_SUMMARY_VIEWS.NOI)}
+            aria-haspopup="dialog"
+          >
             <span>NOI / Ghost</span>
             <strong>{inventorySummary.noiQuantity}</strong>
           </Card>
 
-          <Card as="article" className="inventory-page__summary-card">
+          <Card
+            as="button"
+            type="button"
+            className="inventory-page__summary-card"
+            onClick={() =>
+              openSummaryModal(INVENTORY_SUMMARY_VIEWS.OUT_OF_STOCK)
+            }
+            aria-haspopup="dialog"
+          >
             <span>Out of Stock</span>
             <strong>{inventorySummary.outOfStock}</strong>
           </Card>
@@ -504,6 +707,16 @@ function InventoryPage() {
             <>
               <div className="inventory-page__section-heading">
                 <h2>{isSearching ? 'Part Location' : 'Boxes'}</h2>
+
+                {!isSearching && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => openModal('manageLocations')}
+                  >
+                    Manage Locations
+                  </Button>
+                )}
               </div>
 
               {inventoryLocationGroups.length > 0 ? (
@@ -603,6 +816,7 @@ function InventoryPage() {
         onClose={closeModal}
         onSubmit={handleAddPart}
         savedLocations={savedLocations}
+        removedLocations={removedLocations}
         errorMessage={transactionError}
       />
 
@@ -616,37 +830,45 @@ function InventoryPage() {
       />
 
       <UsePartModal
+        key={`use-${selectedInventoryItem?.id || 'new'}`}
         isOpen={activeModal === 'use'}
         onClose={selectedLocationGroup ? closeActionModal : closeModal}
         onSubmit={handleUsePart}
         savedLocations={savedLocations}
+        removedLocations={removedLocations}
         selectedItem={selectedInventoryItem}
         errorMessage={transactionError}
       />
 
       <GivePartModal
+        key={`give-${selectedInventoryItem?.id || 'new'}`}
         isOpen={activeModal === 'give'}
         onClose={selectedLocationGroup ? closeActionModal : closeModal}
         onSubmit={handleGivePart}
         savedLocations={savedLocations}
+        removedLocations={removedLocations}
         selectedItem={selectedInventoryItem}
         errorMessage={transactionError}
       />
 
       <MovePartModal
+        key={`move-${selectedInventoryItem?.id || 'new'}`}
         isOpen={activeModal === 'move'}
         onClose={selectedLocationGroup ? closeActionModal : closeModal}
         onSubmit={handleMovePart}
         savedLocations={savedLocations}
+        removedLocations={removedLocations}
         selectedItem={selectedInventoryItem}
         errorMessage={transactionError}
       />
 
       <EditPartModal
+        key={`edit-${selectedInventoryItem?.id || 'new'}`}
         isOpen={activeModal === 'edit'}
         onClose={selectedLocationGroup ? closeActionModal : closeModal}
         onSubmit={handleEditPart}
         savedLocations={savedLocations}
+        removedLocations={removedLocations}
         selectedItem={selectedInventoryItem}
         errorMessage={transactionError}
       />
@@ -667,6 +889,31 @@ function InventoryPage() {
         onMove={openMoveFromItem}
         onEdit={openEditFromItem}
         onDelete={openDeleteFromItem}
+        onDeleteLocation={(locationGroup) =>
+          openDeleteLocationModal(locationGroup.location, locationGroup)
+        }
+      />
+
+      <ManageLocationsModal
+        isOpen={activeModal === 'manageLocations'}
+        onClose={closeModal}
+        locations={availableLocations}
+        locationGroups={allInventoryLocationGroups}
+        onDelete={openDeleteLocationModal}
+      />
+
+      <DeleteLocationModal
+        isOpen={activeModal === 'deleteLocation'}
+        onClose={closeModal}
+        onConfirm={handleDeleteLocation}
+        locationGroup={selectedLocationGroup}
+      />
+
+      <InventorySummaryModal
+        isOpen={activeModal === 'summary'}
+        onClose={closeModal}
+        items={inventoryItems}
+        summaryView={selectedSummaryView}
       />
 
       <HistoryModal

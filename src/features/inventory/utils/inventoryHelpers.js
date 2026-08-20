@@ -438,8 +438,17 @@ export const moveInventoryQuantity = ({
     inventoryStatus,
   })
 
+  const sourceItemId = createInventoryItemId({
+    partNumber,
+    location: fromLocation,
+  })
+
+  const withoutEmptySource = afterSubtract.filter((item) => {
+    return item.id !== sourceItemId || !isOutOfStock(item)
+  })
+
   return addInventoryQuantity({
-    items: afterSubtract,
+    items: withoutEmptySource,
     partNumber,
     quantity,
     location: toLocation,

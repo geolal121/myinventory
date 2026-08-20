@@ -1,11 +1,15 @@
 import {
   deleteInventoryItemFromFirebase,
+  deleteLocationFromFirebase,
+  deleteRemovedLocationFromFirebase,
   getInventoryHistoryFromFirebase,
   getInventoryItemsFromFirebase,
   getSavedLocationsFromFirebase,
+  getRemovedLocationsFromFirebase,
   saveInventoryHistoryToFirebase,
   saveInventoryItemToFirebase,
   saveLocationToFirebase,
+  saveRemovedLocationToFirebase,
 } from './inventoryService.js'
 
 export const loadInventoryCloudData = async () => {
@@ -13,16 +17,22 @@ export const loadInventoryCloudData = async () => {
     inventoryItems,
     inventoryHistory,
     savedLocations,
+    removedLocations,
   ] = await Promise.all([
     getInventoryItemsFromFirebase(),
     getInventoryHistoryFromFirebase(),
     getSavedLocationsFromFirebase(),
+    getRemovedLocationsFromFirebase().catch((error) => {
+      console.warn('Failed to load removed inventory locations:', error)
+      return []
+    }),
   ])
 
   return {
     inventoryItems,
     inventoryHistory,
     savedLocations,
+    removedLocations,
   }
 }
 
@@ -48,7 +58,8 @@ export const syncInventoryTransactionToCloud = async ({
   items = [],
   historyRecord = null,
   locations = [],
-  deletedItemId = '',
+  deletedItemIds = [],
+  restoredLocations = [],
 }) => {
   await syncInventoryItemsToCloud(items)
 
@@ -60,7 +71,28 @@ export const syncInventoryTransactionToCloud = async ({
     await syncSavedLocationsToCloud(locations)
   }
 
-  if (deletedItemId) {
-    await deleteInventoryItemFromFirebase(deletedItemId)
+  if (deletedItemIds.length > 0) {
+    await Promise.all(
+      deletedItemIds.map((itemId) => deleteInventoryItemFromFirebase(itemId)),
+    )
   }
+
+  if (restoredLocations.length > 0) {
+    await Promise.all(
+      restoredLocations.map((location) =>
+        deleteRemovedLocationFromFirebase(location),
+      ),
+    )
+  }
+}
+
+export const deleteInventoryLocationFromCloud = async ({
+  location,
+  itemIds = [],
+}) => {
+  await Promise.all([
+    ...itemIds.map((itemId) => deleteInventoryItemFromFirebase(itemId)),
+    deleteLocationFromFirebase(location),
+    saveRemovedLocationToFirebase(location),
+  ])
 }

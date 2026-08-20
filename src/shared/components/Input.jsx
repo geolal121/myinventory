@@ -8,6 +8,8 @@ function Input({
   helperText = '',
   error = '',
   className = '',
+  onClear,
+  clearLabel = 'Clear input',
   ...props
 }) {
   const inputId = id || props.name
@@ -16,6 +18,7 @@ function Input({
   const classes = [
     'ui-input',
     hasError ? 'ui-input--error' : '',
+    onClear && value ? 'ui-input--clearable' : '',
     className,
   ]
     .filter(Boolean)
@@ -29,16 +32,29 @@ function Input({
         </label>
       )}
 
-      <input
-        id={inputId}
-        className={classes}
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        aria-invalid={hasError}
-        {...props}
-      />
+      <div className="ui-input-field__control">
+        <input
+          id={inputId}
+          className={classes}
+          type={type}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          aria-invalid={hasError}
+          {...props}
+        />
+
+        {onClear && value && (
+          <button
+            className="ui-input-field__clear"
+            type="button"
+            onClick={onClear}
+            aria-label={clearLabel}
+          >
+            Clear
+          </button>
+        )}
+      </div>
 
       {error ? (
         <p className="ui-input-field__error">{error}</p>

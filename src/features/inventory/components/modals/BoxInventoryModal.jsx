@@ -11,6 +11,7 @@ function BoxInventoryModal({
   onMove,
   onEdit,
   onDelete,
+  onDeleteLocation,
 }) {
   if (!locationGroup) return null
 
@@ -21,9 +22,19 @@ function BoxInventoryModal({
       description={`${locationGroup.partCount} parts inside this location`}
       onClose={onClose}
       footer={
-        <Button type="button" variant="secondary" onClick={onClose}>
-          Close
-        </Button>
+        <>
+          <Button
+            type="button"
+            variant="danger"
+            onClick={() => onDeleteLocation(locationGroup)}
+          >
+            Delete Location
+          </Button>
+
+          <Button type="button" variant="secondary" onClick={onClose}>
+            Close
+          </Button>
+        </>
       }
     >
       <div className="inventory-page__box-modal-list">

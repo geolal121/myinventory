@@ -175,6 +175,21 @@
   box-shadow: var(--card-shadow);
 
   backdrop-filter: blur(10px);
+
+  color: inherit;
+  font: inherit;
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.inventory-page__summary-card:hover,
+.inventory-page__summary-card:focus-visible {
+  border-color: var(--color-accent);
+
+  box-shadow: var(--card-shadow-hover), var(--glow-accent);
+
+  transform: translateY(-2px);
 }
 
 .inventory-page__summary-card span {
@@ -291,8 +306,113 @@
 .inventory-page__section-heading {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   gap: var(--spacing-3);
+}
+
+/* SUMMARY MODAL */
+
+.inventory-page__summary-modal-list,
+.inventory-page__manage-location-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.inventory-page__summary-modal-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+
+  background: var(--gradient-surface);
+}
+
+.inventory-page__summary-modal-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+}
+
+.inventory-page__summary-modal-card-heading h3 {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-lg);
+}
+
+.inventory-page__summary-modal-card-heading p,
+.inventory-page__part-notes {
+  margin-top: var(--spacing-1);
+
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-sm);
+}
+
+.inventory-page__stock-badge {
+  flex: 0 0 auto;
+
+  padding: var(--spacing-1) var(--spacing-2);
+
+  border: 1px solid var(--color-danger);
+  border-radius: var(--badge-radius);
+
+  background: var(--color-danger-soft);
+
+  color: var(--color-danger);
+
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.inventory-page__summary-modal-quantities {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-2);
+}
+
+.inventory-page__summary-modal-quantities span {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+
+  padding: var(--spacing-2);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+
+  background: var(--color-surface-soft);
+
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-xs);
+}
+
+.inventory-page__summary-modal-quantities strong {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-md);
+}
+
+/* MANAGE LOCATIONS */
+
+.inventory-page__manage-location-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+}
+
+.inventory-page__manage-location-card h3 {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-md);
+}
+
+.inventory-page__manage-location-card p {
+  margin-top: var(--spacing-1);
+
+  font-size: var(--font-size-sm);
 }
 
 /* LOCATION LIST */

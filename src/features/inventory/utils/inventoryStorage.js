@@ -2,6 +2,7 @@ const INVENTORY_STORAGE_KEYS = {
   inventory: 'truck_inventory_items',
   history: 'truck_inventory_history',
   locations: 'truck_inventory_locations',
+  removedLocations: 'truck_inventory_removed_locations',
   pendingSync: 'truck_inventory_pending_sync',
 }
 
@@ -52,6 +53,14 @@ export const loadSavedLocations = () => {
 
 export const saveSavedLocations = (locations) => {
   return writeStorage(INVENTORY_STORAGE_KEYS.locations, locations)
+}
+
+export const loadRemovedLocations = () => {
+  return readStorage(INVENTORY_STORAGE_KEYS.removedLocations, [])
+}
+
+export const saveRemovedLocations = (locations) => {
+  return writeStorage(INVENTORY_STORAGE_KEYS.removedLocations, locations)
 }
 
 export const loadPendingSync = () => {

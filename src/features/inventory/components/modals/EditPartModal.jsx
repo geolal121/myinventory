@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import Button from '../../../../shared/components/Button.jsx'
 import Input from '../../../../shared/components/Input.jsx'
@@ -7,12 +7,12 @@ import Modal from '../../../../shared/components/Modal.jsx'
 import { getLocationOptions } from '../../data/inventoryLocations.js'
 import { formatPartNumberInput } from '../../utils/inventoryHelpers.js'
 
-const getInitialFormData = () => ({
-  partNumber: '',
-  location: '',
-  officialQuantity: '',
-  noiQuantity: '',
-  notes: '',
+const getInitialFormData = (selectedItem = null) => ({
+  partNumber: selectedItem?.partNumber || '',
+  location: selectedItem?.location || '',
+  officialQuantity: String(selectedItem?.officialQuantity ?? ''),
+  noiQuantity: String(selectedItem?.noiQuantity ?? ''),
+  notes: selectedItem?.notes || '',
 })
 
 function EditPartModal({
@@ -20,26 +20,17 @@ function EditPartModal({
   onClose,
   onSubmit,
   savedLocations = [],
+  removedLocations = [],
   selectedItem = null,
   errorMessage = '',
 }) {
-  const [formData, setFormData] = useState(getInitialFormData)
+  const [formData, setFormData] = useState(() =>
+    getInitialFormData(selectedItem),
+  )
 
   const locationOptions = useMemo(() => {
-    return getLocationOptions(savedLocations)
-  }, [savedLocations])
-
-  useEffect(() => {
-    if (!isOpen || !selectedItem) return
-
-    setFormData({
-      partNumber: selectedItem.partNumber || '',
-      location: selectedItem.location || '',
-      officialQuantity: String(selectedItem.officialQuantity ?? 0),
-      noiQuantity: String(selectedItem.noiQuantity ?? 0),
-      notes: selectedItem.notes || '',
-    })
-  }, [isOpen, selectedItem])
+    return getLocationOptions(savedLocations, removedLocations)
+  }, [removedLocations, savedLocations])
 
   const handleChange = (event) => {
     const { name, value } = event.target

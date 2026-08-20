@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import Button from '../../../../shared/components/Button.jsx'
 import Input from '../../../../shared/components/Input.jsx'
@@ -22,10 +22,10 @@ const INVENTORY_STATUS_OPTIONS = [
   },
 ]
 
-const getInitialFormData = () => ({
-  partNumber: '',
+const getInitialFormData = (selectedItem = null) => ({
+  partNumber: selectedItem?.partNumber || '',
   quantity: '',
-  location: '',
+  location: selectedItem?.location || '',
   inventoryStatus: INVENTORY_STATUS.OFFICIAL,
   coworker: '',
   machine: '',
@@ -39,24 +39,17 @@ function GivePartModal({
   onClose,
   onSubmit,
   savedLocations = [],
+  removedLocations = [],
   selectedItem = null,
   errorMessage = '',
 }) {
-  const [formData, setFormData] = useState(getInitialFormData)
+  const [formData, setFormData] = useState(() =>
+    getInitialFormData(selectedItem),
+  )
 
   const locationOptions = useMemo(() => {
-    return getLocationOptions(savedLocations)
-  }, [savedLocations])
-
-  useEffect(() => {
-    if (!isOpen) return
-
-    setFormData((currentFormData) => ({
-      ...currentFormData,
-      partNumber: selectedItem?.partNumber || '',
-      location: selectedItem?.location || '',
-    }))
-  }, [isOpen, selectedItem])
+    return getLocationOptions(savedLocations, removedLocations)
+  }, [removedLocations, savedLocations])
 
   const handleChange = (event) => {
     const { name, value } = event.target

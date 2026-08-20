@@ -14,6 +14,7 @@ import { database } from '../../../services/firebase/firebaseConfig.js'
 const INVENTORY_COLLECTION = 'inventoryItems'
 const HISTORY_COLLECTION = 'inventoryHistory'
 const LOCATIONS_COLLECTION = 'savedLocations'
+const REMOVED_LOCATIONS_COLLECTION = 'removedLocations'
 
 export const getInventoryItemsFromFirebase = async () => {
   const snapshot = await getDocs(collection(database, INVENTORY_COLLECTION))
@@ -78,4 +79,39 @@ export const saveLocationToFirebase = async (location) => {
     name: location,
     updatedAt: serverTimestamp(),
   })
+}
+
+export const deleteLocationFromFirebase = async (location) => {
+  if (!location) return
+
+  const locationRef = doc(database, LOCATIONS_COLLECTION, location)
+
+  await deleteDoc(locationRef)
+}
+
+export const getRemovedLocationsFromFirebase = async () => {
+  const snapshot = await getDocs(
+    collection(database, REMOVED_LOCATIONS_COLLECTION),
+  )
+
+  return snapshot.docs.map((document) => document.data().name).filter(Boolean)
+}
+
+export const saveRemovedLocationToFirebase = async (location) => {
+  if (!location) return
+
+  const locationRef = doc(database, REMOVED_LOCATIONS_COLLECTION, location)
+
+  await setDoc(locationRef, {
+    name: location,
+    updatedAt: serverTimestamp(),
+  })
+}
+
+export const deleteRemovedLocationFromFirebase = async (location) => {
+  if (!location) return
+
+  const locationRef = doc(database, REMOVED_LOCATIONS_COLLECTION, location)
+
+  await deleteDoc(locationRef)
 }

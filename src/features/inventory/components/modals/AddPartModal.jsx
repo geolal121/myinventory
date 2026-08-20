@@ -35,13 +35,14 @@ function AddPartModal({
   onClose,
   onSubmit,
   savedLocations = [],
+  removedLocations = [],
   errorMessage = '',
 }) {
   const [formData, setFormData] = useState(getInitialFormData)
 
   const locationOptions = useMemo(() => {
-    return getLocationOptions(savedLocations)
-  }, [savedLocations])
+    return getLocationOptions(savedLocations, removedLocations)
+  }, [removedLocations, savedLocations])
 
   const resetForm = () => {
     setFormData(getInitialFormData())
