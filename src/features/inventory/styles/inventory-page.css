@@ -473,6 +473,13 @@
   gap: var(--spacing-3);
 }
 
+.inventory-page__search-result-heading > div:first-child,
+.inventory-page__summary-modal-card-heading > div:first-child {
+  flex: 1 1 auto;
+
+  min-width: 0;
+}
+
 .inventory-page__search-result-heading-actions,
 .inventory-page__summary-modal-heading-actions {
   display: flex;
@@ -480,12 +487,17 @@
   align-items: flex-end;
   flex-direction: column;
   gap: var(--spacing-2);
+
+  min-width: 0;
+  max-width: 100%;
 }
 
 .inventory-page__search-result-heading h3 {
   color: var(--color-text-primary);
 
   font-size: var(--font-size-lg);
+
+  overflow-wrap: anywhere;
 }
 
 .inventory-page__search-result-heading p,
@@ -581,7 +593,7 @@
 
 .inventory-page__actions {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--spacing-3);
 }
 
@@ -612,7 +624,7 @@
 
 .inventory-page__summary {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--spacing-3);
 }
 
@@ -826,6 +838,10 @@
 
 /* SUMMARY MODAL */
 
+.inventory-page__summary-modal {
+  max-width: 760px;
+}
+
 .inventory-page__summary-modal-list,
 .inventory-page__manage-location-list {
   display: flex;
@@ -837,6 +853,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-3);
+
+  min-width: 0;
 
   background: var(--gradient-surface);
 }
@@ -852,6 +870,8 @@
   color: var(--color-text-primary);
 
   font-size: var(--font-size-lg);
+
+  overflow-wrap: anywhere;
 }
 
 .inventory-page__summary-modal-card-heading p,
@@ -871,6 +891,8 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   line-height: 1.45;
+
+  overflow-wrap: anywhere;
 }
 
 .inventory-page__part-summary-meta {
@@ -879,6 +901,8 @@
 
 .inventory-page__stock-badge {
   flex: 0 0 auto;
+
+  max-width: 100%;
 
   padding: var(--spacing-1) var(--spacing-2);
 
@@ -891,11 +915,14 @@
 
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
+  text-align: center;
+
+  overflow-wrap: anywhere;
 }
 
 .inventory-page__summary-modal-quantities {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--spacing-2);
 }
 
@@ -2179,6 +2206,25 @@
     gap: var(--spacing-2);
   }
 
+  .inventory-page__search-result-heading,
+  .inventory-page__summary-modal-card-heading {
+    flex-direction: column;
+  }
+
+  .inventory-page__search-result-heading-actions,
+  .inventory-page__summary-modal-heading-actions {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .inventory-page__search-result-heading-actions .ui-button,
+  .inventory-page__summary-modal-heading-actions .ui-button {
+    width: auto;
+    flex: 1 1 10rem;
+  }
+
   .inventory-page__sync-status {
     padding: var(--spacing-2);
 
@@ -2300,18 +2346,22 @@
   }
 
   .inventory-page__search-result-heading {
-    flex-direction: column;
+    align-items: stretch;
   }
 
   .inventory-page__search-result-heading-actions,
   .inventory-page__summary-modal-heading-actions {
-    width: 100%;
-    align-items: stretch;
+    align-items: center;
   }
 
   .inventory-page__search-result-heading-actions .ui-button,
   .inventory-page__summary-modal-heading-actions .ui-button {
-    width: 100%;
+    width: auto;
+  }
+
+  .inventory-page__header-toolbar,
+  .inventory-page__section-heading {
+    flex-wrap: wrap;
   }
 
   .inventory-page__search-result-actions {
@@ -2531,6 +2581,16 @@
   .inventory-page__box-modal-actions {
     grid-template-columns: repeat(5, 1fr);
   }
+
+  .inventory-page__summary-modal {
+    max-width: 960px;
+  }
+
+  .inventory-page__summary-modal-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
 }
 
 /* LARGE DESKTOP */
@@ -2554,6 +2614,16 @@
     aspect-ratio: 1 / 1;
     min-height: auto;
   }
+
+  .inventory-page__summary-modal {
+    max-width: 1040px;
+  }
+
+  .inventory-page__summary-modal-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
 }
 
 /* ULTRAWIDE */
@@ -2576,6 +2646,16 @@
   .inventory-page__location-card.ui-card {
     aspect-ratio: 1 / 1;
     min-height: auto;
+  }
+
+  .inventory-page__summary-modal {
+    max-width: 1120px;
+  }
+
+  .inventory-page__summary-modal-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
   }
 }
 

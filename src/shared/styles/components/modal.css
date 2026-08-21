@@ -21,6 +21,7 @@
 
 .ui-modal {
   width: 100%;
+  min-width: 0;
   max-width: 640px;
   max-height: calc(100vh - var(--spacing-6));
 
@@ -57,6 +58,12 @@
   font-size: var(--font-size-xl);
 }
 
+.ui-modal__header > div {
+  flex: 1 1 auto;
+
+  min-width: 0;
+}
+
 .ui-modal__close.ui-button {
   flex: 0 0 auto;
 
@@ -72,10 +79,13 @@
   margin-top: var(--spacing-2);
 
   font-size: var(--font-size-sm);
+
+  overflow-wrap: anywhere;
 }
 
 .ui-modal__body {
   flex: 1;
+  min-width: 0;
 
   display: flex;
   flex-direction: column;
@@ -86,6 +96,10 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+}
+
+.ui-modal__body > * {
+  min-width: 0;
 }
 
 .ui-modal__footer {
@@ -135,6 +149,29 @@
 
   .ui-modal__header h2 {
     font-size: var(--font-size-lg);
+  }
+}
+
+/* PHONE PORTRAIT */
+
+@media (max-width: 767px) and (orientation: portrait) {
+  .ui-modal-overlay {
+    align-items: stretch;
+
+    padding: 0;
+  }
+
+  .ui-modal {
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+
+    border-radius: 0;
+  }
+
+  .ui-modal__footer {
+    padding-bottom: max(var(--spacing-4), env(safe-area-inset-bottom));
   }
 }
 
@@ -244,7 +281,7 @@
 @supports (-webkit-touch-callout: none) {
   @media (max-width: 767px) {
     .ui-modal {
-      max-height: calc(100dvh - var(--spacing-4));
+      max-height: 100dvh;
     }
 
     .ui-modal__body {

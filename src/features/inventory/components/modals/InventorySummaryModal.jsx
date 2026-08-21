@@ -55,6 +55,7 @@ function InventorySummaryModal({
         visibleParts.length === 1 ? '' : 's'
       }.`}
       onClose={onClose}
+      className="inventory-page__summary-modal"
     >
       {visibleParts.length > 0 ? (
         <div className="inventory-page__summary-modal-list">
