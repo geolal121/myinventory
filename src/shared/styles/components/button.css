@@ -69,9 +69,9 @@
 /* PRIMARY */
 
 .ui-button--primary {
-  border-color: rgba(20, 89, 139, 0.18);
+  border-color: var(--color-accent);
 
-  background: var(--gradient-accent);
+  background: var(--color-accent);
 
   color: var(--color-text-inverse);
 
@@ -79,11 +79,13 @@
 }
 
 .ui-button--primary:hover {
-  background: var(--gradient-accent);
+  border-color: var(--color-accent-hover);
+
+  background: var(--color-accent-hover);
 
   box-shadow: var(--button-shadow-hover);
 
-  transform: var(--hover-scale-sm);
+  transform: translateY(-1px);
 }
 
 /* SECONDARY */
@@ -91,7 +93,7 @@
 .ui-button--secondary {
   border-color: var(--color-border);
 
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--color-surface);
 
   color: var(--color-text-primary);
 }
@@ -121,17 +123,19 @@
 /* DANGER */
 
 .ui-button--danger {
+  border-color: var(--color-danger);
+
   background: var(--color-danger);
 
   color: var(--color-text-inverse);
 
-  box-shadow: var(--glow-danger);
+  box-shadow: var(--button-shadow);
 }
 
 .ui-button--danger:hover {
-  opacity: var(--hover-opacity);
+  opacity: 0.92;
 
-  transform: var(--hover-scale-sm);
+  transform: translateY(-1px);
 }
 
 /* STATES */

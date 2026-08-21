@@ -13,7 +13,7 @@
 /* LABEL */
 
 .ui-select-field__label {
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
 
   font-size: var(--label-font-size);
   font-weight: var(--label-font-weight);
@@ -57,7 +57,7 @@
 .ui-select:focus {
   border-color: var(--color-accent);
 
-  background: var(--color-surface-soft);
+  background: var(--color-surface);
 
   box-shadow: var(--glow-accent);
 }

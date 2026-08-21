@@ -9,8 +9,6 @@
 
   box-shadow: var(--card-shadow);
 
-  backdrop-filter: blur(12px);
-
   transition:
     border-color var(--transition-normal),
     background-color var(--transition-normal),
@@ -39,7 +37,7 @@
 }
 
 .ui-card--elevated {
-  background: var(--color-surface-elevated);
+  background: var(--color-surface);
 
   box-shadow: var(--shadow-md);
 }
@@ -52,8 +50,6 @@
 
 .ui-card:hover {
   border-color: var(--color-border-strong);
-
-  box-shadow: var(--card-shadow-hover);
 }
 
 /* INTERACTIVE */
@@ -63,7 +59,9 @@
 }
 
 .ui-card--interactive:hover {
-  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
+
+  transform: translateY(-1px);
 }
 
 .ui-card--interactive:focus-visible {

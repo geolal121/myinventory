@@ -1,9 +1,42 @@
 import assert from 'node:assert/strict'
-import { readFile } from 'node:fs/promises'
+import { readFile, readdir } from 'node:fs/promises'
 import test from 'node:test'
 
 const readProjectFile = (relativePath) =>
   readFile(new URL(`../${relativePath}`, import.meta.url), 'utf8')
+
+const readCssFiles = async (directory = new URL('../src/', import.meta.url)) => {
+  const entries = await readdir(directory, { withFileTypes: true })
+  const files = await Promise.all(
+    entries.map(async (entry) => {
+      const url = new URL(entry.name, directory)
+
+      if (entry.isDirectory()) {
+        return readCssFiles(new URL(`${entry.name}/`, directory))
+      }
+
+      return entry.name.endsWith('.css') ? readFile(url, 'utf8') : []
+    }),
+  )
+
+  return files.flat()
+}
+
+test('the app theme uses solid surfaces instead of decorative gradients', async () => {
+  const [styles, colors, buttons, cards] = await Promise.all([
+    readCssFiles(),
+    readProjectFile('src/shared/tokens/colors.css'),
+    readProjectFile('src/shared/styles/components/button.css'),
+    readProjectFile('src/shared/styles/components/card.css'),
+  ])
+
+  styles.forEach((source) => {
+    assert.doesNotMatch(source, /(?:linear|radial)-gradient\s*\(/)
+  })
+  assert.match(colors, /--color-background:\s*#f1f4f6;/)
+  assert.match(buttons, /\.ui-button--primary\s*\{[\s\S]*?background: var\(--color-accent\);/)
+  assert.match(cards, /\.ui-card\s*\{[\s\S]*?background: var\(--color-surface\);/)
+})
 
 test('inventory summary cards use the responsive summary modal layout', async () => {
   const [component, styles] = await Promise.all([

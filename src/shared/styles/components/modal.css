@@ -13,7 +13,6 @@
   padding: var(--spacing-3);
 
   background: var(--color-overlay);
-  backdrop-filter: var(--backdrop-blur);
 
   overflow: hidden;
   overscroll-behavior: contain;
@@ -31,7 +30,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--modal-radius) var(--modal-radius) 0 0;
 
-  background: var(--color-background-soft);
+  background: var(--color-surface);
   box-shadow: var(--modal-shadow);
 
   overflow: hidden;
@@ -51,7 +50,7 @@
 
   border-bottom: 1px solid var(--color-border);
 
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--color-surface);
 }
 
 .ui-modal__header h2 {
@@ -93,6 +92,8 @@
 
   padding: var(--spacing-4);
 
+  background: var(--color-background-soft);
+
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -113,7 +114,7 @@
 
   border-top: 1px solid var(--color-border);
 
-  background: rgba(255, 255, 255, 0.94);
+  background: var(--color-surface);
 }
 
 @keyframes modal-enter {

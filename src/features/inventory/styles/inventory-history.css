@@ -38,7 +38,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
 
-  background: var(--gradient-surface);
+  background: var(--color-surface);
 
   box-shadow: var(--shadow-sm);
 }
@@ -81,7 +81,7 @@
   border-left: 4px solid var(--history-accent);
   border-radius: var(--card-radius);
 
-  background: var(--gradient-card) !important;
+  background: var(--color-card) !important;
 
   color: var(--color-card-text);
 
@@ -169,7 +169,7 @@
   border: 1px dashed var(--color-border-strong);
   border-radius: var(--card-radius);
 
-  background: var(--gradient-surface);
+  background: var(--color-surface);
 
   text-align: center;
 }
