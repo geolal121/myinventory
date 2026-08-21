@@ -1,3 +1,6 @@
+import { Pencil } from 'lucide-react'
+
+import Button from '../../../../shared/components/Button.jsx'
 import Card from '../../../../shared/components/Card.jsx'
 import Modal from '../../../../shared/components/Modal.jsx'
 
@@ -6,8 +9,9 @@ import { groupInventoryByPartNumber } from '../../utils/inventoryHelpers.js'
 
 const SUMMARY_VIEW_DETAILS = {
   [INVENTORY_SUMMARY_VIEWS.TOTAL]: {
-    title: 'All Parts',
-    description: 'Every part in your truck, combined across all locations.',
+    title: 'Parts Catalog',
+    description:
+      'Every known part, including out-of-stock parts, combined across all locations.',
     filter: () => true,
   },
   [INVENTORY_SUMMARY_VIEWS.OFFICIAL]: {
@@ -31,13 +35,15 @@ function InventorySummaryModal({
   isOpen,
   onClose,
   items = [],
+  partCatalog = [],
   summaryView = INVENTORY_SUMMARY_VIEWS.TOTAL,
+  onEditDescription = () => {},
 }) {
   const viewDetails =
     SUMMARY_VIEW_DETAILS[summaryView] ||
     SUMMARY_VIEW_DETAILS[INVENTORY_SUMMARY_VIEWS.TOTAL]
 
-  const visibleParts = groupInventoryByPartNumber(items).filter(
+  const visibleParts = groupInventoryByPartNumber(items, partCatalog).filter(
     viewDetails.filter,
   )
 
@@ -77,11 +83,21 @@ function InventorySummaryModal({
                     </p>
                   </div>
 
-                  {part.totalQuantity === 0 && (
-                    <span className="inventory-page__stock-badge">
-                      Out of Stock
-                    </span>
-                  )}
+                  <div className="inventory-page__summary-modal-heading-actions">
+                    {part.totalQuantity === 0 && (
+                      <span className="inventory-page__stock-badge">
+                        Out of Stock
+                      </span>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => onEditDescription(part)}
+                    >
+                      <Pencil size={14} aria-hidden="true" />
+                      Description
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="inventory-page__summary-modal-quantities">

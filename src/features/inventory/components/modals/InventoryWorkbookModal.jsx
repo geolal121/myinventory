@@ -261,7 +261,7 @@ function InventoryWorkbookModal({
                           descriptionImportResult.updatedRecordCount === 1
                             ? ''
                             : 's'
-                        } updated. Existing descriptions were not changed.`
+                        } updated in the parts catalog. Existing descriptions were not changed.`
                       : 'Existing descriptions were not changed.'}
                   </p>
                 </div>

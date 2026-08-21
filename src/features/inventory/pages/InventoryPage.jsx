@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowRightLeft,
   Boxes,
@@ -9,30 +9,35 @@ import {
   HandHelping,
   Hash,
   History as HistoryIcon,
+  LogOut,
   MapPin,
   Package,
   PackageMinus,
   PackagePlus,
+  RotateCcw,
   TrendingUp,
   TextSearch,
   TriangleAlert,
+  X,
 } from 'lucide-react'
 
 import Button from '../../../shared/components/Button.jsx'
 import Card from '../../../shared/components/Card.jsx'
 import Input from '../../../shared/components/Input.jsx'
+import useInventoryAuth from '../../auth/hooks/useInventoryAuth.js'
 
 import InventoryLocationCard from '../components/InventoryLocationCard.jsx'
+import InventorySearchResults from '../components/InventorySearchResults.jsx'
 import AddPartModal from '../components/modals/AddPartModal.jsx'
 import BoxInventoryModal from '../components/modals/BoxInventoryModal.jsx'
 import DeleteLocationModal from '../components/modals/DeleteLocationModal.jsx'
 import DeletePartModal from '../components/modals/DeletePartModal.jsx'
 import DuplicatePartModal from '../components/modals/DuplicatePartModal.jsx'
 import EditPartModal from '../components/modals/EditPartModal.jsx'
+import EditPartDescriptionModal from '../components/modals/EditPartDescriptionModal.jsx'
 import GivePartModal from '../components/modals/GivePartModal.jsx'
 import HistoryModal from '../components/modals/HistoryModal.jsx'
 import InventorySummaryModal from '../components/modals/InventorySummaryModal.jsx'
-import InventoryWorkbookModal from '../components/modals/InventoryWorkbookModal.jsx'
 import ManageLocationsModal from '../components/modals/ManageLocationsModal.jsx'
 import MovePartModal from '../components/modals/MovePartModal.jsx'
 import UsePartModal from '../components/modals/UsePartModal.jsx'
@@ -41,7 +46,6 @@ import { INVENTORY_ACTIONS } from '../data/inventoryActions.js'
 import { getLocationOptions } from '../data/inventoryLocations.js'
 import { INVENTORY_SUMMARY_VIEWS } from '../data/inventorySummaryViews.js'
 import {
-  applyMissingInventoryDescriptions,
   buildInventoryTransaction,
   downloadInventoryCsv,
   findInventoryItemsByPartNumber,
@@ -49,19 +53,29 @@ import {
   getInventorySummary,
   getMostUsedParts,
   groupInventoryByLocation,
-  normalizePartNumberSearch,
+  groupInventoryByPartNumber,
   removeRedundantZeroLocationItems,
   renameInventoryLocation,
 } from '../utils/inventoryHelpers.js'
 import {
+  applyWorkbookDescriptionsToPartCatalog,
+  buildPartCatalog,
+  enrichInventoryItemsWithCatalog,
+  filterPartCatalog,
+  normalizePartCatalogId,
+  upsertPartCatalogEntry,
+} from '../utils/partCatalogHelpers.js'
+import {
   loadArchivedLocations,
   loadInventoryHistory,
   loadInventoryItems,
+  loadPartCatalog,
   loadRemovedLocations,
   loadSavedLocations,
   saveArchivedLocations,
   saveInventoryHistory,
   saveInventoryItems,
+  savePartCatalog,
   saveRemovedLocations,
   saveSavedLocations,
 } from '../utils/inventoryStorage.js'
@@ -71,8 +85,10 @@ import {
   loadInventoryCloudData,
   renameInventoryLocationInCloud,
   restoreInventoryLocationToCloud,
-  syncInventoryItemsToCloud,
   syncInventoryTransactionToCloud,
+  syncPartCatalogToCloud,
+  undoInventoryTransactionInCloud,
+  waitForInventoryWritesToSync,
 } from '../services/inventorySyncService.js'
 
 import '../styles/inventory-page.css'
@@ -90,9 +106,35 @@ const INVENTORY_SEARCH_MODES = {
   DESCRIPTION: 'DESCRIPTION',
 }
 
+const InventoryWorkbookModal = lazy(() =>
+  import('../components/modals/InventoryWorkbookModal.jsx'),
+)
+
+const getOnlineSyncStatus = (onlineStatus = 'Syncing...') => {
+  if (typeof navigator === 'undefined') return onlineStatus
+
+  return navigator.onLine ? onlineStatus : 'Saved Offline'
+}
+
+const INVENTORY_ACTION_LABELS = {
+  [INVENTORY_ACTIONS.ADD]: 'Part added',
+  [INVENTORY_ACTIONS.USE]: 'Part usage saved',
+  [INVENTORY_ACTIONS.GIVE]: 'Part transfer saved',
+  [INVENTORY_ACTIONS.MOVE]: 'Part moved',
+  [INVENTORY_ACTIONS.EDIT]: 'Part updated',
+  [INVENTORY_ACTIONS.DELETE]: 'Part deleted',
+}
+
 function InventoryPage() {
+  const { signOut } = useInventoryAuth()
   const [inventoryItems, setInventoryItems] = useState(() =>
     removeRedundantZeroLocationItems(loadInventoryItems()),
+  )
+  const [partCatalog, setPartCatalog] = useState(() =>
+    buildPartCatalog({
+      catalog: loadPartCatalog(),
+      inventoryItems: loadInventoryItems(),
+    }),
   )
   const [inventoryHistory, setInventoryHistory] = useState(() => loadInventoryHistory())
   const [savedLocations, setSavedLocations] = useState(() => loadSavedLocations())
@@ -112,60 +154,86 @@ function InventoryPage() {
   const [activeModal, setActiveModal] = useState(null)
   const [transactionError, setTransactionError] = useState('')
   const [selectedInventoryItem, setSelectedInventoryItem] = useState(null)
+  const [selectedCatalogPart, setSelectedCatalogPart] = useState(null)
   const [selectedLocationGroup, setSelectedLocationGroup] = useState(null)
   const [pendingDuplicatePart, setPendingDuplicatePart] = useState(null)
   const [duplicateExistingItems, setDuplicateExistingItems] = useState([])
   const [selectedSummaryView, setSelectedSummaryView] = useState(
     INVENTORY_SUMMARY_VIEWS.TOTAL,
   )
-  const [syncStatus, setSyncStatus] = useState('Offline Ready')
+  const [syncStatus, setSyncStatus] = useState(() =>
+    getOnlineSyncStatus('Checking Sync...'),
+  )
+  const [undoAction, setUndoAction] = useState(null)
   const returnToLocationAfterAction = useRef(true)
+  const undoTimeout = useRef(null)
+  const catalogDescriptionReturnModal = useRef(null)
 
   const isSearching = searchTerm.trim().length > 0
 
+  const inventoryItemsWithCatalogDescriptions = useMemo(() => {
+    return enrichInventoryItemsWithCatalog({
+      items: inventoryItems,
+      catalog: partCatalog,
+    })
+  }, [inventoryItems, partCatalog])
+
   const inventorySummary = useMemo(() => {
-    return getInventorySummary(inventoryItems)
-  }, [inventoryItems])
+    return getInventorySummary(inventoryItems, partCatalog)
+  }, [inventoryItems, partCatalog])
 
   const mostUsedParts = useMemo(() => {
     return getMostUsedParts({
       history: inventoryHistory,
-      items: inventoryItems,
+      items: inventoryItemsWithCatalogDescriptions,
+      catalog: partCatalog,
       limit: 10,
     })
-  }, [inventoryHistory, inventoryItems])
+  }, [inventoryHistory, inventoryItemsWithCatalogDescriptions, partCatalog])
+
+  const matchingPartCatalog = useMemo(() => {
+    if (!isSearching) return partCatalog
+
+    return filterPartCatalog({
+      catalog: partCatalog,
+      searchTerm,
+      searchByDescription:
+        searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION,
+    })
+  }, [isSearching, partCatalog, searchMode, searchTerm])
 
   const filteredInventoryItems = useMemo(() => {
-    if (!isSearching) return inventoryItems
+    if (!isSearching) return inventoryItemsWithCatalogDescriptions
 
-    if (searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION) {
-      const descriptionSearchTerm = searchTerm.trim().toLowerCase()
+    const matchingPartIds = new Set(
+      matchingPartCatalog.map((part) => part.id),
+    )
 
-      return inventoryItems.filter((item) =>
-        String(item.description || '')
-          .toLowerCase()
-          .includes(descriptionSearchTerm),
-      )
-    }
+    return inventoryItemsWithCatalogDescriptions.filter((item) =>
+      matchingPartIds.has(normalizePartCatalogId(item.partNumber)),
+    )
+  }, [
+    inventoryItemsWithCatalogDescriptions,
+    isSearching,
+    matchingPartCatalog,
+  ])
 
-    const normalizedSearchTerm = normalizePartNumberSearch(searchTerm).toLowerCase()
+  const searchResultParts = useMemo(() => {
+    if (!isSearching) return []
 
-    return inventoryItems.filter((item) => {
-      const normalizedPartNumber = normalizePartNumberSearch(
-        item.partNumber,
-      ).toLowerCase()
-
-      return normalizedPartNumber.includes(normalizedSearchTerm)
-    })
-  }, [inventoryItems, isSearching, searchMode, searchTerm])
+    return groupInventoryByPartNumber(
+      filteredInventoryItems,
+      matchingPartCatalog,
+    )
+  }, [filteredInventoryItems, isSearching, matchingPartCatalog])
 
   const inventoryLocationGroups = useMemo(() => {
     return groupInventoryByLocation(filteredInventoryItems)
   }, [filteredInventoryItems])
 
   const allInventoryLocationGroups = useMemo(() => {
-    return groupInventoryByLocation(inventoryItems)
-  }, [inventoryItems])
+    return groupInventoryByLocation(inventoryItemsWithCatalogDescriptions)
+  }, [inventoryItemsWithCatalogDescriptions])
 
   const availableLocations = useMemo(() => {
     const activeLocations = getLocationOptions(
@@ -281,7 +349,7 @@ function InventoryPage() {
   useEffect(() => {
     const loadCloudData = async () => {
       try {
-        setSyncStatus('Syncing...')
+        setSyncStatus(getOnlineSyncStatus())
 
         const cloudData = await loadInventoryCloudData()
         const localRemovedLocations = loadRemovedLocations()
@@ -299,6 +367,34 @@ function InventoryPage() {
             (archive) => [archive.location.trim().toUpperCase(), archive],
           ),
         )
+        const mergedPartCatalog = buildPartCatalog({
+          catalog: [
+            ...cloudData.partCatalog,
+            ...loadPartCatalog(),
+          ],
+          inventoryItems:
+            cloudData.inventoryItems.length > 0
+              ? cloudData.inventoryItems
+              : loadInventoryItems(),
+        })
+        const cloudCatalogById = new Map(
+          cloudData.partCatalog.map((part) => [part.id, part]),
+        )
+        const catalogEntriesToSync = mergedPartCatalog.filter((part) => {
+          const cloudPart = cloudCatalogById.get(part.id)
+
+          return (
+            !cloudPart ||
+            cloudPart.partNumber !== part.partNumber ||
+            cloudPart.description !== part.description
+          )
+        })
+
+        setPartCatalog(mergedPartCatalog)
+
+        if (catalogEntriesToSync.length > 0) {
+          await syncPartCatalogToCloud(catalogEntriesToSync)
+        }
 
         if (cloudData.inventoryItems.length > 0) {
           const removedLocationNames = new Set(
@@ -353,10 +449,10 @@ function InventoryPage() {
           setArchivedLocations(Array.from(archivedLocationMap.values()))
         }
 
-        setSyncStatus('Cloud Synced')
+        setSyncStatus(getOnlineSyncStatus('Cloud Synced'))
       } catch (error) {
         console.error('Failed to load cloud inventory data:', error)
-        setSyncStatus('Offline Ready')
+        setSyncStatus(getOnlineSyncStatus('Offline Ready'))
       }
     }
 
@@ -364,8 +460,35 @@ function InventoryPage() {
   }, [])
 
   useEffect(() => {
+    const handleOffline = () => setSyncStatus('Saved Offline')
+    const handleOnline = () => {
+      setSyncStatus('Syncing...')
+
+      waitForInventoryWritesToSync()
+        .then(() => setSyncStatus('Cloud Synced'))
+        .catch(() => setSyncStatus('Offline Ready'))
+    }
+
+    window.addEventListener('offline', handleOffline)
+    window.addEventListener('online', handleOnline)
+
+    return () => {
+      window.removeEventListener('offline', handleOffline)
+      window.removeEventListener('online', handleOnline)
+    }
+  }, [])
+
+  useEffect(() => {
+    return () => window.clearTimeout(undoTimeout.current)
+  }, [])
+
+  useEffect(() => {
     saveInventoryItems(inventoryItems)
   }, [inventoryItems])
+
+  useEffect(() => {
+    savePartCatalog(partCatalog)
+  }, [partCatalog])
 
   useEffect(() => {
     saveInventoryHistory(inventoryHistory)
@@ -388,6 +511,7 @@ function InventoryPage() {
     setActiveModal(null)
     setTransactionError('')
     setSelectedInventoryItem(null)
+    setSelectedCatalogPart(null)
     setSelectedLocationGroup(null)
     setPendingDuplicatePart(null)
     setDuplicateExistingItems([])
@@ -434,6 +558,18 @@ function InventoryPage() {
     setActiveModal('summary')
   }
 
+  const openCatalogDescriptionModal = (part, returnModal = null) => {
+    catalogDescriptionReturnModal.current = returnModal
+    setSelectedCatalogPart(part)
+    setActiveModal('editDescription')
+  }
+
+  const closeCatalogDescriptionModal = () => {
+    setSelectedCatalogPart(null)
+    setActiveModal(catalogDescriptionReturnModal.current)
+    catalogDescriptionReturnModal.current = null
+  }
+
   const openDeleteLocationModal = (location, locationGroup = null) => {
     const normalizedLocation = location.trim().toUpperCase()
     const currentLocationGroup =
@@ -460,9 +596,7 @@ function InventoryPage() {
       return
     }
 
-    const isPartNumberSearch = /^[a-zA-Z0-9-]*$/.test(value)
-
-    setSearchTerm(isPartNumberSearch ? formatPartNumberInput(value) : value)
+    setSearchTerm(formatPartNumberInput(value))
   }
 
   const handleSearchModeChange = (nextSearchMode) => {
@@ -480,24 +614,38 @@ function InventoryPage() {
     ].filter((location) => location && !savedLocations.includes(location))
   }
 
-  const saveNewLocations = (locations = []) => {
-    if (locations.length === 0) return
-
-    setSavedLocations((currentLocations) => [
+  const getLocationsWithAdditions = (locations = []) => {
+    return [
       ...new Set([
-        ...currentLocations,
+        ...savedLocations,
         ...locations,
       ]),
-    ])
+    ]
+  }
+
+  const showUndoAction = (nextUndoAction) => {
+    window.clearTimeout(undoTimeout.current)
+    setUndoAction(nextUndoAction)
+
+    undoTimeout.current = window.setTimeout(() => {
+      setUndoAction(null)
+    }, 10000)
+  }
+
+  const dismissUndoAction = () => {
+    window.clearTimeout(undoTimeout.current)
+    setUndoAction(null)
+  }
+
+  const removeLocationsFromDeletedList = (locations = []) => {
+    if (locations.length === 0) return removedLocations
 
     const newLocationNames = new Set(
       locations.map((location) => location.trim().toUpperCase()),
     )
 
-    setRemovedLocations((currentLocations) =>
-      currentLocations.filter(
-        (location) => !newLocationNames.has(location.trim().toUpperCase()),
-      ),
+    return removedLocations.filter(
+      (location) => !newLocationNames.has(location.trim().toUpperCase()),
     )
   }
 
@@ -530,7 +678,16 @@ function InventoryPage() {
       return false
     }
 
+    const catalogResult = upsertPartCatalogEntry({
+      catalog: partCatalog,
+      partNumber: formData.partNumber,
+      description: formData.description || '',
+      replaceDescription: action === INVENTORY_ACTIONS.EDIT,
+    })
+
     const newLocations = getNewLocations(formData)
+    const nextSavedLocations = getLocationsWithAdditions(newLocations)
+    const nextRemovedLocations = removeLocationsFromDeletedList(newLocations)
     const nextItemIds = new Set(
       transactionResult.items.map((item) => item.id),
     )
@@ -554,24 +711,45 @@ function InventoryPage() {
 
     setInventoryItems(transactionResult.items)
     setInventoryHistory(transactionResult.history)
-    saveNewLocations(newLocations)
+    setPartCatalog(catalogResult.catalog)
+    setSavedLocations(nextSavedLocations)
+    setRemovedLocations(nextRemovedLocations)
+
+    showUndoAction({
+      type: 'inventory',
+      message: INVENTORY_ACTION_LABELS[action] || 'Inventory updated',
+      previousItems: inventoryItems,
+      currentItems: transactionResult.items,
+      previousHistory: inventoryHistory,
+      previousCatalog: partCatalog,
+      currentCatalog: catalogResult.catalog,
+      previousLocations: savedLocations,
+      currentLocations: nextSavedLocations,
+      previousRemovedLocations: removedLocations,
+      historyRecordId: transactionResult.historyRecord?.id || '',
+    })
 
     setTransactionError('')
-    setSyncStatus('Syncing...')
+    setSyncStatus(getOnlineSyncStatus())
 
-    syncInventoryTransactionToCloud({
-      items: transactionResult.items,
-      historyRecord: transactionResult.historyRecord,
-      locations: newLocations,
-      deletedItemIds,
-      restoredLocations,
-    })
+    Promise.all([
+      syncInventoryTransactionToCloud({
+        items: transactionResult.items,
+        historyRecord: transactionResult.historyRecord,
+        locations: newLocations,
+        deletedItemIds,
+        restoredLocations,
+      }),
+      catalogResult.didChange
+        ? syncPartCatalogToCloud([catalogResult.entry])
+        : Promise.resolve(),
+    ])
       .then(() => {
-        setSyncStatus('Cloud Synced')
+        setSyncStatus(getOnlineSyncStatus('Cloud Synced'))
       })
       .catch((error) => {
         console.error('Failed to sync inventory transaction:', error)
-        setSyncStatus('Offline Ready')
+        setSyncStatus(getOnlineSyncStatus('Offline Ready'))
       })
 
     return true
@@ -700,15 +878,15 @@ function InventoryPage() {
       ...currentLocations,
       cleanLocation,
     ])
-    setSyncStatus('Syncing...')
+    setSyncStatus(getOnlineSyncStatus())
 
     addInventoryLocationToCloud(cleanLocation)
       .then(() => {
-        setSyncStatus('Cloud Synced')
+        setSyncStatus(getOnlineSyncStatus('Cloud Synced'))
       })
       .catch((error) => {
         console.error('Failed to add inventory location:', error)
-        setSyncStatus('Offline Ready')
+        setSyncStatus(getOnlineSyncStatus('Offline Ready'))
       })
 
     return { isValid: true, errorMessage: '' }
@@ -795,7 +973,7 @@ function InventoryPage() {
         : [...nextLocations, cleanFromLocation]
     })
 
-    setSyncStatus('Syncing...')
+    setSyncStatus(getOnlineSyncStatus())
 
     renameInventoryLocationInCloud({
       fromLocation: cleanFromLocation,
@@ -804,11 +982,11 @@ function InventoryPage() {
       deletedItemIds,
     })
       .then(() => {
-        setSyncStatus('Cloud Synced')
+        setSyncStatus(getOnlineSyncStatus('Cloud Synced'))
       })
       .catch((error) => {
         console.error('Failed to rename inventory location:', error)
-        setSyncStatus('Offline Ready')
+        setSyncStatus(getOnlineSyncStatus('Offline Ready'))
       })
 
     return { isValid: true, errorMessage: '' }
@@ -827,6 +1005,22 @@ function InventoryPage() {
     })
 
     const combinedItems = Array.from(restoredItemsById.values())
+    const restoredPartCatalog = buildPartCatalog({
+      catalog: partCatalog,
+      inventoryItems: archive.items,
+    })
+    const currentCatalogById = new Map(
+      partCatalog.map((part) => [part.id, part]),
+    )
+    const restoredCatalogEntries = restoredPartCatalog.filter((part) => {
+      const currentPart = currentCatalogById.get(part.id)
+
+      return (
+        !currentPart ||
+        currentPart.partNumber !== part.partNumber ||
+        currentPart.description !== part.description
+      )
+    })
     const restoredItems = removeRedundantZeroLocationItems(combinedItems)
     const restoredItemsByCleanId = new Map(
       restoredItems.map((item) => [item.id, item]),
@@ -843,6 +1037,7 @@ function InventoryPage() {
       .map((item) => restoredItemsByCleanId.get(item.id))
 
     setInventoryItems(restoredItems)
+    setPartCatalog(restoredPartCatalog)
     setSavedLocations((currentLocations) => [
       ...currentLocations.filter(
         (location) => location.trim().toUpperCase() !== normalizedLocation,
@@ -861,24 +1056,27 @@ function InventoryPage() {
       ),
     )
 
-    setSyncStatus('Syncing...')
+    setSyncStatus(getOnlineSyncStatus())
 
     restoreInventoryLocationToCloud({
       location: archive.location,
       items: archiveItemsToRestore,
     })
       .then(() =>
-        syncInventoryTransactionToCloud({
-          items: updatedItems,
-          deletedItemIds,
-        }),
+        Promise.all([
+          syncInventoryTransactionToCloud({
+            items: updatedItems,
+            deletedItemIds,
+          }),
+          syncPartCatalogToCloud(restoredCatalogEntries),
+        ]),
       )
       .then(() => {
-        setSyncStatus('Cloud Synced')
+        setSyncStatus(getOnlineSyncStatus('Cloud Synced'))
       })
       .catch((error) => {
         console.error('Failed to restore inventory location:', error)
-        setSyncStatus('Offline Ready')
+        setSyncStatus(getOnlineSyncStatus('Offline Ready'))
       })
   }
 
@@ -920,7 +1118,13 @@ function InventoryPage() {
       archivedLocation,
     ])
 
-    setSyncStatus('Syncing...')
+    showUndoAction({
+      type: 'location',
+      message: `${locationGroup.location} removed`,
+      archive: archivedLocation,
+    })
+
+    setSyncStatus(getOnlineSyncStatus())
 
     deleteInventoryLocationFromCloud({
       location: locationGroup.location,
@@ -928,43 +1132,117 @@ function InventoryPage() {
       deletedAt,
     })
       .then(() => {
-        setSyncStatus('Cloud Synced')
+        setSyncStatus(getOnlineSyncStatus('Cloud Synced'))
       })
       .catch((error) => {
         console.error('Failed to delete inventory location:', error)
-        setSyncStatus('Offline Ready')
+        setSyncStatus(getOnlineSyncStatus('Offline Ready'))
+      })
+
+  }
+
+  const handleUndo = () => {
+    if (!undoAction) return
+
+    const actionToUndo = undoAction
+    dismissUndoAction()
+
+    if (actionToUndo.type === 'location') {
+      handleRestoreLocation(actionToUndo.archive)
+      return
+    }
+
+    setInventoryItems(actionToUndo.previousItems)
+    setInventoryHistory(actionToUndo.previousHistory)
+    setPartCatalog(actionToUndo.previousCatalog)
+    setSavedLocations(actionToUndo.previousLocations)
+    setRemovedLocations(actionToUndo.previousRemovedLocations)
+    setSyncStatus(getOnlineSyncStatus())
+
+    undoInventoryTransactionInCloud({
+      previousItems: actionToUndo.previousItems,
+      currentItems: actionToUndo.currentItems,
+      previousCatalog: actionToUndo.previousCatalog,
+      currentCatalog: actionToUndo.currentCatalog,
+      previousLocations: actionToUndo.previousLocations,
+      currentLocations: actionToUndo.currentLocations,
+      historyRecordId: actionToUndo.historyRecordId,
+    })
+      .then(() => {
+        setSyncStatus(getOnlineSyncStatus('Cloud Synced'))
+      })
+      .catch((error) => {
+        console.error('Failed to sync inventory undo:', error)
+        setSyncStatus(getOnlineSyncStatus('Offline Ready'))
       })
   }
 
   const handleImportWorkbookDescriptions = (descriptions = []) => {
-    const result = applyMissingInventoryDescriptions({
-      items: inventoryItems,
+    const result = applyWorkbookDescriptionsToPartCatalog({
+      catalog: partCatalog,
+      inventoryItems,
       descriptions,
     })
 
-    if (result.updatedItems.length > 0) {
-      setInventoryItems(result.items)
-      setSyncStatus('Syncing...')
+    if (result.updatedEntries.length > 0) {
+      setPartCatalog(result.catalog)
+      setSyncStatus(getOnlineSyncStatus())
 
-      syncInventoryItemsToCloud(result.updatedItems)
+      syncPartCatalogToCloud(result.updatedEntries)
         .then(() => {
-          setSyncStatus('Cloud Synced')
+          setSyncStatus(getOnlineSyncStatus('Cloud Synced'))
         })
         .catch((error) => {
           console.error('Failed to sync inventory descriptions:', error)
-          setSyncStatus('Offline Ready')
+          setSyncStatus(getOnlineSyncStatus('Offline Ready'))
         })
     }
 
     return {
       workbookDescriptionCount: descriptions.length,
       updatedPartCount: result.updatedPartNumbers.length,
-      updatedRecordCount: result.updatedItems.length,
+      updatedRecordCount: result.updatedEntries.length,
     }
   }
 
+  const handleEditCatalogDescription = ({ partNumber, description }) => {
+    const result = upsertPartCatalogEntry({
+      catalog: partCatalog,
+      partNumber,
+      description,
+      replaceDescription: true,
+    })
+
+    if (!result.didChange) return true
+
+    setPartCatalog(result.catalog)
+    showUndoAction({
+      type: 'inventory',
+      message: 'Description updated',
+      previousItems: inventoryItems,
+      currentItems: inventoryItems,
+      previousHistory: inventoryHistory,
+      previousCatalog: partCatalog,
+      currentCatalog: result.catalog,
+      previousLocations: savedLocations,
+      currentLocations: savedLocations,
+      previousRemovedLocations: removedLocations,
+      historyRecordId: '',
+    })
+    setSyncStatus(getOnlineSyncStatus())
+
+    syncPartCatalogToCloud([result.entry])
+      .then(() => setSyncStatus(getOnlineSyncStatus('Cloud Synced')))
+      .catch((error) => {
+        console.error('Failed to sync part description:', error)
+        setSyncStatus(getOnlineSyncStatus('Offline Ready'))
+      })
+
+    return true
+  }
+
   const handleExportInventory = () => {
-    downloadInventoryCsv(inventoryItems)
+    downloadInventoryCsv(inventoryItemsWithCatalogDescriptions, partCatalog)
   }
 
   const openUseFromItem = (item) => {
@@ -1000,6 +1278,21 @@ function InventoryPage() {
             <HistoryIcon size={17} aria-hidden="true" />
             History
           </Button>
+
+          <Button
+            className="inventory-page__sign-out-button"
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              signOut().catch((error) => {
+                console.error('Failed to sign out of inventory:', error)
+              })
+            }}
+            aria-label="Sign out"
+            title="Sign out"
+          >
+            <LogOut size={17} aria-hidden="true" />
+          </Button>
         </div>
 
         <header className="inventory-page__header">
@@ -1011,7 +1304,15 @@ function InventoryPage() {
             </p>
           </div>
 
-          <div className="inventory-page__sync-status">
+          <div
+            className={`inventory-page__sync-status ${
+              syncStatus === 'Saved Offline' || syncStatus === 'Offline Ready'
+                ? 'inventory-page__sync-status--offline'
+                : syncStatus.includes('Syncing') || syncStatus.includes('Checking')
+                  ? 'inventory-page__sync-status--syncing'
+                  : ''
+            }`}
+          >
             <span className="inventory-page__sync-dot"></span>
             <span>{syncStatus}</span>
           </div>
@@ -1265,7 +1566,18 @@ function InventoryPage() {
                 )}
               </div>
 
-              {visibleLocationGroups.length > 0 ? (
+              {isSearching && searchResultParts.length > 0 ? (
+                <InventorySearchResults
+                  parts={searchResultParts}
+                  items={filteredInventoryItems}
+                  onUse={openUseFromItem}
+                  onMove={openMoveFromItem}
+                  onEdit={openEditFromItem}
+                  onEditDescription={(part) =>
+                    openCatalogDescriptionModal(part)
+                  }
+                />
+              ) : !isSearching && visibleLocationGroups.length > 0 ? (
                 <div className="inventory-page__location-list">
                   {visibleLocationGroups.map((locationGroup) => (
                     <InventoryLocationCard
@@ -1500,22 +1812,67 @@ function InventoryPage() {
       <InventorySummaryModal
         isOpen={activeModal === 'summary'}
         onClose={closeModal}
-        items={inventoryItems}
+        items={inventoryItemsWithCatalogDescriptions}
+        partCatalog={partCatalog}
         summaryView={selectedSummaryView}
+        onEditDescription={(part) =>
+          openCatalogDescriptionModal(part, 'summary')
+        }
       />
 
-      <InventoryWorkbookModal
-        isOpen={activeModal === 'workbook'}
-        onClose={closeModal}
-        inventoryItems={inventoryItems}
-        onImportDescriptions={handleImportWorkbookDescriptions}
+      <EditPartDescriptionModal
+        key={`description-${selectedCatalogPart?.id || 'none'}`}
+        isOpen={activeModal === 'editDescription'}
+        onClose={closeCatalogDescriptionModal}
+        onSubmit={handleEditCatalogDescription}
+        part={selectedCatalogPart}
       />
+
+      {activeModal === 'workbook' && (
+        <Suspense
+          fallback={
+            <div className="inventory-page__feature-loading" role="status">
+              Opening Excel tools…
+            </div>
+          }
+        >
+          <InventoryWorkbookModal
+            isOpen
+            onClose={closeModal}
+            inventoryItems={inventoryItems}
+            onImportDescriptions={handleImportWorkbookDescriptions}
+          />
+        </Suspense>
+      )}
 
       <HistoryModal
         isOpen={activeModal === 'history'}
         onClose={closeModal}
         history={inventoryHistory}
       />
+
+      {undoAction && (
+        <div className="inventory-page__undo" role="status">
+          <span>{undoAction.message}</span>
+          <Button
+            className="inventory-page__undo-button"
+            variant="secondary"
+            size="sm"
+            onClick={handleUndo}
+          >
+            <RotateCcw size={16} aria-hidden="true" />
+            Undo
+          </Button>
+          <button
+            type="button"
+            className="inventory-page__undo-dismiss"
+            aria-label="Dismiss undo message"
+            onClick={dismissUndoAction}
+          >
+            <X size={17} aria-hidden="true" />
+          </button>
+        </div>
+      )}
     </main>
   )
 }

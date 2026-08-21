@@ -7,15 +7,21 @@ import {
   query,
   serverTimestamp,
   setDoc,
+  waitForPendingWrites,
 } from 'firebase/firestore'
 
 import { database } from '../../../services/firebase/firebaseConfig.js'
 
 const INVENTORY_COLLECTION = 'inventoryItems'
+const PART_CATALOG_COLLECTION = 'partCatalog'
 const HISTORY_COLLECTION = 'inventoryHistory'
 const LOCATIONS_COLLECTION = 'savedLocations'
 const REMOVED_LOCATIONS_COLLECTION = 'removedLocations'
 const ARCHIVED_LOCATIONS_COLLECTION = 'archivedLocations'
+
+export const waitForInventoryWritesToSync = async () => {
+  await waitForPendingWrites(database)
+}
 
 export const getInventoryItemsFromFirebase = async () => {
   const snapshot = await getDocs(collection(database, INVENTORY_COLLECTION))
@@ -41,6 +47,32 @@ export const deleteInventoryItemFromFirebase = async (itemId) => {
   await deleteDoc(itemRef)
 }
 
+export const getPartCatalogFromFirebase = async () => {
+  const snapshot = await getDocs(collection(database, PART_CATALOG_COLLECTION))
+
+  return snapshot.docs.map((document) => ({
+    id: document.id,
+    ...document.data(),
+  }))
+}
+
+export const savePartCatalogEntryToFirebase = async (entry) => {
+  if (!entry?.id) return
+
+  const entryRef = doc(database, PART_CATALOG_COLLECTION, entry.id)
+
+  await setDoc(entryRef, {
+    ...entry,
+    updatedAt: serverTimestamp(),
+  })
+}
+
+export const deletePartCatalogEntryFromFirebase = async (entryId) => {
+  if (!entryId) return
+
+  await deleteDoc(doc(database, PART_CATALOG_COLLECTION, entryId))
+}
+
 export const getInventoryHistoryFromFirebase = async () => {
   const historyQuery = query(
     collection(database, HISTORY_COLLECTION),
@@ -63,6 +95,12 @@ export const saveInventoryHistoryToFirebase = async (historyRecord) => {
     synced: true,
     syncedAt: serverTimestamp(),
   })
+}
+
+export const deleteInventoryHistoryFromFirebase = async (historyId) => {
+  if (!historyId) return
+
+  await deleteDoc(doc(database, HISTORY_COLLECTION, historyId))
 }
 
 export const getSavedLocationsFromFirebase = async () => {

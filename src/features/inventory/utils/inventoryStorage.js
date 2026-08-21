@@ -1,5 +1,6 @@
 const INVENTORY_STORAGE_KEYS = {
   inventory: 'truck_inventory_items',
+  partCatalog: 'truck_inventory_part_catalog',
   history: 'truck_inventory_history',
   locations: 'truck_inventory_locations',
   removedLocations: 'truck_inventory_removed_locations',
@@ -38,6 +39,14 @@ export const loadInventoryItems = () => {
 
 export const saveInventoryItems = (items) => {
   return writeStorage(INVENTORY_STORAGE_KEYS.inventory, items)
+}
+
+export const loadPartCatalog = () => {
+  return readStorage(INVENTORY_STORAGE_KEYS.partCatalog, [])
+}
+
+export const savePartCatalog = (catalog) => {
+  return writeStorage(INVENTORY_STORAGE_KEYS.partCatalog, catalog)
 }
 
 export const loadInventoryHistory = () => {

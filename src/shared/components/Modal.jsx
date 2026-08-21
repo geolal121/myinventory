@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import { X } from 'lucide-react'
 
 import Button from './Button.jsx'
@@ -12,15 +12,74 @@ function Modal({
   footer = null,
   className = '',
 }) {
+  const dialogRef = useRef(null)
+  const onCloseRef = useRef(onClose)
+  const titleId = useId()
+  const descriptionId = useId()
+
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
+
   useEffect(() => {
     if (!isOpen) return undefined
 
     const originalOverflow = document.body.style.overflow
+    const previouslyFocusedElement = document.activeElement
+    const dialog = dialogRef.current
+    const getFocusableElements = () =>
+      Array.from(
+        dialog?.querySelectorAll(
+          'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+        ) || [],
+      )
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        onCloseRef.current()
+        return
+      }
+
+      if (event.key !== 'Tab') return
+
+      const focusableElements = getFocusableElements()
+
+      if (focusableElements.length === 0) {
+        event.preventDefault()
+        dialog?.focus()
+        return
+      }
+
+      const firstElement = focusableElements[0]
+      const lastElement = focusableElements[focusableElements.length - 1]
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault()
+        lastElement.focus()
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault()
+        firstElement.focus()
+      }
+    }
 
     document.body.style.overflow = 'hidden'
+    document.addEventListener('keydown', handleKeyDown)
+
+    const focusFrame = window.requestAnimationFrame(() => {
+      const firstFocusableElement = getFocusableElements()[0]
+
+      if (firstFocusableElement) {
+        firstFocusableElement.focus()
+      } else {
+        dialog?.focus()
+      }
+    })
 
     return () => {
+      window.cancelAnimationFrame(focusFrame)
       document.body.style.overflow = originalOverflow
+      document.removeEventListener('keydown', handleKeyDown)
+      previouslyFocusedElement?.focus?.()
     }
   }, [isOpen])
 
@@ -29,19 +88,30 @@ function Modal({
   const classes = ['ui-modal', className].filter(Boolean).join(' ')
 
   return (
-    <div className="ui-modal-overlay" role="presentation">
+    <div
+      className="ui-modal-overlay"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose()
+      }}
+    >
       <section
+        ref={dialogRef}
         className={classes}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="modal-title"
+        aria-labelledby={titleId}
+        aria-describedby={description ? descriptionId : undefined}
+        tabIndex="-1"
       >
         <header className="ui-modal__header">
           <div>
-            <h2 id="modal-title">{title}</h2>
+            <h2 id={titleId}>{title}</h2>
 
             {description && (
-              <p className="ui-modal__description">{description}</p>
+              <p id={descriptionId} className="ui-modal__description">
+                {description}
+              </p>
             )}
           </div>
 

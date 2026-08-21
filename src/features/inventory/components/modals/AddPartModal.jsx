@@ -24,6 +24,7 @@ const INVENTORY_STATUS_OPTIONS = [
 
 const getInitialFormData = () => ({
   partNumber: '',
+  description: '',
   quantity: '',
   location: '',
   inventoryStatus: INVENTORY_STATUS.OFFICIAL,
@@ -125,6 +126,16 @@ function AddPartModal({
           onChange={handleChange}
           placeholder="Example: 4"
           required
+        />
+
+        <Input
+          name="description"
+          label="Description"
+          type="text"
+          value={formData.description}
+          onChange={handleChange}
+          placeholder="Example: Pressure valve"
+          helperText="Optional. Excel can fill this later if left blank."
         />
 
         <Input

@@ -1,16 +1,40 @@
-# React + Vite
+# MyInventory
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Mobile-first truck inventory for technician 72485 at the Los Angeles branch.
 
-Currently, two official plugins are available:
+## Local development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+The Firebase web configuration is read from the existing `.env` file.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## One-time secure login setup
 
-## Expanding the ESLint configuration
+Before publishing the authenticated version:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Open Firebase Console for project `myinventory-a95a1`.
+2. Go to **Authentication → Sign-in method** and enable **Email/Password**.
+3. Go to **Authentication → Users → Add user**.
+4. Use this internal login email:
+   `72485@myinventory.local`
+5. Create a private password with at least six characters. Do not put the
+   password in this repository or an environment file.
+6. Deploy the app and the owner-only Firestore rules together.
+
+The app displays **Branch**, **Tech ID**, and **Private Password**. It converts
+the Los Angeles branch and Tech ID 72485 into the internal Firebase login email.
+There is no public account-registration screen.
+
+## Verification
+
+```bash
+npm test
+npm run lint
+npm run build
+```
+
+The checked-in `firestore.rules` file replaces public database access with an
+owner-only rule for the internal login identity above.

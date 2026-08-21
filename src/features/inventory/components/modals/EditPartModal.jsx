@@ -9,6 +9,7 @@ import { formatPartNumberInput } from '../../utils/inventoryHelpers.js'
 
 const getInitialFormData = (selectedItem = null) => ({
   partNumber: selectedItem?.partNumber || '',
+  description: selectedItem?.description || '',
   location: selectedItem?.location || '',
   officialQuantity: String(selectedItem?.officialQuantity ?? ''),
   noiQuantity: String(selectedItem?.noiQuantity ?? ''),
@@ -60,6 +61,7 @@ function EditPartModal({
     const wasSaved = onSubmit({
       originalItem: selectedItem,
       partNumber: formData.partNumber,
+      description: formData.description,
       location: formData.location,
       officialQuantity: Number(formData.officialQuantity),
       noiQuantity: Number(formData.noiQuantity),
@@ -116,6 +118,16 @@ function EditPartModal({
           placeholder="Box 1, Box 2, Slide Box..."
           list="edit-part-location-options"
           required
+        />
+
+        <Input
+          name="description"
+          label="Description"
+          type="text"
+          value={formData.description}
+          onChange={handleChange}
+          placeholder="Example: Pressure valve"
+          helperText="You can correct or clear the saved catalog description."
         />
 
         <datalist id="edit-part-location-options">

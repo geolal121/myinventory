@@ -14,24 +14,7 @@ export const normalizePartNumberSearch = (partNumber = '') => {
 }
 
 export const formatPartNumberInput = (value = '') => {
-  const cleanedValue = value
-    .toUpperCase()
-    .replace(/[^A-Z0-9]/g, '')
-    .slice(0, 9)
-
-  const firstSection = cleanedValue.slice(0, 3)
-  const secondSection = cleanedValue.slice(3, 7)
-  const thirdSection = cleanedValue.slice(7, 9)
-
-  if (cleanedValue.length <= 3) {
-    return firstSection
-  }
-
-  if (cleanedValue.length <= 7) {
-    return `${firstSection}-${secondSection}`
-  }
-
-  return `${firstSection}-${secondSection}-${thirdSection}`
+  return String(value).toUpperCase().replace(/[^A-Z0-9-]/g, '')
 }
 
 export const normalizeText = (text = '') => {
@@ -188,35 +171,6 @@ export const removeRedundantZeroLocationItems = (items = []) => {
       })
 
       return
-    }
-
-    const keptItem =
-      partItems.find((item) =>
-        normalizeInventoryDescription(item.description),
-      ) || partItems[0]
-
-    if (!keptItem) return
-
-    keptItemIds.add(keptItem.id)
-    const mergedDescription = savedDescription || ''
-    const mergedNotes = normalizeText(keptItem.notes) || savedNotes || ''
-    const hasMergedChanges =
-      partItems.length > 1 ||
-      keptItem.description !== mergedDescription ||
-      keptItem.notes !== mergedNotes ||
-      JSON.stringify(keptItem.knownMachines || []) !==
-        JSON.stringify(mergedKnownMachines) ||
-      JSON.stringify(keptItem.knownCustomers || []) !==
-        JSON.stringify(mergedKnownCustomers)
-
-    if (hasMergedChanges) {
-      enhancedItemsById.set(keptItem.id, {
-        ...keptItem,
-        description: mergedDescription,
-        knownMachines: mergedKnownMachines,
-        knownCustomers: mergedKnownCustomers,
-        notes: mergedNotes,
-      })
     }
   })
 
@@ -675,6 +629,7 @@ export const editInventoryItem = ({
   location,
   officialQuantity = 0,
   noiQuantity = 0,
+  description = '',
   notes = '',
 }) => {
   if (!originalItem) return items
@@ -717,8 +672,7 @@ export const editInventoryItem = ({
           ]),
         ],
         description:
-          normalizeInventoryDescription(item.description) ||
-          normalizeInventoryDescription(originalItem.description),
+          normalizeInventoryDescription(description),
         notes: normalizeText(notes) || item.notes || originalItem.notes || '',
       }
     })
@@ -733,6 +687,7 @@ export const editInventoryItem = ({
       location: cleanLocation,
       officialQuantity: officialAmount,
       noiQuantity: noiAmount,
+      description: normalizeInventoryDescription(description),
       notes: normalizeText(notes),
     },
   ]
@@ -846,21 +801,37 @@ export const groupInventoryByLocation = (items = []) => {
   })
 }
 
-export const groupInventoryByPartNumber = (items = []) => {
+export const groupInventoryByPartNumber = (items = [], catalog = []) => {
   const partMap = new Map()
+
+  catalog.forEach((catalogPart) => {
+    const partId = normalizePartNumberLookup(catalogPart.partNumber)
+
+    if (!partId) return
+
+    partMap.set(partId, {
+      partNumber: normalizePartNumber(catalogPart.partNumber),
+      description: normalizeInventoryDescription(catalogPart.description),
+      officialQuantity: 0,
+      noiQuantity: 0,
+      totalQuantity: 0,
+      locations: [],
+    })
+  })
 
   items.forEach((item) => {
     const partNumber = normalizePartNumber(item.partNumber)
+    const partId = normalizePartNumberLookup(partNumber)
 
-    if (!partNumber) return
+    if (!partId) return
 
     const officialQuantity = Number(item.officialQuantity || 0)
     const noiQuantity = Number(item.noiQuantity || 0)
     const totalQuantity = officialQuantity + noiQuantity
-    const existingPart = partMap.get(partNumber)
+    const existingPart = partMap.get(partId)
 
     if (!existingPart) {
-      partMap.set(partNumber, {
+      partMap.set(partId, {
         partNumber,
         description: '',
         officialQuantity: 0,
@@ -870,7 +841,7 @@ export const groupInventoryByPartNumber = (items = []) => {
       })
     }
 
-    const part = partMap.get(partNumber)
+    const part = partMap.get(partId)
 
     part.description =
       part.description || normalizeInventoryDescription(item.description)
@@ -934,8 +905,8 @@ export const searchInventory = (items = [], searchTerm = '') => {
   })
 }
 
-export const getInventorySummary = (items = []) => {
-  const parts = groupInventoryByPartNumber(items)
+export const getInventorySummary = (items = [], catalog = []) => {
+  const parts = groupInventoryByPartNumber(items, catalog)
 
   return {
     totalParts: parts.length,
@@ -951,27 +922,43 @@ export const getInventorySummary = (items = []) => {
   }
 }
 
-export const getCurrentStockByPartNumber = (items = []) => {
+export const getCurrentStockByPartNumber = (items = [], catalog = []) => {
   const stockMap = new Map()
+
+  catalog.forEach((part) => {
+    const partNumber = normalizePartNumber(part.partNumber)
+    const partId = normalizePartNumberLookup(partNumber)
+
+    if (!partId) return
+
+    stockMap.set(partId, {
+      partNumber,
+      description: normalizeInventoryDescription(part.description),
+      totalQuantity: 0,
+      officialQuantity: 0,
+      noiQuantity: 0,
+    })
+  })
 
   items.forEach((item) => {
     const partNumber = normalizePartNumber(item.partNumber)
+    const partId = normalizePartNumberLookup(partNumber)
 
-    if (!partNumber) return
+    if (!partId) return
 
     const officialQuantity = Number(item.officialQuantity || 0)
     const noiQuantity = Number(item.noiQuantity || 0)
     const totalQuantity = officialQuantity + noiQuantity
 
-    stockMap.set(partNumber, {
-      partNumber,
+    stockMap.set(partId, {
+      partNumber: stockMap.get(partId)?.partNumber || partNumber,
       description:
-        stockMap.get(partNumber)?.description ||
+        stockMap.get(partId)?.description ||
         normalizeInventoryDescription(item.description),
-      totalQuantity: Number(stockMap.get(partNumber)?.totalQuantity || 0) + totalQuantity,
+      totalQuantity: Number(stockMap.get(partId)?.totalQuantity || 0) + totalQuantity,
       officialQuantity:
-        Number(stockMap.get(partNumber)?.officialQuantity || 0) + officialQuantity,
-      noiQuantity: Number(stockMap.get(partNumber)?.noiQuantity || 0) + noiQuantity,
+        Number(stockMap.get(partId)?.officialQuantity || 0) + officialQuantity,
+      noiQuantity: Number(stockMap.get(partId)?.noiQuantity || 0) + noiQuantity,
     })
   })
 
@@ -981,28 +968,30 @@ export const getCurrentStockByPartNumber = (items = []) => {
 export const getMostUsedParts = ({
   history = [],
   items = [],
+  catalog = [],
   limit = 10,
 } = {}) => {
-  const stockMap = getCurrentStockByPartNumber(items)
+  const stockMap = getCurrentStockByPartNumber(items, catalog)
   const usageMap = new Map()
 
   history.forEach((record) => {
     if (record.action !== INVENTORY_ACTIONS.USE) return
 
     const partNumber = normalizePartNumber(record.partNumber)
+    const partId = normalizePartNumberLookup(partNumber)
     const quantity = Number(record.quantity || 0)
 
-    if (!partNumber || quantity <= 0) return
+    if (!partId || quantity <= 0) return
 
-    const existingRecord = usageMap.get(partNumber)
+    const existingRecord = usageMap.get(partId)
 
-    usageMap.set(partNumber, {
-      partNumber,
+    usageMap.set(partId, {
+      partNumber: stockMap.get(partId)?.partNumber || partNumber,
       usedQuantity: Number(existingRecord?.usedQuantity || 0) + quantity,
-      currentStock: Number(stockMap.get(partNumber)?.totalQuantity || 0),
-      description: stockMap.get(partNumber)?.description || '',
-      officialQuantity: Number(stockMap.get(partNumber)?.officialQuantity || 0),
-      noiQuantity: Number(stockMap.get(partNumber)?.noiQuantity || 0),
+      currentStock: Number(stockMap.get(partId)?.totalQuantity || 0),
+      description: stockMap.get(partId)?.description || '',
+      officialQuantity: Number(stockMap.get(partId)?.officialQuantity || 0),
+      noiQuantity: Number(stockMap.get(partId)?.noiQuantity || 0),
       lastUsedAt:
         !existingRecord?.lastUsedAt ||
         new Date(record.createdAt).getTime() >
@@ -1040,7 +1029,7 @@ export const escapeCsvValue = (value = '') => {
   return stringValue
 }
 
-export const buildInventoryCsv = (items = []) => {
+export const buildInventoryCsv = (items = [], catalog = []) => {
   const headers = [
     'Part Number',
     'Description',
@@ -1051,7 +1040,20 @@ export const buildInventoryCsv = (items = []) => {
     'Notes',
   ]
 
-  const sortedItems = [...items].sort((firstItem, secondItem) => {
+  const stockedPartIds = new Set(
+    items.map((item) => normalizePartNumberLookup(item.partNumber)),
+  )
+  const outOfStockItems = catalog
+    .filter((part) => !stockedPartIds.has(normalizePartNumberLookup(part.partNumber)))
+    .map((part) => ({
+      partNumber: part.partNumber,
+      description: part.description || '',
+      location: '',
+      officialQuantity: 0,
+      noiQuantity: 0,
+      notes: '',
+    }))
+  const sortedItems = [...items, ...outOfStockItems].sort((firstItem, secondItem) => {
     const partComparison = normalizePartNumber(firstItem.partNumber).localeCompare(
       normalizePartNumber(secondItem.partNumber),
       undefined,
@@ -1094,8 +1096,8 @@ export const buildInventoryCsv = (items = []) => {
   ].join('\n')
 }
 
-export const downloadInventoryCsv = (items = []) => {
-  const csvContent = buildInventoryCsv(items)
+export const downloadInventoryCsv = (items = [], catalog = []) => {
+  const csvContent = buildInventoryCsv(items, catalog)
   const blob = new Blob([csvContent], {
     type: 'text/csv;charset=utf-8;',
   })
