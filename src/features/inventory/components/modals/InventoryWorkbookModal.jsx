@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
 import {
+  AlertTriangle,
   BadgeCheck,
   CircleCheck,
   Download,
   FileSpreadsheet,
+  ListChecks,
   ShieldCheck,
   Upload,
 } from 'lucide-react'
@@ -14,7 +16,9 @@ import Modal from '../../../../shared/components/Modal.jsx'
 
 import {
   buildWorkbookFillPreview,
+  buildWorkbookReviewCsv,
   createFilledWorkbookFileName,
+  createWorkbookReviewFileName,
   fillInventoryWorkbook,
   inspectInventoryWorkbook,
   WORKBOOK_QUANTITY_MODES,
@@ -28,6 +32,7 @@ function InventoryWorkbookModal({
   isOpen,
   onClose,
   inventoryItems = [],
+  partCatalog = [],
   onImportDescriptions,
   onWorkbookInspected,
 }) {
@@ -49,9 +54,10 @@ function InventoryWorkbookModal({
       inspection,
       sheetName: inspection.suggestedSheetName,
       inventoryItems,
+      partCatalog,
       quantityMode,
     })
-  }, [inspection, inventoryItems, quantityMode])
+  }, [inspection, inventoryItems, partCatalog, quantityMode])
 
   const resetWorkbook = () => {
     setFile(null)
@@ -140,6 +146,7 @@ function InventoryWorkbookModal({
         inspection,
         sheetName: inspection.suggestedSheetName,
         inventoryItems,
+        partCatalog,
         quantityMode,
       })
       const blob = new Blob([result.bytes], { type: EXCEL_MIME_TYPE })
@@ -161,6 +168,24 @@ function InventoryWorkbookModal({
     } finally {
       setIsDownloading(false)
     }
+  }
+
+  const handleDownloadReview = () => {
+    if (!file || !preview) return
+
+    const csvContent = buildWorkbookReviewCsv(preview)
+    const blob = new Blob([`\uFEFF${csvContent}`], {
+      type: 'text/csv;charset=utf-8;',
+    })
+    const downloadUrl = URL.createObjectURL(blob)
+    const downloadLink = document.createElement('a')
+
+    downloadLink.href = downloadUrl
+    downloadLink.download = createWorkbookReviewFileName(file.name)
+    document.body.appendChild(downloadLink)
+    downloadLink.click()
+    downloadLink.remove()
+    window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000)
   }
 
   const quantityOptions = [
@@ -324,6 +349,34 @@ function InventoryWorkbookModal({
                   </div>
                 </div>
 
+                <div
+                  className={`inventory-workbook__review-status ${
+                    preview.reviewIssueCount > 0
+                      ? 'inventory-workbook__review-status--attention'
+                      : ''
+                  }`}
+                >
+                  {preview.reviewIssueCount > 0 ? (
+                    <AlertTriangle size={20} aria-hidden="true" />
+                  ) : (
+                    <CircleCheck size={20} aria-hidden="true" />
+                  )}
+                  <div>
+                    <strong>
+                      {preview.reviewIssueCount > 0
+                        ? `${preview.reviewIssueCount} review finding${
+                            preview.reviewIssueCount === 1 ? '' : 's'
+                          }`
+                        : 'No discrepancies found'}
+                    </strong>
+                    <p>
+                      {preview.reviewIssueCount > 0
+                        ? 'Review the details below before using the filled workbook.'
+                        : 'The workbook and MyInventory records line up.'}
+                    </p>
+                  </div>
+                </div>
+
                 {preview.sheet.filledRowCount > 0 && (
                   <div className="inventory-workbook__notice">
                     This worksheet already has{' '}
@@ -333,7 +386,7 @@ function InventoryWorkbookModal({
                 )}
 
                 {preview.inventoryPartsNotInSheet.length > 0 && (
-                  <div className="inventory-workbook__unmatched">
+                  <div className="inventory-workbook__review-group">
                     <strong>
                       {preview.inventoryPartsNotInSheet.length} stocked part
                       {preview.inventoryPartsNotInSheet.length === 1
@@ -349,6 +402,70 @@ function InventoryWorkbookModal({
                     </p>
                   </div>
                 )}
+
+                {preview.workbookPartsNotInCatalog.length > 0 && (
+                  <div className="inventory-workbook__review-group">
+                    <strong>
+                      {preview.workbookPartsNotInCatalog.length} workbook part
+                      {preview.workbookPartsNotInCatalog.length === 1 ? '' : 's'} not saved in MyInventory
+                    </strong>
+                    <p>
+                      {preview.workbookPartsNotInCatalog.slice(0, 8).join(', ')}
+                      {preview.workbookPartsNotInCatalog.length > 8
+                        ? ` and ${preview.workbookPartsNotInCatalog.length - 8} more`
+                        : ''}
+                    </p>
+                  </div>
+                )}
+
+                {preview.duplicateSheetParts.length > 0 && (
+                  <div className="inventory-workbook__review-group inventory-workbook__review-group--warning">
+                    <strong>
+                      {preview.duplicateSheetParts.length} duplicate part
+                      {preview.duplicateSheetParts.length === 1 ? '' : 's'} on this worksheet
+                    </strong>
+                    <p>
+                      {preview.duplicateSheetParts
+                        .slice(0, 8)
+                        .map((part) => `${part.partNumber} (rows ${part.rowNumbers.join(', ')})`)
+                        .join(' · ')}
+                      {preview.duplicateSheetParts.length > 8
+                        ? ` and ${preview.duplicateSheetParts.length - 8} more`
+                        : ''}
+                    </p>
+                  </div>
+                )}
+
+                {preview.changedCountRows.length > 0 && (
+                  <div className="inventory-workbook__review-group">
+                    <strong>
+                      {preview.changedCountRows.length} existing count
+                      {preview.changedCountRows.length === 1 ? '' : 's'} will change
+                    </strong>
+                    <p>
+                      {preview.changedCountRows
+                        .slice(0, 8)
+                        .map(
+                          (row) =>
+                            `${row.partNumber}: ${row.existingQuantity} → ${row.quantity}`,
+                        )
+                        .join(' · ')}
+                      {preview.changedCountRows.length > 8
+                        ? ` and ${preview.changedCountRows.length - 8} more`
+                        : ''}
+                    </p>
+                  </div>
+                )}
+
+                <Button
+                  type="button"
+                  variant="secondary"
+                  fullWidth
+                  onClick={handleDownloadReview}
+                >
+                  <ListChecks size={18} aria-hidden="true" />
+                  Download Review Report
+                </Button>
               </>
             )}
           </>

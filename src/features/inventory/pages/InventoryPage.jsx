@@ -1975,6 +1975,7 @@ function InventoryPage() {
             isOpen
             onClose={closeModal}
             inventoryItems={inventoryItems}
+            partCatalog={partCatalog}
             onImportDescriptions={handleImportWorkbookDescriptions}
             onWorkbookInspected={setWorkbookHealthCheck}
           />

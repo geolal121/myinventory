@@ -438,6 +438,7 @@ export const buildWorkbookFillPreview = ({
   inspection,
   sheetName,
   inventoryItems = [],
+  partCatalog = [],
   quantityMode = WORKBOOK_QUANTITY_MODES.TOTAL,
 }) => {
   const sheet = inspection.sheets.find((candidate) => candidate.name === sheetName)
@@ -447,9 +448,13 @@ export const buildWorkbookFillPreview = ({
   }
 
   const inventoryByPart = aggregateInventoryByPart(inventoryItems)
+  const catalogPartNumbers = new Set(
+    partCatalog.map((part) => normalizeWorkbookPartNumber(part.partNumber)),
+  )
   const sheetPartNumbers = new Set(
     sheet.rows.map((row) => row.normalizedPartNumber),
   )
+  const sheetRowsByPart = new Map()
   const matchedPartNumbers = new Set()
   let totalQuantity = 0
   let zeroCountRows = 0
@@ -457,12 +462,27 @@ export const buildWorkbookFillPreview = ({
   const rows = sheet.rows.map((row) => {
     const inventoryPart = inventoryByPart.get(row.normalizedPartNumber)
     const quantity = getQuantityForMode(inventoryPart, quantityMode)
+    const existingQuantity = String(row.existingQuantity || '').trim()
+    const existingQuantityNumber = Number(existingQuantity)
+    const willChange =
+      existingQuantity !== '' &&
+      (!Number.isFinite(existingQuantityNumber) || existingQuantityNumber !== quantity)
+    const matchingRows = sheetRowsByPart.get(row.normalizedPartNumber) || []
+
+    matchingRows.push(row)
+    sheetRowsByPart.set(row.normalizedPartNumber, matchingRows)
 
     if (inventoryPart) matchedPartNumbers.add(row.normalizedPartNumber)
     if (quantity === 0) zeroCountRows += 1
     totalQuantity += quantity
 
-    return { ...row, quantity }
+    return {
+      ...row,
+      quantity,
+      isInCatalog: catalogPartNumbers.has(row.normalizedPartNumber),
+      isStockedInApp: Boolean(inventoryPart),
+      willChange,
+    }
   })
 
   const inventoryPartsNotInSheet = Array.from(inventoryByPart.entries())
@@ -479,6 +499,71 @@ export const buildWorkbookFillPreview = ({
       }),
     )
 
+  const workbookPartsNotInCatalog = Array.from(sheetRowsByPart.entries())
+    .filter(([normalizedPartNumber]) => !catalogPartNumbers.has(normalizedPartNumber))
+    .map(([, matchingRows]) => matchingRows[0].partNumber)
+    .sort((first, second) =>
+      first.localeCompare(second, undefined, {
+        numeric: true,
+        sensitivity: 'base',
+      }),
+    )
+  const duplicateSheetParts = Array.from(sheetRowsByPart.values())
+    .filter((matchingRows) => matchingRows.length > 1)
+    .map((matchingRows) => ({
+      partNumber: matchingRows[0].partNumber,
+      rowNumbers: matchingRows.map((row) => row.rowNumber),
+    }))
+    .sort((first, second) =>
+      first.partNumber.localeCompare(second.partNumber, undefined, {
+        numeric: true,
+        sensitivity: 'base',
+      }),
+    )
+  const duplicatePartNumbers = new Set(
+    duplicateSheetParts.map((part) => normalizeWorkbookPartNumber(part.partNumber)),
+  )
+  const changedCountRows = rows.filter((row) => row.willChange)
+  const reviewRows = rows.map((row) => {
+    const notes = []
+
+    if (duplicatePartNumbers.has(row.normalizedPartNumber)) {
+      notes.push('Duplicate workbook row')
+    }
+    if (!row.isInCatalog) {
+      notes.push('Not in MyInventory catalog')
+    } else if (!row.isStockedInApp) {
+      notes.push('Out of stock in MyInventory')
+    }
+    if (row.willChange) {
+      notes.push('Existing workbook count will change')
+    }
+    if (notes.length === 0) notes.push('Ready')
+
+    return {
+      rowNumber: row.rowNumber,
+      partNumber: row.partNumber,
+      description: row.description,
+      existingQuantity: row.existingQuantity,
+      appQuantity: row.quantity,
+      review: notes.join('; '),
+    }
+  })
+
+  inventoryPartsNotInSheet.forEach((partNumber) => {
+    reviewRows.push({
+      rowNumber: '',
+      partNumber,
+      description: '',
+      existingQuantity: '',
+      appQuantity: getQuantityForMode(
+        inventoryByPart.get(normalizeWorkbookPartNumber(partNumber)),
+        quantityMode,
+      ),
+      review: 'Stocked in MyInventory but missing from workbook',
+    })
+  })
+
   return {
     sheet,
     rows,
@@ -487,7 +572,47 @@ export const buildWorkbookFillPreview = ({
     zeroCountRows,
     totalQuantity,
     inventoryPartsNotInSheet,
+    workbookPartsNotInCatalog,
+    duplicateSheetParts,
+    changedCountRows,
+    reviewRows,
+    reviewIssueCount:
+      inventoryPartsNotInSheet.length +
+      workbookPartsNotInCatalog.length +
+      duplicateSheetParts.length +
+      changedCountRows.length,
   }
+}
+
+const escapeWorkbookCsvValue = (value = '') => {
+  const cleanValue = String(value ?? '')
+
+  if (!/[",\n\r]/.test(cleanValue)) return cleanValue
+
+  return `"${cleanValue.replace(/"/g, '""')}"`
+}
+
+export const buildWorkbookReviewCsv = (preview) => {
+  const headers = [
+    'Workbook Row',
+    'Part Number',
+    'Description',
+    'Existing Workbook Quantity',
+    'MyInventory Quantity',
+    'Review',
+  ]
+  const rows = (preview?.reviewRows || []).map((row) => [
+    row.rowNumber,
+    row.partNumber,
+    row.description,
+    row.existingQuantity,
+    row.appQuantity,
+    row.review,
+  ])
+
+  return [headers, ...rows]
+    .map((row) => row.map(escapeWorkbookCsvValue).join(','))
+    .join('\n')
 }
 
 const replaceCellValue = ({
@@ -550,12 +675,14 @@ export const fillInventoryWorkbook = ({
   inspection,
   sheetName,
   inventoryItems = [],
+  partCatalog = [],
   quantityMode = WORKBOOK_QUANTITY_MODES.TOTAL,
 }) => {
   const preview = buildWorkbookFillPreview({
     inspection,
     sheetName,
     inventoryItems,
+    partCatalog,
     quantityMode,
   })
   const workbook = openWorkbook(arrayBuffer)
@@ -585,4 +712,12 @@ export const createFilledWorkbookFileName = (fileName = 'inventory.xlsx') => {
   return /\.xlsx$/i.test(cleanFileName)
     ? cleanFileName.replace(/\.xlsx$/i, '-filled.xlsx')
     : `${cleanFileName}-filled.xlsx`
+}
+
+export const createWorkbookReviewFileName = (fileName = 'inventory.xlsx') => {
+  const cleanFileName = fileName.trim() || 'inventory.xlsx'
+
+  return /\.xlsx$/i.test(cleanFileName)
+    ? cleanFileName.replace(/\.xlsx$/i, '-review.csv')
+    : `${cleanFileName}-review.csv`
 }

@@ -1852,7 +1852,8 @@
 .inventory-workbook__success p,
 .inventory-workbook__description-result p,
 .inventory-workbook__notice,
-.inventory-workbook__unmatched p {
+.inventory-workbook__review-status p,
+.inventory-workbook__review-group p {
   font-size: var(--font-size-sm);
 }
 
@@ -1948,7 +1949,8 @@
 }
 
 .inventory-workbook__notice,
-.inventory-workbook__unmatched {
+.inventory-workbook__review-status,
+.inventory-workbook__review-group {
   padding: var(--spacing-3);
 
   border-radius: var(--radius-md);
@@ -1962,7 +1964,46 @@
   color: var(--color-text-primary);
 }
 
-.inventory-workbook__unmatched {
+.inventory-workbook__review-status {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+
+  border: 1px solid var(--color-success);
+
+  background: var(--color-success-soft);
+
+  color: var(--color-success);
+}
+
+.inventory-workbook__review-status--attention {
+  border-color: var(--color-warning);
+
+  background: var(--color-warning-soft);
+
+  color: var(--color-warning);
+}
+
+.inventory-workbook__review-status > svg {
+  flex: 0 0 auto;
+
+  margin-top: 1px;
+}
+
+.inventory-workbook__review-status strong,
+.inventory-workbook__review-group strong {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-sm);
+}
+
+.inventory-workbook__review-status p {
+  margin-top: var(--spacing-1);
+
+  color: var(--color-text-primary);
+}
+
+.inventory-workbook__review-group {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-1);
@@ -1972,13 +2013,13 @@
   background: var(--color-surface-soft);
 }
 
-.inventory-workbook__unmatched strong {
-  color: var(--color-text-primary);
+.inventory-workbook__review-group--warning {
+  border-color: var(--color-warning);
 
-  font-size: var(--font-size-sm);
+  background: var(--color-warning-soft);
 }
 
-.inventory-workbook__unmatched p {
+.inventory-workbook__review-group p {
   color: var(--color-text-secondary);
 
   overflow-wrap: anywhere;
