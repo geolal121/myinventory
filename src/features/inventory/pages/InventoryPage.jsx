@@ -7,12 +7,14 @@ import {
   FileSpreadsheet,
   Ghost,
   HandHelping,
+  Hash,
   History as HistoryIcon,
   MapPin,
   Package,
   PackageMinus,
   PackagePlus,
   TrendingUp,
+  TextSearch,
   TriangleAlert,
 } from 'lucide-react'
 
@@ -48,6 +50,7 @@ import {
   getMostUsedParts,
   groupInventoryByLocation,
   normalizePartNumberSearch,
+  removeRedundantZeroLocationItems,
   renameInventoryLocation,
 } from '../utils/inventoryHelpers.js'
 import {
@@ -82,8 +85,15 @@ const INVENTORY_VIEW_TABS = {
   EXPORT: 'EXPORT',
 }
 
+const INVENTORY_SEARCH_MODES = {
+  PART_NUMBER: 'PART_NUMBER',
+  DESCRIPTION: 'DESCRIPTION',
+}
+
 function InventoryPage() {
-  const [inventoryItems, setInventoryItems] = useState(() => loadInventoryItems())
+  const [inventoryItems, setInventoryItems] = useState(() =>
+    removeRedundantZeroLocationItems(loadInventoryItems()),
+  )
   const [inventoryHistory, setInventoryHistory] = useState(() => loadInventoryHistory())
   const [savedLocations, setSavedLocations] = useState(() => loadSavedLocations())
   const [removedLocations, setRemovedLocations] = useState(() =>
@@ -93,6 +103,9 @@ function InventoryPage() {
     loadArchivedLocations(),
   )
   const [searchTerm, setSearchTerm] = useState('')
+  const [searchMode, setSearchMode] = useState(
+    INVENTORY_SEARCH_MODES.PART_NUMBER,
+  )
   const [activeInventoryView, setActiveInventoryView] = useState(
     INVENTORY_VIEW_TABS.BOXES,
   )
@@ -125,6 +138,16 @@ function InventoryPage() {
   const filteredInventoryItems = useMemo(() => {
     if (!isSearching) return inventoryItems
 
+    if (searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION) {
+      const descriptionSearchTerm = searchTerm.trim().toLowerCase()
+
+      return inventoryItems.filter((item) =>
+        String(item.description || '')
+          .toLowerCase()
+          .includes(descriptionSearchTerm),
+      )
+    }
+
     const normalizedSearchTerm = normalizePartNumberSearch(searchTerm).toLowerCase()
 
     return inventoryItems.filter((item) => {
@@ -134,7 +157,7 @@ function InventoryPage() {
 
       return normalizedPartNumber.includes(normalizedSearchTerm)
     })
-  }, [inventoryItems, isSearching, searchTerm])
+  }, [inventoryItems, isSearching, searchMode, searchTerm])
 
   const inventoryLocationGroups = useMemo(() => {
     return groupInventoryByLocation(filteredInventoryItems)
@@ -239,12 +262,21 @@ function InventoryPage() {
   const selectedLocationGroupWithCurrentItems = useMemo(() => {
     if (!selectedLocationGroup) return null
 
+    const currentLocationGroups = isSearching
+      ? inventoryLocationGroups
+      : activeLocationGroups
+
     return (
-      activeLocationGroups.find(
+      currentLocationGroups.find(
         (locationGroup) => locationGroup.id === selectedLocationGroup.id,
       ) || selectedLocationGroup
     )
-  }, [activeLocationGroups, selectedLocationGroup])
+  }, [
+    activeLocationGroups,
+    inventoryLocationGroups,
+    isSearching,
+    selectedLocationGroup,
+  ])
 
   useEffect(() => {
     const loadCloudData = async () => {
@@ -275,12 +307,34 @@ function InventoryPage() {
             ),
           )
 
-          setInventoryItems(
-            cloudData.inventoryItems.filter(
-              (item) =>
-                !removedLocationNames.has(item.location.trim().toUpperCase()),
-            ),
+          const activeCloudItems = cloudData.inventoryItems.filter(
+            (item) =>
+              !removedLocationNames.has(item.location.trim().toUpperCase()),
           )
+          const cleanedCloudItems = removeRedundantZeroLocationItems(
+            activeCloudItems,
+          )
+          const cleanedItemIds = new Set(
+            cleanedCloudItems.map((item) => item.id),
+          )
+          const originalItemsById = new Map(
+            activeCloudItems.map((item) => [item.id, item]),
+          )
+          const deletedItemIds = activeCloudItems
+            .filter((item) => !cleanedItemIds.has(item.id))
+            .map((item) => item.id)
+          const updatedItems = cleanedCloudItems.filter(
+            (item) => item !== originalItemsById.get(item.id),
+          )
+
+          setInventoryItems(cleanedCloudItems)
+
+          if (deletedItemIds.length > 0 || updatedItems.length > 0) {
+            await syncInventoryTransactionToCloud({
+              items: updatedItems,
+              deletedItemIds,
+            })
+          }
         }
 
         if (cloudData.inventoryHistory.length > 0) {
@@ -400,9 +454,22 @@ function InventoryPage() {
 
   const handleSearchChange = (event) => {
     const { value } = event.target
+
+    if (searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION) {
+      setSearchTerm(value)
+      return
+    }
+
     const isPartNumberSearch = /^[a-zA-Z0-9-]*$/.test(value)
 
     setSearchTerm(isPartNumberSearch ? formatPartNumberInput(value) : value)
+  }
+
+  const handleSearchModeChange = (nextSearchMode) => {
+    if (nextSearchMode === searchMode) return
+
+    setSearchMode(nextSearchMode)
+    setSearchTerm('')
   }
 
   const getNewLocations = (formData) => {
@@ -759,7 +826,21 @@ function InventoryPage() {
       restoredItemsById.set(item.id, item)
     })
 
-    const restoredItems = Array.from(restoredItemsById.values())
+    const combinedItems = Array.from(restoredItemsById.values())
+    const restoredItems = removeRedundantZeroLocationItems(combinedItems)
+    const restoredItemsByCleanId = new Map(
+      restoredItems.map((item) => [item.id, item]),
+    )
+    const cleanedItemIds = new Set(restoredItemsByCleanId.keys())
+    const deletedItemIds = combinedItems
+      .filter((item) => !cleanedItemIds.has(item.id))
+      .map((item) => item.id)
+    const updatedItems = restoredItems.filter(
+      (item) => item !== restoredItemsById.get(item.id),
+    )
+    const archiveItemsToRestore = archive.items
+      .filter((item) => cleanedItemIds.has(item.id))
+      .map((item) => restoredItemsByCleanId.get(item.id))
 
     setInventoryItems(restoredItems)
     setSavedLocations((currentLocations) => [
@@ -784,8 +865,14 @@ function InventoryPage() {
 
     restoreInventoryLocationToCloud({
       location: archive.location,
-      items: archive.items,
+      items: archiveItemsToRestore,
     })
+      .then(() =>
+        syncInventoryTransactionToCloud({
+          items: updatedItems,
+          deletedItemIds,
+        }),
+      )
       .then(() => {
         setSyncStatus('Cloud Synced')
       })
@@ -938,19 +1025,84 @@ function InventoryPage() {
         )}
 
         <section className="inventory-page__search-section">
+          <div
+            className="inventory-page__search-mode"
+            role="group"
+            aria-label="Choose how to search inventory"
+          >
+            <button
+              type="button"
+              className={`inventory-page__search-mode-button ${
+                searchMode === INVENTORY_SEARCH_MODES.PART_NUMBER
+                  ? 'inventory-page__search-mode-button--active'
+                  : ''
+              }`}
+              onClick={() =>
+                handleSearchModeChange(INVENTORY_SEARCH_MODES.PART_NUMBER)
+              }
+              aria-pressed={
+                searchMode === INVENTORY_SEARCH_MODES.PART_NUMBER
+              }
+            >
+              <Hash size={17} aria-hidden="true" />
+              Part Number
+            </button>
+
+            <button
+              type="button"
+              className={`inventory-page__search-mode-button ${
+                searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION
+                  ? 'inventory-page__search-mode-button--active'
+                  : ''
+              }`}
+              onClick={() =>
+                handleSearchModeChange(INVENTORY_SEARCH_MODES.DESCRIPTION)
+              }
+              aria-pressed={
+                searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION
+              }
+            >
+              <TextSearch size={17} aria-hidden="true" />
+              Description
+            </button>
+          </div>
+
           <Input
             id="inventory-search"
-            label="Search Part Number"
+            label={
+              searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION
+                ? 'Search Description'
+                : 'Search Part Number'
+            }
             type="search"
             value={searchTerm}
             onChange={handleSearchChange}
             onClear={() => setSearchTerm('')}
-            clearLabel="Clear part number search"
+            clearLabel={
+              searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION
+                ? 'Clear description search'
+                : 'Clear part number search'
+            }
             enterKeyHint="search"
             autoComplete="off"
-            autoCapitalize="characters"
-            spellCheck="false"
-            placeholder="Example: 123-4567-89"
+            autoCapitalize={
+              searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION
+                ? 'sentences'
+                : 'characters'
+            }
+            spellCheck={
+              searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION
+            }
+            placeholder={
+              searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION
+                ? 'Example: pressure valve'
+                : 'Example: 123-4567-89'
+            }
+            helperText={
+              searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION
+                ? 'Search any word from the saved part description.'
+                : 'Letters and numbers are both supported.'
+            }
           />
         </section>
 
@@ -1093,7 +1245,13 @@ function InventoryPage() {
           {activeInventoryView === INVENTORY_VIEW_TABS.BOXES && (
             <>
               <div className="inventory-page__section-heading">
-                <h2>{isSearching ? 'Part Location' : 'Boxes'}</h2>
+                <h2>
+                  {isSearching
+                    ? searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION
+                      ? 'Description Matches'
+                      : 'Part Locations'
+                    : 'Boxes'}
+                </h2>
 
                 {!isSearching && (
                   <Button
@@ -1119,10 +1277,18 @@ function InventoryPage() {
                 </div>
               ) : (
                 <Card className="inventory-page__empty-state">
-                  <h3>{isSearching ? 'No part found' : 'No boxes found'}</h3>
+                  <h3>
+                    {isSearching
+                      ? searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION
+                        ? 'No description found'
+                        : 'No part found'
+                      : 'No boxes found'}
+                  </h3>
                   <p>
                     {isSearching
-                      ? 'No box contains that part number.'
+                      ? searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION
+                        ? 'Try another word from the part description.'
+                        : 'No box contains that part number.'
                       : 'Add your first part or adjust your search.'}
                   </p>
                 </Card>

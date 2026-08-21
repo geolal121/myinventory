@@ -66,6 +66,8 @@
 /* PRIMARY */
 
 .ui-button--primary {
+  border-color: rgba(20, 89, 139, 0.18);
+
   background: var(--gradient-accent);
 
   color: var(--color-text-inverse);
@@ -74,7 +76,7 @@
 }
 
 .ui-button--primary:hover {
-  background: var(--color-accent-hover);
+  background: var(--gradient-accent);
 
   box-shadow: var(--button-shadow-hover);
 
@@ -86,7 +88,7 @@
 .ui-button--secondary {
   border-color: var(--color-border);
 
-  background: var(--color-surface);
+  background: rgba(255, 255, 255, 0.82);
 
   color: var(--color-text-primary);
 }
@@ -95,6 +97,8 @@
   border-color: var(--color-accent);
 
   background: var(--color-surface-soft);
+
+  box-shadow: var(--shadow-sm);
 }
 
 /* GHOST */
@@ -137,6 +141,11 @@
 
 .ui-button:active {
   transform: scale(0.98);
+}
+
+.ui-button:focus-visible {
+  outline: 3px solid var(--color-accent-soft);
+  outline-offset: 2px;
 }
 
 /* SMALL PHONE (0px - 479px) */

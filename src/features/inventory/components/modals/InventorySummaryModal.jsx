@@ -69,8 +69,11 @@ function InventorySummaryModal({
                     )}
 
                     <p className="inventory-page__part-summary-meta">
-                      {part.locations.length} location
-                      {part.locations.length === 1 ? '' : 's'}
+                      {part.locations.length > 0
+                        ? `${part.locations.length} stocked location${
+                            part.locations.length === 1 ? '' : 's'
+                          }`
+                        : 'Not stocked in any location'}
                     </p>
                   </div>
 
@@ -93,17 +96,19 @@ function InventorySummaryModal({
                   </span>
                 </div>
 
-                <div className="inventory-page__part-location-list">
-                  {part.locations.map((location) => (
-                    <div
-                      key={location.id}
-                      className="inventory-page__part-location-row"
-                    >
-                      <span>{location.location}</span>
-                      <strong>{location.totalQuantity}</strong>
-                    </div>
-                  ))}
-                </div>
+                {part.locations.length > 0 && (
+                  <div className="inventory-page__part-location-list">
+                    {part.locations.map((location) => (
+                      <div
+                        key={location.id}
+                        className="inventory-page__part-location-row"
+                      >
+                        <span>{location.location}</span>
+                        <strong>{location.totalQuantity}</strong>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </Card>
             )
           })}

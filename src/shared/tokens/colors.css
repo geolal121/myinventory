@@ -1,51 +1,53 @@
 :root {
   /* BACKGROUNDS */
-  --color-background: hsl(210, 18%, 91%);
-  --color-background-soft: hsl(210, 18%, 94%);
-  --color-background-elevated: hsl(210, 18%, 86%);
+  --color-background: #eaf1f7;
+  --color-background-soft: #f4f7fb;
+  --color-background-elevated: #dce7f1;
 
   /* SURFACES */
   --color-surface: #ffffff;
-  --color-surface-soft: hsl(210, 18%, 97%);
-  --color-surface-elevated: hsl(210, 18%, 92%);
+  --color-surface-soft: #f7fafd;
+  --color-surface-elevated: #edf3f8;
 
   /* BORDERS */
-  --color-border: rgba(36, 51, 69, 0.10);
-  --color-border-strong: rgba(36, 51, 69, 0.18);
+  --color-border: rgba(29, 57, 84, 0.11);
+  --color-border-strong: rgba(29, 57, 84, 0.22);
 
   /* TEXT */
-  --color-text-primary: #243345;
-  --color-text-secondary: #5f6f82;
-  --color-text-muted: #8794a3;
+  --color-text-primary: #183047;
+  --color-text-secondary: #587086;
+  --color-text-muted: #8496a8;
   --color-text-inverse: #ffffff;
 
   /* PRIMARY ACCENT */
-  --color-accent: #255a96;
-  --color-accent-hover: #1b8dbe;
-  --color-accent-soft: rgba(37, 90, 150, 0.12);
+  --color-accent: #21639b;
+  --color-accent-hover: #1688ad;
+  --color-accent-bright: #12a0b7;
+  --color-accent-soft: rgba(33, 99, 155, 0.11);
 
   /* SECONDARY ACCENT */
-  --color-accent-secondary: #d7e1ec;
-  --color-accent-secondary-hover: #c7d5e4;
-  --color-accent-secondary-soft: rgba(37, 90, 150, 0.08);
+  --color-accent-secondary: #d9e8f4;
+  --color-accent-secondary-hover: #c9dfef;
+  --color-accent-secondary-soft: rgba(18, 160, 183, 0.08);
 
   /* CARD COLORS */
   --color-card: #ffffff;
-  --color-card-hover: hsl(210, 18%, 97%);
-  --color-card-text: #243345;
+  --color-card-hover: #f8fbfd;
+  --color-card-text: #183047;
 
   /* STATUS COLORS */
-  --color-success: #3f8f68;
-  --color-success-soft: rgba(63, 143, 104, 0.14);
+  --color-success: #26866a;
+  --color-success-soft: rgba(38, 134, 106, 0.13);
 
-  --color-warning: #b7791f;
-  --color-warning-soft: rgba(183, 121, 31, 0.14);
+  --color-warning: #b87416;
+  --color-warning-soft: rgba(184, 116, 22, 0.13);
+  --color-orange: var(--color-warning);
 
-  --color-danger: #d9574f;
-  --color-danger-soft: rgba(217, 87, 79, 0.13);
+  --color-danger: #c84f54;
+  --color-danger-soft: rgba(200, 79, 84, 0.12);
 
-  --color-info: #255a96;
-  --color-info-soft: rgba(37, 90, 150, 0.14);
+  --color-info: #21639b;
+  --color-info-soft: rgba(33, 99, 155, 0.12);
 
   /* INVENTORY STATUS */
   --color-in-stock: var(--color-success);
@@ -83,31 +85,29 @@
 
   /* GRADIENTS */
   --gradient-page:
-    linear-gradient(
-      180deg,
-      var(--color-background) 0%,
-      var(--color-background-soft) 52%,
-      var(--color-background-elevated) 100%
-    );
+    radial-gradient(circle at 12% 0%, rgba(18, 160, 183, 0.11), transparent 28rem),
+    radial-gradient(circle at 92% 12%, rgba(33, 99, 155, 0.10), transparent 24rem),
+    linear-gradient(180deg, #f4f8fb 0%, var(--color-background) 58%, #e5edf5 100%);
 
   --gradient-surface:
     linear-gradient(
-      145deg,
+      150deg,
       var(--color-surface) 0%,
       var(--color-surface-soft) 100%
     );
 
   --gradient-card:
     linear-gradient(
-      145deg,
+      150deg,
       var(--color-card) 0%,
       var(--color-card-hover) 100%
     );
 
   --gradient-accent:
     linear-gradient(
-      135deg,
+      130deg,
       var(--color-accent) 0%,
-      var(--color-accent-hover) 100%
+      var(--color-accent-hover) 70%,
+      var(--color-accent-bright) 100%
     );
 }

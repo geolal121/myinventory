@@ -9,6 +9,8 @@
 
   box-shadow: var(--card-shadow);
 
+  backdrop-filter: blur(12px);
+
   transition:
     border-color var(--transition-normal),
     background-color var(--transition-normal),
@@ -62,6 +64,11 @@
 
 .ui-card--interactive:hover {
   transform: translateY(-2px);
+}
+
+.ui-card--interactive:focus-visible {
+  outline: 3px solid var(--color-accent-soft);
+  outline-offset: 2px;
 }
 
 /* SMALL PHONE (0px - 479px) */

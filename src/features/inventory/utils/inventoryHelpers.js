@@ -131,6 +131,100 @@ export const isOutOfStock = (item) => {
   return Number(item.officialQuantity || 0) + Number(item.noiQuantity || 0) === 0
 }
 
+export const removeRedundantZeroLocationItems = (items = []) => {
+  const itemsByPart = new Map()
+
+  items.forEach((item, index) => {
+    const partNumber = normalizePartNumberLookup(item.partNumber) || `__${index}`
+    const partItems = itemsByPart.get(partNumber) || []
+
+    partItems.push(item)
+    itemsByPart.set(partNumber, partItems)
+  })
+
+  const keptItemIds = new Set()
+  const enhancedItemsById = new Map()
+
+  itemsByPart.forEach((partItems) => {
+    const stockedItems = partItems.filter((item) => !isOutOfStock(item))
+    const savedDescription = partItems
+      .map((item) => normalizeInventoryDescription(item.description))
+      .find(Boolean)
+    const savedNotes = partItems
+      .map((item) => normalizeText(item.notes))
+      .find(Boolean)
+    const mergedKnownMachines = [
+      ...new Set(partItems.flatMap((item) => item.knownMachines || [])),
+    ]
+    const mergedKnownCustomers = [
+      ...new Set(partItems.flatMap((item) => item.knownCustomers || [])),
+    ]
+
+    if (stockedItems.length > 0) {
+      stockedItems.forEach((item) => {
+        keptItemIds.add(item.id)
+        const nextDescription =
+          normalizeInventoryDescription(item.description) ||
+          savedDescription ||
+          ''
+        const nextNotes = normalizeText(item.notes) || savedNotes || ''
+        const hasMergedChanges =
+          item.description !== nextDescription ||
+          item.notes !== nextNotes ||
+          JSON.stringify(item.knownMachines || []) !==
+            JSON.stringify(mergedKnownMachines) ||
+          JSON.stringify(item.knownCustomers || []) !==
+            JSON.stringify(mergedKnownCustomers)
+
+        if (hasMergedChanges) {
+          enhancedItemsById.set(item.id, {
+            ...item,
+            description: nextDescription,
+            knownMachines: mergedKnownMachines,
+            knownCustomers: mergedKnownCustomers,
+            notes: nextNotes,
+          })
+        }
+      })
+
+      return
+    }
+
+    const keptItem =
+      partItems.find((item) =>
+        normalizeInventoryDescription(item.description),
+      ) || partItems[0]
+
+    if (!keptItem) return
+
+    keptItemIds.add(keptItem.id)
+    const mergedDescription = savedDescription || ''
+    const mergedNotes = normalizeText(keptItem.notes) || savedNotes || ''
+    const hasMergedChanges =
+      partItems.length > 1 ||
+      keptItem.description !== mergedDescription ||
+      keptItem.notes !== mergedNotes ||
+      JSON.stringify(keptItem.knownMachines || []) !==
+        JSON.stringify(mergedKnownMachines) ||
+      JSON.stringify(keptItem.knownCustomers || []) !==
+        JSON.stringify(mergedKnownCustomers)
+
+    if (hasMergedChanges) {
+      enhancedItemsById.set(keptItem.id, {
+        ...keptItem,
+        description: mergedDescription,
+        knownMachines: mergedKnownMachines,
+        knownCustomers: mergedKnownCustomers,
+        notes: mergedNotes,
+      })
+    }
+  })
+
+  return items
+    .filter((item) => keptItemIds.has(item.id))
+    .map((item) => enhancedItemsById.get(item.id) || item)
+}
+
 export const getInventoryItem = ({ items, partNumber, location }) => {
   const itemId = createInventoryItemId({ partNumber, location })
 
@@ -716,6 +810,8 @@ export const groupInventoryByLocation = (items = []) => {
     const noiQuantity = Number(item.noiQuantity || 0)
     const totalQuantity = officialQuantity + noiQuantity
 
+    if (totalQuantity <= 0) return
+
     if (!locationMap.has(location)) {
       locationMap.set(location, {
         id: location.toUpperCase(),
@@ -781,14 +877,16 @@ export const groupInventoryByPartNumber = (items = []) => {
     part.officialQuantity += officialQuantity
     part.noiQuantity += noiQuantity
     part.totalQuantity += totalQuantity
-    part.locations.push({
-      id: item.id,
-      location: normalizeText(item.location) || 'No Location',
-      officialQuantity,
-      noiQuantity,
-      totalQuantity,
-      notes: normalizeText(item.notes),
-    })
+    if (totalQuantity > 0) {
+      part.locations.push({
+        id: item.id,
+        location: normalizeText(item.location) || 'No Location',
+        officialQuantity,
+        noiQuantity,
+        totalQuantity,
+        notes: normalizeText(item.notes),
+      })
+    }
   })
 
   return Array.from(partMap.values())
@@ -1076,6 +1174,8 @@ export const buildInventoryTransaction = ({
       ...transaction,
     })
   }
+
+  nextItems = removeRedundantZeroLocationItems(nextItems)
 
   return {
     isValid: true,
