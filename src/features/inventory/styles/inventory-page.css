@@ -364,6 +364,20 @@
   font-size: var(--font-size-sm);
 }
 
+.inventory-page__part-description {
+  margin-top: var(--spacing-1);
+
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.45;
+}
+
+.inventory-page__part-summary-meta {
+  color: var(--color-text-secondary);
+}
+
 .inventory-page__stock-badge {
   flex: 0 0 auto;
 
@@ -942,7 +956,9 @@
 }
 
 .inventory-workbook__privacy-note,
-.inventory-workbook__success {
+.inventory-workbook__technician,
+.inventory-workbook__success,
+.inventory-workbook__description-result {
   display: flex;
   align-items: flex-start;
   gap: var(--spacing-2);
@@ -959,17 +975,45 @@
 }
 
 .inventory-workbook__privacy-note svg,
-.inventory-workbook__success svg {
+.inventory-workbook__technician svg,
+.inventory-workbook__success svg,
+.inventory-workbook__description-result svg {
   flex: 0 0 auto;
 
   margin-top: 1px;
 }
 
 .inventory-workbook__privacy-note p,
+.inventory-workbook__technician p,
 .inventory-workbook__success p,
+.inventory-workbook__description-result p,
 .inventory-workbook__notice,
 .inventory-workbook__unmatched p {
   font-size: var(--font-size-sm);
+}
+
+.inventory-workbook__technician {
+  border: 1px solid var(--color-border);
+
+  background: var(--gradient-surface);
+
+  color: var(--color-accent);
+}
+
+.inventory-workbook__technician div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.inventory-workbook__technician strong {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-sm);
+}
+
+.inventory-workbook__technician p {
+  color: var(--color-text-secondary);
 }
 
 .inventory-workbook__success {
@@ -980,7 +1024,16 @@
   color: var(--color-success);
 }
 
-.inventory-workbook__success div {
+.inventory-workbook__description-result {
+  border: 1px solid var(--color-border);
+
+  background: var(--color-surface-soft);
+
+  color: var(--color-success);
+}
+
+.inventory-workbook__success div,
+.inventory-workbook__description-result div {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-1);
@@ -988,6 +1041,14 @@
 
 .inventory-workbook__success p {
   color: var(--color-text-primary);
+}
+
+.inventory-workbook__description-result strong {
+  color: var(--color-text-primary);
+}
+
+.inventory-workbook__description-result p {
+  color: var(--color-text-secondary);
 }
 
 .inventory-workbook__summary {

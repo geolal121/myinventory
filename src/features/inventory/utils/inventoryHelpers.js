@@ -38,6 +38,91 @@ export const normalizeText = (text = '') => {
   return text.trim()
 }
 
+const EMPTY_DESCRIPTION_VALUES = new Set([
+  '-',
+  '--',
+  'N/A',
+  'NA',
+  'NONE',
+  'NO DESCRIPTION',
+])
+
+const normalizePartNumberLookup = (partNumber = '') => {
+  return normalizePartNumber(partNumber).replace(/[^A-Z0-9]/g, '')
+}
+
+export const normalizeInventoryDescription = (description = '') => {
+  const cleanDescription = String(description).trim().replace(/\s+/g, ' ')
+
+  if (
+    !cleanDescription ||
+    EMPTY_DESCRIPTION_VALUES.has(cleanDescription.toUpperCase())
+  ) {
+    return ''
+  }
+
+  return cleanDescription
+}
+
+export const applyMissingInventoryDescriptions = ({
+  items = [],
+  descriptions = [],
+} = {}) => {
+  const savedDescriptionsByPart = new Map()
+  const workbookDescriptionsByPart = new Map()
+
+  items.forEach((item) => {
+    const partNumber = normalizePartNumberLookup(item.partNumber)
+    const description = normalizeInventoryDescription(item.description)
+
+    if (partNumber && description && !savedDescriptionsByPart.has(partNumber)) {
+      savedDescriptionsByPart.set(partNumber, description)
+    }
+  })
+
+  descriptions.forEach((entry) => {
+    const partNumber = normalizePartNumberLookup(
+      entry.normalizedPartNumber || entry.partNumber,
+    )
+    const description = normalizeInventoryDescription(entry.description)
+
+    if (
+      partNumber &&
+      description &&
+      !workbookDescriptionsByPart.has(partNumber)
+    ) {
+      workbookDescriptionsByPart.set(partNumber, description)
+    }
+  })
+
+  const updatedItems = []
+  const updatedPartNumbers = new Set()
+  const nextItems = items.map((item) => {
+    if (normalizeInventoryDescription(item.description)) return item
+
+    const partNumber = normalizePartNumberLookup(item.partNumber)
+    const description =
+      savedDescriptionsByPart.get(partNumber) ||
+      workbookDescriptionsByPart.get(partNumber) ||
+      ''
+
+    if (!description) return item
+
+    const nextItem = { ...item, description }
+
+    updatedItems.push(nextItem)
+    updatedPartNumbers.add(partNumber)
+
+    return nextItem
+  })
+
+  return {
+    items: nextItems,
+    updatedItems,
+    updatedPartNumbers: Array.from(updatedPartNumbers),
+  }
+}
+
 export const createInventoryItemId = ({ partNumber, location }) => {
   return `${normalizePartNumber(partNumber)}__${normalizeText(location).toUpperCase()}`
 }
@@ -314,6 +399,7 @@ export const addInventoryQuantity = ({
   quantity,
   location,
   inventoryStatus = INVENTORY_STATUS.OFFICIAL,
+  description = '',
   notes = '',
 }) => {
   const cleanPartNumber = normalizePartNumber(partNumber)
@@ -330,6 +416,16 @@ export const addInventoryQuantity = ({
   })
 
   const existingItem = items.find((item) => item.id === itemId)
+  const inheritedDescription = items
+    .filter(
+      (item) =>
+        normalizePartNumberLookup(item.partNumber) ===
+        normalizePartNumberLookup(cleanPartNumber),
+    )
+    .map((item) => normalizeInventoryDescription(item.description))
+    .find(Boolean)
+  const cleanDescription =
+    normalizeInventoryDescription(description) || inheritedDescription || ''
 
   if (!existingItem) {
     return [
@@ -344,6 +440,7 @@ export const addInventoryQuantity = ({
           inventoryStatus === INVENTORY_STATUS.NOI ? amount : 0,
         knownMachines: [],
         knownCustomers: [],
+        description: cleanDescription,
         notes: normalizeText(notes),
       },
     ]
@@ -362,6 +459,8 @@ export const addInventoryQuantity = ({
         inventoryStatus === INVENTORY_STATUS.NOI
           ? Number(item.noiQuantity || 0) + amount
           : Number(item.noiQuantity || 0),
+      description:
+        normalizeInventoryDescription(item.description) || cleanDescription,
       notes: normalizeText(notes) || item.notes,
     }
   })
@@ -430,6 +529,11 @@ export const moveInventoryQuantity = ({
   toLocation,
   inventoryStatus = INVENTORY_STATUS.OFFICIAL,
 }) => {
+  const sourceItem = getInventoryItem({
+    items,
+    partNumber,
+    location: fromLocation,
+  })
   const afterSubtract = subtractInventoryQuantity({
     items,
     partNumber,
@@ -453,6 +557,7 @@ export const moveInventoryQuantity = ({
     quantity,
     location: toLocation,
     inventoryStatus,
+    description: sourceItem?.description || '',
   })
 }
 
@@ -517,6 +622,9 @@ export const editInventoryItem = ({
             ...(originalItem.knownCustomers || []),
           ]),
         ],
+        description:
+          normalizeInventoryDescription(item.description) ||
+          normalizeInventoryDescription(originalItem.description),
         notes: normalizeText(notes) || item.notes || originalItem.notes || '',
       }
     })
@@ -589,6 +697,9 @@ export const renameInventoryLocation = ({
           ...(nextItem.knownCustomers || []),
         ]),
       ],
+      description:
+        normalizeInventoryDescription(existingItem.description) ||
+        normalizeInventoryDescription(nextItem.description),
       notes: existingItem.notes || nextItem.notes || '',
     })
   })
@@ -655,6 +766,7 @@ export const groupInventoryByPartNumber = (items = []) => {
     if (!existingPart) {
       partMap.set(partNumber, {
         partNumber,
+        description: '',
         officialQuantity: 0,
         noiQuantity: 0,
         totalQuantity: 0,
@@ -664,6 +776,8 @@ export const groupInventoryByPartNumber = (items = []) => {
 
     const part = partMap.get(partNumber)
 
+    part.description =
+      part.description || normalizeInventoryDescription(item.description)
     part.officialQuantity += officialQuantity
     part.noiQuantity += noiQuantity
     part.totalQuantity += totalQuantity
@@ -706,6 +820,7 @@ export const searchInventory = (items = [], searchTerm = '') => {
     const searchableText = [
       item.partNumber,
       normalizePartNumberSearch(item.partNumber),
+      item.description,
       item.location,
       item.notes,
       ...(item.knownMachines || []),
@@ -752,6 +867,9 @@ export const getCurrentStockByPartNumber = (items = []) => {
 
     stockMap.set(partNumber, {
       partNumber,
+      description:
+        stockMap.get(partNumber)?.description ||
+        normalizeInventoryDescription(item.description),
       totalQuantity: Number(stockMap.get(partNumber)?.totalQuantity || 0) + totalQuantity,
       officialQuantity:
         Number(stockMap.get(partNumber)?.officialQuantity || 0) + officialQuantity,
@@ -784,6 +902,7 @@ export const getMostUsedParts = ({
       partNumber,
       usedQuantity: Number(existingRecord?.usedQuantity || 0) + quantity,
       currentStock: Number(stockMap.get(partNumber)?.totalQuantity || 0),
+      description: stockMap.get(partNumber)?.description || '',
       officialQuantity: Number(stockMap.get(partNumber)?.officialQuantity || 0),
       noiQuantity: Number(stockMap.get(partNumber)?.noiQuantity || 0),
       lastUsedAt:
@@ -826,6 +945,7 @@ export const escapeCsvValue = (value = '') => {
 export const buildInventoryCsv = (items = []) => {
   const headers = [
     'Part Number',
+    'Description',
     'Location',
     'Official Quantity',
     'NOI Quantity',
@@ -861,6 +981,7 @@ export const buildInventoryCsv = (items = []) => {
 
     return [
       item.partNumber,
+      item.description || '',
       item.location,
       officialQuantity,
       noiQuantity,

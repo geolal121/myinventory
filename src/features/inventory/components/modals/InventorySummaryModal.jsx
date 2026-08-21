@@ -61,7 +61,14 @@ function InventorySummaryModal({
                 <div className="inventory-page__summary-modal-card-heading">
                   <div>
                     <h3>{part.partNumber}</h3>
-                    <p>
+
+                    {part.description && (
+                      <p className="inventory-page__part-description">
+                        {part.description}
+                      </p>
+                    )}
+
+                    <p className="inventory-page__part-summary-meta">
                       {part.locations.length} location
                       {part.locations.length === 1 ? '' : 's'}
                     </p>

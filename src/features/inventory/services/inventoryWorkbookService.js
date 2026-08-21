@@ -20,11 +20,32 @@ const QUANTITY_HEADERS = new Set([
   'quantity',
 ])
 const LOCATION_HEADERS = new Set(['location', 'storagelocation'])
+const DESCRIPTION_HEADERS = new Set([
+  'description',
+  'itemdescription',
+  'materialdescription',
+  'partdesc',
+  'partdescr',
+  'partdescription',
+])
+const EMPTY_DESCRIPTION_VALUES = new Set([
+  '-',
+  '--',
+  'N/A',
+  'NA',
+  'NONE',
+  'NO DESCRIPTION',
+])
 
 export const WORKBOOK_QUANTITY_MODES = {
   TOTAL: 'TOTAL',
   OFFICIAL: 'OFFICIAL',
   NOI: 'NOI',
+}
+
+export const INVENTORY_WORKBOOK_TECHNICIAN = {
+  id: '72485',
+  name: 'Heriberto',
 }
 
 const decodeXml = (value = '') => {
@@ -55,6 +76,16 @@ const normalizeHeader = (value = '') => {
 
 export const normalizeWorkbookPartNumber = (value = '') => {
   return String(value).trim().toUpperCase().replace(/[^A-Z0-9]/g, '')
+}
+
+const normalizeWorkbookDescription = (value = '') => {
+  const description = String(value).trim().replace(/\s+/g, ' ')
+
+  if (!description || EMPTY_DESCRIPTION_VALUES.has(description.toUpperCase())) {
+    return ''
+  }
+
+  return description
 }
 
 const getColumnFromReference = (reference = '') => {
@@ -158,7 +189,13 @@ const findHeaderColumn = (cells, knownHeaders) => {
   return ''
 }
 
-const inspectSheet = ({ name, path, sheetXml, sharedStrings }) => {
+const inspectSheet = ({
+  name,
+  path,
+  sheetXml,
+  sharedStrings,
+  technicianId,
+}) => {
   const parsedRows = parseSheetRows(sheetXml, sharedStrings)
   const headerRow = parsedRows.slice(0, 25).find((row) => {
     return (
@@ -172,6 +209,14 @@ const inspectSheet = ({ name, path, sheetXml, sharedStrings }) => {
   const partColumn = findHeaderColumn(headerRow.cells, PART_HEADERS)
   const quantityColumn = findHeaderColumn(headerRow.cells, QUANTITY_HEADERS)
   const locationColumn = findHeaderColumn(headerRow.cells, LOCATION_HEADERS)
+  const descriptionColumn = findHeaderColumn(
+    headerRow.cells,
+    DESCRIPTION_HEADERS,
+  )
+
+  if (!locationColumn) return null
+
+  const normalizedTechnicianId = normalizeWorkbookPartNumber(technicianId)
   const rows = parsedRows
     .filter((row) => row.rowNumber > headerRow.rowNumber)
     .map((row) => {
@@ -182,12 +227,19 @@ const inspectSheet = ({ name, path, sheetXml, sharedStrings }) => {
         rowNumber: row.rowNumber,
         partNumber: String(partCell?.value || '').trim(),
         normalizedPartNumber: normalizeWorkbookPartNumber(partCell?.value),
+        description: normalizeWorkbookDescription(
+          row.cells.get(descriptionColumn)?.value,
+        ),
         existingQuantity: String(quantityCell?.value || '').trim(),
         location: String(row.cells.get(locationColumn)?.value || '').trim(),
         styleId: quantityCell?.styleId || partCell?.styleId || '',
       }
     })
-    .filter((row) => row.normalizedPartNumber)
+    .filter(
+      (row) =>
+        row.normalizedPartNumber &&
+        normalizeWorkbookPartNumber(row.location) === normalizedTechnicianId,
+    )
 
   if (rows.length === 0) return null
 
@@ -198,6 +250,8 @@ const inspectSheet = ({ name, path, sheetXml, sharedStrings }) => {
     partColumn,
     quantityColumn,
     locationColumn,
+    descriptionColumn,
+    technicianId,
     rowCount: rows.length,
     filledRowCount: rows.filter((row) => row.existingQuantity !== '').length,
     rows,
@@ -275,33 +329,70 @@ const openWorkbook = (arrayBuffer) => {
   return { files, sharedStrings, sheets, activeSheetIndex }
 }
 
-export const inspectInventoryWorkbook = (arrayBuffer) => {
+export const inspectInventoryWorkbook = (
+  arrayBuffer,
+  technician = INVENTORY_WORKBOOK_TECHNICIAN,
+) => {
   const workbook = openWorkbook(arrayBuffer)
-  const countSheets = workbook.sheets
-    .map((sheet) =>
-      inspectSheet({
-        ...sheet,
-        sheetXml: readXmlEntry(workbook.files, sheet.path),
-        sharedStrings: workbook.sharedStrings,
-      }),
-    )
-    .filter(Boolean)
+  const activeSheet = workbook.sheets[workbook.activeSheetIndex]
+  const technicianName = technician.name.trim().toUpperCase()
+  const orderedCandidates = [
+    ...workbook.sheets.filter((sheet) =>
+      sheet.name.toUpperCase().includes(technicianName),
+    ),
+    ...(activeSheet && activeSheet.name.toUpperCase() !== 'MAIN'
+      ? [activeSheet]
+      : []),
+    ...workbook.sheets.filter(
+      (sheet) => sheet.name.toUpperCase() !== 'MAIN',
+    ),
+    ...workbook.sheets.filter(
+      (sheet) => sheet.name.toUpperCase() === 'MAIN',
+    ),
+  ]
+  const seenSheetPaths = new Set()
+  let technicianSheet = null
 
-  if (countSheets.length === 0) {
+  for (const sheet of orderedCandidates) {
+    if (seenSheetPaths.has(sheet.path)) continue
+    seenSheetPaths.add(sheet.path)
+
+    technicianSheet = inspectSheet({
+      ...sheet,
+      sheetXml: readXmlEntry(workbook.files, sheet.path),
+      sharedStrings: workbook.sharedStrings,
+      technicianId: technician.id,
+    })
+
+    if (technicianSheet) break
+  }
+
+  if (!technicianSheet) {
     throw new Error(
-      'No worksheet with Part Number and Physical Count columns was found.',
+      `No Physical Count rows were found for ${technician.name} (technician ID ${technician.id}).`,
     )
   }
 
-  const activeSheetName = workbook.sheets[workbook.activeSheetIndex]?.name
-  const suggestedSheet =
-    countSheets.find((sheet) => sheet.name === activeSheetName) ||
-    countSheets.find((sheet) => sheet.filledRowCount === 0) ||
-    countSheets[0]
+  const descriptionsByPart = new Map()
+
+  technicianSheet.rows.forEach((row) => {
+    if (
+      row.description &&
+      !descriptionsByPart.has(row.normalizedPartNumber)
+    ) {
+      descriptionsByPart.set(row.normalizedPartNumber, {
+        partNumber: row.partNumber,
+        normalizedPartNumber: row.normalizedPartNumber,
+        description: row.description,
+      })
+    }
+  })
 
   return {
-    sheets: countSheets,
-    suggestedSheetName: suggestedSheet.name,
+    sheets: [technicianSheet],
+    suggestedSheetName: technicianSheet.name,
+    technician,
+    descriptions: Array.from(descriptionsByPart.values()),
   }
 }
 

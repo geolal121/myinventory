@@ -80,6 +80,11 @@ function InventoryItemCard({ item, onUse, onGive, onMove, onDelete }) {
         >
           <div>
             <h3>{item.partNumber}</h3>
+            {item.description && (
+              <p className="inventory-page__part-description">
+                {item.description}
+              </p>
+            )}
             <p>{item.location}</p>
           </div>
 

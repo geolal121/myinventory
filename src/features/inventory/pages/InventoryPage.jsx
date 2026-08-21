@@ -39,6 +39,7 @@ import { INVENTORY_ACTIONS } from '../data/inventoryActions.js'
 import { getLocationOptions } from '../data/inventoryLocations.js'
 import { INVENTORY_SUMMARY_VIEWS } from '../data/inventorySummaryViews.js'
 import {
+  applyMissingInventoryDescriptions,
   buildInventoryTransaction,
   downloadInventoryCsv,
   findInventoryItemsByPartNumber,
@@ -67,6 +68,7 @@ import {
   loadInventoryCloudData,
   renameInventoryLocationInCloud,
   restoreInventoryLocationToCloud,
+  syncInventoryItemsToCloud,
   syncInventoryTransactionToCloud,
 } from '../services/inventorySyncService.js'
 
@@ -847,6 +849,33 @@ function InventoryPage() {
       })
   }
 
+  const handleImportWorkbookDescriptions = (descriptions = []) => {
+    const result = applyMissingInventoryDescriptions({
+      items: inventoryItems,
+      descriptions,
+    })
+
+    if (result.updatedItems.length > 0) {
+      setInventoryItems(result.items)
+      setSyncStatus('Syncing...')
+
+      syncInventoryItemsToCloud(result.updatedItems)
+        .then(() => {
+          setSyncStatus('Cloud Synced')
+        })
+        .catch((error) => {
+          console.error('Failed to sync inventory descriptions:', error)
+          setSyncStatus('Offline Ready')
+        })
+    }
+
+    return {
+      workbookDescriptionCount: descriptions.length,
+      updatedPartCount: result.updatedPartNumbers.length,
+      updatedRecordCount: result.updatedItems.length,
+    }
+  }
+
   const handleExportInventory = () => {
     downloadInventoryCsv(inventoryItems)
   }
@@ -1121,6 +1150,11 @@ function InventoryPage() {
 
                       <div className="inventory-page__most-used-content">
                         <h3>{part.partNumber}</h3>
+                        {part.description && (
+                          <p className="inventory-page__part-description">
+                            {part.description}
+                          </p>
+                        )}
                         <p>Last used: {part.lastUsedAt || 'No date'}</p>
                       </div>
 
@@ -1308,6 +1342,7 @@ function InventoryPage() {
         isOpen={activeModal === 'workbook'}
         onClose={closeModal}
         inventoryItems={inventoryItems}
+        onImportDescriptions={handleImportWorkbookDescriptions}
       />
 
       <HistoryModal

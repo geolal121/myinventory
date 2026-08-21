@@ -55,8 +55,16 @@ function BoxInventoryModal({
                 <div>
                   <h3>{item.partNumber}</h3>
 
+                  {item.description && (
+                    <p className="inventory-page__part-description">
+                      {item.description}
+                    </p>
+                  )}
+
                   {item.notes && (
-                    <p>{item.notes}</p>
+                    <p className="inventory-page__part-notes">
+                      Notes: {item.notes}
+                    </p>
                   )}
                 </div>
 

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import {
+  BadgeCheck,
   CircleCheck,
   Download,
   FileSpreadsheet,
@@ -27,36 +28,37 @@ function InventoryWorkbookModal({
   isOpen,
   onClose,
   inventoryItems = [],
+  onImportDescriptions,
 }) {
   const [file, setFile] = useState(null)
   const [arrayBuffer, setArrayBuffer] = useState(null)
   const [inspection, setInspection] = useState(null)
-  const [selectedSheetName, setSelectedSheetName] = useState('')
   const [quantityMode, setQuantityMode] = useState(
     WORKBOOK_QUANTITY_MODES.TOTAL,
   )
   const [errorMessage, setErrorMessage] = useState('')
+  const [descriptionImportResult, setDescriptionImportResult] = useState(null)
   const [isReading, setIsReading] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
 
   const preview = useMemo(() => {
-    if (!inspection || !selectedSheetName) return null
+    if (!inspection) return null
 
     return buildWorkbookFillPreview({
       inspection,
-      sheetName: selectedSheetName,
+      sheetName: inspection.suggestedSheetName,
       inventoryItems,
       quantityMode,
     })
-  }, [inspection, inventoryItems, quantityMode, selectedSheetName])
+  }, [inspection, inventoryItems, quantityMode])
 
   const resetWorkbook = () => {
     setFile(null)
     setArrayBuffer(null)
     setInspection(null)
-    setSelectedSheetName('')
     setQuantityMode(WORKBOOK_QUANTITY_MODES.TOTAL)
     setErrorMessage('')
+    setDescriptionImportResult(null)
     setIsReading(false)
     setIsDownloading(false)
   }
@@ -70,8 +72,8 @@ function InventoryWorkbookModal({
     const selectedFile = event.target.files?.[0]
 
     setErrorMessage('')
+    setDescriptionImportResult(null)
     setInspection(null)
-    setSelectedSheetName('')
     setArrayBuffer(null)
     setFile(selectedFile || null)
 
@@ -91,11 +93,21 @@ function InventoryWorkbookModal({
 
     try {
       const nextArrayBuffer = await selectedFile.arrayBuffer()
+
+      await new Promise((resolve) => window.requestAnimationFrame(resolve))
+
       const nextInspection = inspectInventoryWorkbook(nextArrayBuffer)
+      const nextDescriptionImportResult = onImportDescriptions?.(
+        nextInspection.descriptions || [],
+      ) || {
+        workbookDescriptionCount: nextInspection.descriptions?.length || 0,
+        updatedPartCount: 0,
+        updatedRecordCount: 0,
+      }
 
       setArrayBuffer(nextArrayBuffer)
       setInspection(nextInspection)
-      setSelectedSheetName(nextInspection.suggestedSheetName)
+      setDescriptionImportResult(nextDescriptionImportResult)
     } catch (error) {
       setErrorMessage(
         error instanceof Error
@@ -108,7 +120,7 @@ function InventoryWorkbookModal({
   }
 
   const handleDownload = () => {
-    if (!file || !arrayBuffer || !inspection || !selectedSheetName) return
+    if (!file || !arrayBuffer || !inspection) return
 
     setErrorMessage('')
     setIsDownloading(true)
@@ -117,7 +129,7 @@ function InventoryWorkbookModal({
       const result = fillInventoryWorkbook({
         arrayBuffer,
         inspection,
-        sheetName: selectedSheetName,
+        sheetName: inspection.suggestedSheetName,
         inventoryItems,
         quantityMode,
       })
@@ -142,10 +154,6 @@ function InventoryWorkbookModal({
     }
   }
 
-  const worksheetOptions = (inspection?.sheets || []).map((sheet) => ({
-    value: sheet.name,
-    label: `${sheet.name} — ${sheet.rowCount} parts`,
-  }))
   const quantityOptions = [
     {
       value: WORKBOOK_QUANTITY_MODES.TOTAL,
@@ -219,16 +227,48 @@ function InventoryWorkbookModal({
 
         {inspection && (
           <>
-            <div className="inventory-form__row">
-              <Select
-                name="countWorksheet"
-                label="Worksheet to Fill"
-                value={selectedSheetName}
-                onChange={(event) => setSelectedSheetName(event.target.value)}
-                options={worksheetOptions}
-                placeholder="Select worksheet"
-              />
+            <div className="inventory-workbook__technician">
+              <BadgeCheck size={20} aria-hidden="true" />
+              <div>
+                <strong>
+                  {inspection.technician.name} · ID {inspection.technician.id}
+                </strong>
+                <p>
+                  {inspection.suggestedSheetName} ·{' '}
+                  {inspection.sheets[0].rowCount} assigned parts
+                </p>
+              </div>
+            </div>
 
+            {descriptionImportResult && (
+              <div className="inventory-workbook__description-result">
+                <CircleCheck size={19} aria-hidden="true" />
+                <div>
+                  <strong>
+                    {descriptionImportResult.updatedPartCount > 0
+                      ? `${descriptionImportResult.updatedPartCount} part description${
+                          descriptionImportResult.updatedPartCount === 1
+                            ? ''
+                            : 's'
+                        } added to MyInventory`
+                      : descriptionImportResult.workbookDescriptionCount > 0
+                        ? 'Part descriptions are already up to date'
+                        : 'No usable part descriptions were found'}
+                  </strong>
+                  <p>
+                    {descriptionImportResult.updatedPartCount > 0
+                      ? `${descriptionImportResult.updatedRecordCount} inventory record${
+                          descriptionImportResult.updatedRecordCount === 1
+                            ? ''
+                            : 's'
+                        } updated. Existing descriptions were not changed.`
+                      : 'Existing descriptions were not changed.'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div>
               <Select
                 name="workbookQuantityMode"
                 label="Quantity to Use"
@@ -246,8 +286,9 @@ function InventoryWorkbookModal({
                   <div>
                     <strong>{preview.sheet.name} is ready</strong>
                     <p>
-                      Every Physical Count row will be replaced in the
-                      downloaded copy. Other worksheets stay unchanged.
+                      Only Physical Count rows assigned to technician ID{' '}
+                      {inspection.technician.id} will be filled. Every other
+                      technician stays unchanged.
                     </p>
                   </div>
                 </div>
