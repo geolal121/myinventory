@@ -4,6 +4,7 @@ import {
   Boxes,
   CircleCheck,
   Download,
+  FileSpreadsheet,
   Ghost,
   HandHelping,
   History as HistoryIcon,
@@ -29,6 +30,7 @@ import EditPartModal from '../components/modals/EditPartModal.jsx'
 import GivePartModal from '../components/modals/GivePartModal.jsx'
 import HistoryModal from '../components/modals/HistoryModal.jsx'
 import InventorySummaryModal from '../components/modals/InventorySummaryModal.jsx'
+import InventoryWorkbookModal from '../components/modals/InventoryWorkbookModal.jsx'
 import ManageLocationsModal from '../components/modals/ManageLocationsModal.jsx'
 import MovePartModal from '../components/modals/MovePartModal.jsx'
 import UsePartModal from '../components/modals/UsePartModal.jsx'
@@ -1150,20 +1152,43 @@ function InventoryPage() {
                 <h2>Export</h2>
               </div>
 
-              <Card className="inventory-page__export-card">
-                <div>
-                  <h3>Export Inventory CSV</h3>
-                  <p>
-                    Download your current inventory sorted by part number and
-                    location.
-                  </p>
-                </div>
+              <div className="inventory-page__export-list">
+                <Card className="inventory-page__export-card">
+                  <div className="inventory-page__export-card-icon">
+                    <FileSpreadsheet size={22} aria-hidden="true" />
+                  </div>
+                  <div>
+                    <h3>Fill Quarterly Excel Sheet</h3>
+                    <p>
+                      Upload your count workbook and download a copy filled
+                      with the quantities currently on your truck.
+                    </p>
+                  </div>
 
-                <Button onClick={handleExportInventory}>
-                  <Download size={18} aria-hidden="true" />
-                  Export CSV
-                </Button>
-              </Card>
+                  <Button onClick={() => openModal('workbook')}>
+                    <FileSpreadsheet size={18} aria-hidden="true" />
+                    Fill Excel Sheet
+                  </Button>
+                </Card>
+
+                <Card className="inventory-page__export-card">
+                  <div className="inventory-page__export-card-icon">
+                    <Download size={22} aria-hidden="true" />
+                  </div>
+                  <div>
+                    <h3>Export Inventory CSV</h3>
+                    <p>
+                      Download your current inventory sorted by part number and
+                      location.
+                    </p>
+                  </div>
+
+                  <Button variant="secondary" onClick={handleExportInventory}>
+                    <Download size={18} aria-hidden="true" />
+                    Export CSV
+                  </Button>
+                </Card>
+              </div>
             </>
           )}
         </section>
@@ -1277,6 +1302,12 @@ function InventoryPage() {
         onClose={closeModal}
         items={inventoryItems}
         summaryView={selectedSummaryView}
+      />
+
+      <InventoryWorkbookModal
+        isOpen={activeModal === 'workbook'}
+        onClose={closeModal}
+        inventoryItems={inventoryItems}
       />
 
       <HistoryModal

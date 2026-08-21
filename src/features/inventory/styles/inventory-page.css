@@ -801,6 +801,264 @@
   gap: var(--spacing-2);
 }
 
+/* EXPORT */
+
+.inventory-page__export-list {
+  display: grid;
+  gap: var(--spacing-3);
+}
+
+.inventory-page__export-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.inventory-page__export-card > .ui-button {
+  grid-column: 1 / -1;
+}
+
+.inventory-page__export-card h3 {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-md);
+}
+
+.inventory-page__export-card p {
+  margin-top: var(--spacing-1);
+
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-sm);
+}
+
+.inventory-page__export-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 44px;
+  height: 44px;
+
+  border-radius: var(--radius-md);
+
+  background: var(--color-accent-soft);
+
+  color: var(--color-accent);
+}
+
+/* QUARTERLY WORKBOOK */
+
+.inventory-workbook {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.inventory-workbook__upload {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+
+  min-height: 88px;
+  padding: var(--spacing-4);
+
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+
+  background: var(--color-surface-soft);
+
+  cursor: pointer;
+}
+
+.inventory-workbook__upload:hover,
+.inventory-workbook__upload:focus-within {
+  border-color: var(--color-accent);
+
+  box-shadow: var(--glow-accent);
+}
+
+.inventory-workbook__upload > span:last-of-type {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+
+  min-width: 0;
+}
+
+.inventory-workbook__upload strong,
+.inventory-workbook__upload small {
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inventory-workbook__upload strong {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-sm);
+}
+
+.inventory-workbook__upload small {
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-xs);
+}
+
+.inventory-workbook__upload input {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  opacity: 0;
+
+  cursor: pointer;
+}
+
+.inventory-workbook__upload input:disabled {
+  cursor: wait;
+}
+
+.inventory-workbook__upload-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  height: 48px;
+
+  border-radius: var(--radius-md);
+
+  background: var(--color-accent-soft);
+
+  color: var(--color-accent);
+}
+
+.inventory-workbook__privacy-note,
+.inventory-workbook__success {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+
+  padding: var(--spacing-3);
+
+  border-radius: var(--radius-md);
+}
+
+.inventory-workbook__privacy-note {
+  background: var(--color-info-soft);
+
+  color: var(--color-info);
+}
+
+.inventory-workbook__privacy-note svg,
+.inventory-workbook__success svg {
+  flex: 0 0 auto;
+
+  margin-top: 1px;
+}
+
+.inventory-workbook__privacy-note p,
+.inventory-workbook__success p,
+.inventory-workbook__notice,
+.inventory-workbook__unmatched p {
+  font-size: var(--font-size-sm);
+}
+
+.inventory-workbook__success {
+  border: 1px solid var(--color-success);
+
+  background: var(--color-success-soft);
+
+  color: var(--color-success);
+}
+
+.inventory-workbook__success div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.inventory-workbook__success p {
+  color: var(--color-text-primary);
+}
+
+.inventory-workbook__summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-2);
+}
+
+.inventory-workbook__summary div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+
+  min-width: 0;
+  padding: var(--spacing-3);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+
+  background: var(--color-surface-soft);
+}
+
+.inventory-workbook__summary span {
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-xs);
+}
+
+.inventory-workbook__summary strong {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-lg);
+}
+
+.inventory-workbook__notice,
+.inventory-workbook__unmatched {
+  padding: var(--spacing-3);
+
+  border-radius: var(--radius-md);
+}
+
+.inventory-workbook__notice {
+  border: 1px solid var(--color-warning);
+
+  background: var(--color-warning-soft);
+
+  color: var(--color-text-primary);
+}
+
+.inventory-workbook__unmatched {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+
+  border: 1px solid var(--color-border);
+
+  background: var(--color-surface-soft);
+}
+
+.inventory-workbook__unmatched strong {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-sm);
+}
+
+.inventory-workbook__unmatched p {
+  color: var(--color-text-secondary);
+
+  overflow-wrap: anywhere;
+}
+
 /* EMPTY */
 
 .inventory-page__empty-state {
@@ -987,6 +1245,17 @@
     min-height: 42px;
 
     padding: var(--spacing-2) var(--spacing-3);
+  }
+
+  .inventory-workbook__upload {
+    min-height: 80px;
+
+    padding: var(--spacing-3);
+  }
+
+  .inventory-workbook__upload-icon {
+    width: 42px;
+    height: 42px;
   }
 }
 
