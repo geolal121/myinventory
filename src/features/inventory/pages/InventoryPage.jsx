@@ -1546,6 +1546,8 @@ function InventoryPage() {
         </section>
 
         <section className="inventory-page__actions" aria-label="Inventory actions">
+          <h2 className="inventory-page__panel-title">Quick Actions</h2>
+
           <Button fullWidth onClick={() => openModal('add')}>
             <PackagePlus size={19} aria-hidden="true" />
             Add Part
@@ -1565,28 +1567,30 @@ function InventoryPage() {
             <ArrowRightLeft size={19} aria-hidden="true" />
             Move Part
           </Button>
+
+          <Button
+            variant="secondary"
+            className="inventory-count-launch"
+            onClick={() => openModal('count')}
+          >
+            <span className="inventory-count-launch__icon">
+              <ClipboardCheck size={22} aria-hidden="true" />
+            </span>
+            <span className="inventory-count-launch__copy">
+              <strong>Count Inventory</strong>
+              <small>Verify a location and save corrections.</small>
+            </span>
+            <ChevronRight
+              className="inventory-count-launch__arrow"
+              size={20}
+              aria-hidden="true"
+            />
+          </Button>
         </section>
 
-        <Button
-          variant="secondary"
-          className="inventory-count-launch"
-          onClick={() => openModal('count')}
-        >
-          <span className="inventory-count-launch__icon">
-            <ClipboardCheck size={22} aria-hidden="true" />
-          </span>
-          <span className="inventory-count-launch__copy">
-            <strong>Count Inventory</strong>
-            <small>Verify a location, review differences, and save corrections.</small>
-          </span>
-          <ChevronRight
-            className="inventory-count-launch__arrow"
-            size={20}
-            aria-hidden="true"
-          />
-        </Button>
-
         <section className="inventory-page__summary" aria-label="Inventory summary">
+          <h2 className="inventory-page__panel-title">Inventory Snapshot</h2>
+
           <Card
             as="button"
             type="button"

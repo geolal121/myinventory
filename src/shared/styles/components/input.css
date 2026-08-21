@@ -35,7 +35,7 @@
     var(--input-padding-y)
     var(--input-padding-x);
 
-  border: 1px solid var(--color-border-strong);
+  border: 1px solid var(--color-border);
   border-radius: var(--input-radius);
 
   background: var(--color-surface);

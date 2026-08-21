@@ -65,6 +65,40 @@
   color: var(--color-accent);
 }
 
+.inventory-page__actions .inventory-count-launch.ui-button {
+  grid-column: 1 / -1;
+
+  min-height: 68px;
+  margin-top: var(--spacing-1);
+  padding: var(--spacing-3);
+
+  border-color: color-mix(in srgb, var(--color-utility) 45%, var(--color-border));
+
+  background: var(--color-utility-soft);
+
+  box-shadow: none;
+}
+
+.inventory-page__actions .inventory-count-launch.ui-button:hover {
+  border-color: var(--color-utility);
+
+  background: var(--color-utility-soft);
+}
+
+.inventory-page__actions .inventory-count-launch__icon {
+  width: 42px;
+  height: 42px;
+
+  background: var(--color-utility);
+
+  color: var(--color-brand-deep);
+}
+
+.inventory-page__actions .inventory-count-launch__icon svg,
+.inventory-page__actions .inventory-count-launch__arrow {
+  color: var(--color-brand-deep);
+}
+
 .inventory-count-modal {
   max-width: 820px;
 }

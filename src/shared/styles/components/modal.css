@@ -48,12 +48,14 @@
 
   padding: var(--spacing-4);
 
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 4px solid var(--color-utility);
 
-  background: var(--color-surface);
+  background: var(--color-brand);
 }
 
 .ui-modal__header h2 {
+  color: var(--color-text-inverse);
+
   font-size: var(--font-size-xl);
 }
 
@@ -72,10 +74,22 @@
   padding: 0;
 
   border-radius: 50%;
+
+  background: var(--color-brand-surface);
+
+  color: var(--color-text-inverse);
+}
+
+.ui-modal__close.ui-button:hover {
+  background: var(--color-brand-deep);
+
+  color: var(--color-text-inverse);
 }
 
 .ui-modal__description {
   margin-top: var(--spacing-2);
+
+  color: rgba(255, 255, 255, 0.76);
 
   font-size: var(--font-size-sm);
 

@@ -99,7 +99,7 @@
 }
 
 .ui-button--secondary:hover {
-  border-color: var(--color-accent);
+  border-color: var(--color-border-strong);
 
   background: var(--color-surface-soft);
 
@@ -115,7 +115,7 @@
 }
 
 .ui-button--ghost:hover {
-  background: var(--color-surface-soft);
+  background: var(--color-accent-soft);
 
   color: var(--color-text-primary);
 }

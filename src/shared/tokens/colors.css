@@ -1,39 +1,46 @@
 :root {
   /* BACKGROUNDS */
-  --color-background: #f1f4f6;
-  --color-background-soft: #f7f9fa;
-  --color-background-elevated: #e8edf1;
+  --color-background: #f3f1ec;
+  --color-background-soft: #faf9f6;
+  --color-background-elevated: #e8e5de;
 
   /* SURFACES */
-  --color-surface: #ffffff;
-  --color-surface-soft: #f7f9fa;
-  --color-surface-elevated: #edf1f4;
+  --color-surface: #fffefb;
+  --color-surface-soft: #f8f6f1;
+  --color-surface-elevated: #ece8df;
 
   /* BORDERS */
-  --color-border: #d9e1e7;
-  --color-border-strong: #b8c5cf;
+  --color-border: #d9d5cc;
+  --color-border-strong: #b8b1a5;
 
   /* TEXT */
-  --color-text-primary: #183247;
-  --color-text-secondary: #5b7082;
-  --color-text-muted: #8293a2;
+  --color-text-primary: #172f40;
+  --color-text-secondary: #5c6d77;
+  --color-text-muted: #879299;
   --color-text-inverse: #ffffff;
 
   /* PRIMARY ACCENT */
-  --color-accent: #176b8c;
-  --color-accent-hover: #125774;
-  --color-accent-bright: #0d819d;
-  --color-accent-soft: rgba(23, 107, 140, 0.10);
+  --color-accent: #0b7285;
+  --color-accent-hover: #075c6b;
+  --color-accent-bright: #128ca0;
+  --color-accent-soft: rgba(11, 114, 133, 0.11);
+
+  /* APP CHROME */
+  --color-brand: #17364a;
+  --color-brand-deep: #102a3b;
+  --color-brand-surface: #24495e;
+  --color-utility: #d58a25;
+  --color-utility-soft: rgba(213, 138, 37, 0.14);
 
   /* SECONDARY ACCENT */
-  --color-accent-secondary: #dbe8ed;
-  --color-accent-secondary-hover: #c9dce4;
-  --color-accent-secondary-soft: rgba(13, 129, 157, 0.08);
+  --color-accent-secondary: #dbe8e9;
+  --color-accent-secondary-hover: #c8dcde;
+  --color-accent-secondary-soft: rgba(11, 114, 133, 0.08);
 
   /* CARD COLORS */
-  --color-card: #ffffff;
-  --color-card-hover: #fbfcfd;
-  --color-card-text: #183247;
+  --color-card: #fffefb;
+  --color-card-hover: #faf8f3;
+  --color-card-text: #172f40;
 
   /* STATUS COLORS */
   --color-success: #26866a;
@@ -55,6 +62,6 @@
   --color-noi: var(--color-warning);
 
   /* OVERLAYS */
-  --color-overlay: rgba(24, 50, 71, 0.46);
-  --color-overlay-soft: rgba(24, 50, 71, 0.14);
+  --color-overlay: rgba(16, 42, 59, 0.52);
+  --color-overlay-soft: rgba(16, 42, 59, 0.14);
 }

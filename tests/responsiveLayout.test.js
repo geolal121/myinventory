@@ -33,9 +33,29 @@ test('the app theme uses solid surfaces instead of decorative gradients', async 
   styles.forEach((source) => {
     assert.doesNotMatch(source, /(?:linear|radial)-gradient\s*\(/)
   })
-  assert.match(colors, /--color-background:\s*#f1f4f6;/)
+  assert.match(colors, /--color-background:\s*#f3f1ec;/)
+  assert.match(colors, /--color-brand:\s*#17364a;/)
+  assert.match(colors, /--color-utility:\s*#d58a25;/)
   assert.match(buttons, /\.ui-button--primary\s*\{[\s\S]*?background: var\(--color-accent\);/)
   assert.match(cards, /\.ui-card\s*\{[\s\S]*?background: var\(--color-surface\);/)
+})
+
+test('the inventory dashboard groups search, quick actions, and snapshot panels', async () => {
+  const [component, styles] = await Promise.all([
+    readProjectFile('src/features/inventory/pages/InventoryPage.jsx'),
+    readProjectFile('src/features/inventory/styles/inventory-page.css'),
+  ])
+
+  assert.match(component, /inventory-page__panel-title">Quick Actions</)
+  assert.match(component, /inventory-page__panel-title">Inventory Snapshot</)
+  assert.match(
+    component,
+    /<section className="inventory-page__actions"[\s\S]*?className="inventory-count-launch"[\s\S]*?<\/section>/,
+  )
+  assert.match(
+    styles,
+    /@media \(min-width: 1200px\)[\s\S]*?\.inventory-page__container\s*\{[\s\S]*?grid-template-columns: repeat\(12, minmax\(0, 1fr\)\)/,
+  )
 })
 
 test('inventory summary cards use the responsive summary modal layout', async () => {
