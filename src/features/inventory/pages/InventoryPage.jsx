@@ -29,6 +29,7 @@ import Input from '../../../shared/components/Input.jsx'
 import useInventoryAuth from '../../auth/hooks/useInventoryAuth.js'
 
 import InventoryLocationCard from '../components/InventoryLocationCard.jsx'
+import InventoryHealthView from '../components/InventoryHealthView.jsx'
 import InventorySearchResults from '../components/InventorySearchResults.jsx'
 import AddPartModal from '../components/modals/AddPartModal.jsx'
 import BoxInventoryModal from '../components/modals/BoxInventoryModal.jsx'
@@ -65,6 +66,7 @@ import {
   createInventoryBackupFileName,
   mergeInventoryBackup,
 } from '../utils/inventoryBackup.js'
+import { analyzeInventoryHealth } from '../utils/inventoryHealth.js'
 import {
   applyWorkbookDescriptionsToPartCatalog,
   buildPartCatalog,
@@ -108,6 +110,7 @@ const INVENTORY_VIEW_TABS = {
   BOXES: 'BOXES',
   MOST_USED: 'MOST_USED',
   EXPORT: 'EXPORT',
+  HEALTH: 'HEALTH',
 }
 
 const INVENTORY_SEARCH_MODES = {
@@ -173,6 +176,7 @@ function InventoryPage() {
   const [syncStatus, setSyncStatus] = useState(() =>
     getOnlineSyncStatus('Checking Sync...'),
   )
+  const [workbookHealthCheck, setWorkbookHealthCheck] = useState(null)
   const [undoAction, setUndoAction] = useState(null)
   const returnToLocationAfterAction = useRef(true)
   const undoTimeout = useRef(null)
@@ -199,6 +203,17 @@ function InventoryPage() {
       limit: 10,
     })
   }, [inventoryHistory, inventoryItemsWithCatalogDescriptions, partCatalog])
+
+  const inventoryHealth = useMemo(
+    () =>
+      analyzeInventoryHealth({
+        inventoryItems,
+        partCatalog,
+        savedLocations,
+        workbookCheck: workbookHealthCheck,
+      }),
+    [inventoryItems, partCatalog, savedLocations, workbookHealthCheck],
+  )
 
   const matchingPartCatalog = useMemo(() => {
     if (!isSearching) return partCatalog
@@ -1591,6 +1606,23 @@ function InventoryPage() {
           <button
             type="button"
             className={`inventory-page__tab ${
+              activeInventoryView === INVENTORY_VIEW_TABS.HEALTH
+                ? 'inventory-page__tab--active'
+                : ''
+            }`}
+            onClick={() => setActiveInventoryView(INVENTORY_VIEW_TABS.HEALTH)}
+          >
+            <ShieldCheck
+              className="inventory-page__tab-icon"
+              size={18}
+              aria-hidden="true"
+            />
+            <span>Health</span>
+          </button>
+
+          <button
+            type="button"
+            className={`inventory-page__tab ${
               activeInventoryView === INVENTORY_VIEW_TABS.EXPORT
                 ? 'inventory-page__tab--active'
                 : ''
@@ -1720,6 +1752,18 @@ function InventoryPage() {
                 </Card>
               )}
             </>
+          )}
+
+          {activeInventoryView === INVENTORY_VIEW_TABS.HEALTH && (
+            <InventoryHealthView
+              health={inventoryHealth}
+              onEditDescription={(part) =>
+                openCatalogDescriptionModal(part)
+              }
+              onEditItem={openEditFromItem}
+              onManageLocations={() => openModal('manageLocations')}
+              onCheckWorkbook={() => openModal('workbook')}
+            />
           )}
 
           {activeInventoryView === INVENTORY_VIEW_TABS.EXPORT && (
@@ -1932,6 +1976,7 @@ function InventoryPage() {
             onClose={closeModal}
             inventoryItems={inventoryItems}
             onImportDescriptions={handleImportWorkbookDescriptions}
+            onWorkbookInspected={setWorkbookHealthCheck}
           />
         </Suspense>
       )}

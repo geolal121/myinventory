@@ -29,6 +29,7 @@ function InventoryWorkbookModal({
   onClose,
   inventoryItems = [],
   onImportDescriptions,
+  onWorkbookInspected,
 }) {
   const [file, setFile] = useState(null)
   const [arrayBuffer, setArrayBuffer] = useState(null)
@@ -97,6 +98,14 @@ function InventoryWorkbookModal({
       await new Promise((resolve) => window.requestAnimationFrame(resolve))
 
       const nextInspection = inspectInventoryWorkbook(nextArrayBuffer)
+      const inspectedSheet = nextInspection.sheets[0]
+
+      onWorkbookInspected?.({
+        fileName: selectedFile.name,
+        sheetName: nextInspection.suggestedSheetName,
+        checkedAt: new Date().toISOString(),
+        partNumbers: inspectedSheet.rows.map((row) => row.partNumber),
+      })
       const nextDescriptionImportResult = onImportDescriptions?.(
         nextInspection.descriptions || [],
       ) || {

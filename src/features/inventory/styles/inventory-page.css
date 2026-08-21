@@ -620,7 +620,7 @@
 
 .inventory-page__tabs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
 
   gap: var(--spacing-1);
 
@@ -858,6 +858,277 @@
 
 .inventory-page__part-location-row strong {
   color: var(--color-text-primary);
+}
+
+/* INVENTORY HEALTH */
+
+.inventory-health {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.inventory-health__hero {
+  --health-color: var(--color-success);
+  --health-soft: var(--color-success-soft);
+
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--spacing-4);
+
+  overflow: hidden;
+
+  border-color: color-mix(in srgb, var(--health-color) 32%, var(--color-border));
+
+  background:
+    radial-gradient(circle at 92% 18%, color-mix(in srgb, var(--health-color) 16%, transparent), transparent 9rem),
+    var(--gradient-surface);
+}
+
+.inventory-health__hero--good_with_suggestions {
+  --health-color: var(--color-warning);
+  --health-soft: var(--color-warning-soft);
+}
+
+.inventory-health__hero--fix_needed {
+  --health-color: var(--color-danger);
+  --health-soft: var(--color-danger-soft);
+}
+
+.inventory-health__hero-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 58px;
+  height: 58px;
+
+  border-radius: var(--radius-lg);
+
+  background: var(--health-soft);
+
+  color: var(--health-color);
+}
+
+.inventory-health__status {
+  display: inline-flex;
+
+  margin-bottom: var(--spacing-1);
+  padding: var(--spacing-1) var(--spacing-2);
+
+  border-radius: var(--radius-full);
+
+  background: var(--health-soft);
+
+  color: var(--health-color);
+
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+}
+
+.inventory-health__hero h2 {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-xl);
+}
+
+.inventory-health__hero p {
+  margin-top: var(--spacing-1);
+
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-sm);
+}
+
+.inventory-health__metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-3);
+}
+
+.inventory-health__metrics .ui-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+
+  min-width: 0;
+
+  background: var(--gradient-surface);
+}
+
+.inventory-health__metrics span {
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-xs);
+}
+
+.inventory-health__metrics strong {
+  color: var(--color-accent);
+
+  font-size: var(--font-size-xl);
+}
+
+.inventory-health__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+
+  padding: var(--spacing-4);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--card-radius);
+
+  background: rgba(255, 255, 255, 0.78);
+
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(12px);
+}
+
+.inventory-health__section--informational {
+  background: color-mix(in srgb, var(--color-info-soft) 45%, white);
+}
+
+.inventory-health__section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+}
+
+.inventory-health__section-heading h3 {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-md);
+}
+
+.inventory-health__section-heading p {
+  margin-top: var(--spacing-1);
+
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-sm);
+}
+
+.inventory-health__section-heading > span {
+  min-width: 32px;
+  padding: var(--spacing-1) var(--spacing-2);
+
+  border-radius: var(--radius-full);
+
+  background: var(--color-accent-soft);
+
+  color: var(--color-accent);
+
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+}
+
+.inventory-health__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.inventory-health__issue {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--spacing-3);
+
+  padding: var(--spacing-3);
+
+  background: var(--color-surface-soft);
+}
+
+.inventory-health__issue > svg {
+  color: var(--color-warning);
+}
+
+.inventory-health__issue--danger > svg {
+  color: var(--color-danger);
+}
+
+.inventory-health__issue strong,
+.inventory-health__workbook-meta strong,
+.inventory-health__empty-workbook strong {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-sm);
+}
+
+.inventory-health__issue p,
+.inventory-health__workbook-meta p,
+.inventory-health__empty-workbook p {
+  margin-top: var(--spacing-1);
+
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-xs);
+}
+
+.inventory-health__clear-row,
+.inventory-health__workbook-meta,
+.inventory-health__empty-workbook {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+
+  padding: var(--spacing-3);
+
+  border-radius: var(--radius-md);
+
+  background: var(--color-success-soft);
+
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-sm);
+}
+
+.inventory-health__clear-row svg {
+  flex: 0 0 auto;
+
+  color: var(--color-success);
+}
+
+.inventory-health__workbook-meta,
+.inventory-health__empty-workbook {
+  background: var(--color-surface-soft);
+}
+
+.inventory-health__workbook-meta > svg,
+.inventory-health__empty-workbook > svg {
+  flex: 0 0 auto;
+
+  color: var(--color-accent);
+}
+
+.inventory-health__tag-list,
+.inventory-health__part-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+}
+
+.inventory-health__tag-list span,
+.inventory-health__part-list span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+
+  min-height: 34px;
+  padding: var(--spacing-1) var(--spacing-3);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+
+  background: var(--color-surface);
+
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
 }
 
 /* MANAGE LOCATIONS */
@@ -1777,6 +2048,9 @@
   }
 
   .inventory-page__tab {
+    flex-direction: column;
+    gap: var(--spacing-1);
+
     min-height: 48px;
 
     padding: var(--spacing-2);
@@ -1842,6 +2116,36 @@
 }
 
 @media (max-width: 479px) {
+  .inventory-health__hero {
+    align-items: flex-start;
+
+    padding: var(--spacing-3);
+  }
+
+  .inventory-health__hero-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .inventory-health__metrics {
+    gap: var(--spacing-2);
+  }
+
+  .inventory-health__metrics .ui-card,
+  .inventory-health__section {
+    padding: var(--spacing-3);
+  }
+
+  .inventory-health__issue {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .inventory-health__issue .ui-button {
+    grid-column: 1 / -1;
+
+    width: 100%;
+  }
+
   .inventory-page__backup-actions {
     grid-template-columns: 1fr;
   }
