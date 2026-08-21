@@ -8,6 +8,7 @@ import Select from '../../../../shared/components/Select.jsx'
 import { getLocationOptions } from '../../data/inventoryLocations.js'
 import {
   formatPartNumberInput,
+  getPartNumberInputMode,
   INVENTORY_STATUS,
 } from '../../utils/inventoryHelpers.js'
 
@@ -118,6 +119,7 @@ function GivePartModal({
             name="partNumber"
             label="Part Number"
             type="text"
+            inputMode={getPartNumberInputMode()}
             value={formData.partNumber}
             onChange={handleChange}
             placeholder="Example: 123-4567-89"

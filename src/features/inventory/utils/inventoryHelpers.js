@@ -32,6 +32,21 @@ export const formatPartNumberSearchInput = (value = '') => {
   return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`
 }
 
+export const getPartNumberInputMode = (browserNavigator) => {
+  const activeNavigator =
+    browserNavigator ??
+    (typeof navigator === 'undefined' ? undefined : navigator)
+  const userAgent = String(activeNavigator?.userAgent || '')
+  const platform = String(activeNavigator?.platform || '')
+  const isApplePhoneOrTablet = /iPhone|iPad|iPod/i.test(userAgent)
+  const isTouchIpadUsingDesktopMode =
+    /Mac/i.test(platform) && Number(activeNavigator?.maxTouchPoints || 0) > 1
+
+  return isApplePhoneOrTablet || isTouchIpadUsingDesktopMode
+    ? 'numeric'
+    : 'text'
+}
+
 export const normalizeText = (text = '') => {
   return text.trim()
 }
