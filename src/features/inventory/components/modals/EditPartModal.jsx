@@ -5,10 +5,7 @@ import Input from '../../../../shared/components/Input.jsx'
 import Modal from '../../../../shared/components/Modal.jsx'
 
 import { getLocationOptions } from '../../data/inventoryLocations.js'
-import {
-  formatPartNumberInput,
-  getPartNumberInputMode,
-} from '../../utils/inventoryHelpers.js'
+import { formatPartNumberInput } from '../../utils/inventoryHelpers.js'
 
 const getInitialFormData = (selectedItem = null) => ({
   partNumber: selectedItem?.partNumber || '',
@@ -107,7 +104,7 @@ function EditPartModal({
           name="partNumber"
           label="Part Number"
           type="text"
-          inputMode={getPartNumberInputMode()}
+          inputMode="text"
           value={formData.partNumber}
           onChange={handleChange}
           placeholder="Example: 123-4567-89"

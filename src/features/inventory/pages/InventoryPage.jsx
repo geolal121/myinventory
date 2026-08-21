@@ -58,7 +58,6 @@ import {
   downloadInventoryCsv,
   findInventoryItemsByPartNumber,
   formatPartNumberSearchInput,
-  getPartNumberInputMode,
   getInventorySummary,
   getMostUsedParts,
   groupInventoryByLocation,
@@ -1520,11 +1519,7 @@ function InventoryPage() {
                 : 'Clear part number search'
             }
             enterKeyHint="search"
-            inputMode={
-              searchMode === INVENTORY_SEARCH_MODES.PART_NUMBER
-                ? getPartNumberInputMode()
-                : 'text'
-            }
+            inputMode="text"
             autoComplete="off"
             autoCapitalize={
               searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION

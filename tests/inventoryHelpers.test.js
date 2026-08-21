@@ -5,7 +5,6 @@ import {
   buildInventoryCsv,
   formatPartNumberInput,
   formatPartNumberSearchInput,
-  getPartNumberInputMode,
   getInventorySummary,
   groupInventoryByPartNumber,
   INVENTORY_STATUS,
@@ -34,41 +33,6 @@ test('numeric part searches add standard dashes while letters remain allowed', (
   assert.equal(formatPartNumberSearchInput('A123'), 'A123')
   assert.equal(formatPartNumberSearchInput('123-ABC'), '123-ABC')
   assert.equal(formatPartNumberSearchInput('12b45'), '12B45')
-})
-
-test('part number keyboard hint uses number-first iOS input without locking Android', () => {
-  assert.equal(
-    getPartNumberInputMode({
-      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)',
-      platform: 'iPhone',
-      maxTouchPoints: 5,
-    }),
-    'numeric',
-  )
-  assert.equal(
-    getPartNumberInputMode({
-      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15)',
-      platform: 'MacIntel',
-      maxTouchPoints: 5,
-    }),
-    'numeric',
-  )
-  assert.equal(
-    getPartNumberInputMode({
-      userAgent: 'Mozilla/5.0 (Linux; Android 16; Pixel)',
-      platform: 'Linux armv8l',
-      maxTouchPoints: 5,
-    }),
-    'text',
-  )
-  assert.equal(
-    getPartNumberInputMode({
-      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-      platform: 'MacIntel',
-      maxTouchPoints: 0,
-    }),
-    'text',
-  )
 })
 
 const createItem = ({

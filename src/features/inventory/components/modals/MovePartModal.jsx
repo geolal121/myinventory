@@ -9,7 +9,6 @@ import { getLocationOptions } from '../../data/inventoryLocations.js'
 import {
   formatPartNumberInput,
   getAvailableQuantity,
-  getPartNumberInputMode,
   INVENTORY_STATUS,
 } from '../../utils/inventoryHelpers.js'
 
@@ -132,7 +131,7 @@ function MovePartModal({
             name="partNumber"
             label="Part Number"
             type="text"
-            inputMode={getPartNumberInputMode()}
+            inputMode="text"
             value={formData.partNumber}
             onChange={handleChange}
             placeholder="Example: 123-4567-89"

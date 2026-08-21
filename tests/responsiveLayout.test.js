@@ -55,3 +55,21 @@ test('tablet and laptop layouts retain bounded modals and flexible columns', asy
     /\.inventory-page__summary-modal-list\s*\{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/,
   )
 })
+
+test('part-number fields keep the full alphanumeric mobile keyboard', async () => {
+  const partNumberEntryFiles = await Promise.all(
+    [
+      'src/features/inventory/pages/InventoryPage.jsx',
+      'src/features/inventory/components/modals/AddPartModal.jsx',
+      'src/features/inventory/components/modals/UsePartModal.jsx',
+      'src/features/inventory/components/modals/GivePartModal.jsx',
+      'src/features/inventory/components/modals/MovePartModal.jsx',
+      'src/features/inventory/components/modals/EditPartModal.jsx',
+    ].map(readProjectFile),
+  )
+
+  partNumberEntryFiles.forEach((source) => {
+    assert.match(source, /inputMode="text"/)
+    assert.doesNotMatch(source, /inputMode="numeric"/)
+  })
+})
