@@ -30,6 +30,7 @@ import useInventoryAuth from '../../auth/hooks/useInventoryAuth.js'
 
 import InventoryLocationCard from '../components/InventoryLocationCard.jsx'
 import InventoryHealthView from '../components/InventoryHealthView.jsx'
+import InstallAppPrompt from '../components/InstallAppPrompt.jsx'
 import InventorySearchResults from '../components/InventorySearchResults.jsx'
 import AddPartModal from '../components/modals/AddPartModal.jsx'
 import BoxInventoryModal from '../components/modals/BoxInventoryModal.jsx'
@@ -1396,6 +1397,8 @@ function InventoryPage() {
             </p>
           </div>
         </header>
+
+        <InstallAppPrompt />
 
         {transactionError && (
           <Card className="inventory-page__error-card">

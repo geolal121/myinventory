@@ -188,6 +188,103 @@
   animation: inventory-sync-pulse 1.5s ease-in-out infinite;
 }
 
+/* INSTALL APP */
+
+.inventory-install {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--spacing-3);
+
+  padding: var(--spacing-3);
+
+  border: 1px solid color-mix(in srgb, var(--color-accent) 24%, var(--color-border));
+  border-radius: var(--card-radius);
+
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(235, 247, 252, 0.92));
+
+  box-shadow: var(--shadow-sm);
+}
+
+.inventory-install__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;
+  height: 42px;
+
+  border-radius: var(--radius-md);
+
+  background: var(--color-accent-soft);
+
+  color: var(--color-accent);
+}
+
+.inventory-install__content {
+  min-width: 0;
+}
+
+.inventory-install__content strong {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-sm);
+}
+
+.inventory-install__content p {
+  margin-top: var(--spacing-1);
+
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-xs);
+}
+
+.inventory-install__ios-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-1);
+
+  min-height: 36px;
+  padding: var(--spacing-2) var(--spacing-3);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+
+  background: var(--color-surface);
+
+  color: var(--color-accent);
+
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.inventory-install__dismiss {
+  display: inline-grid;
+  place-items: center;
+
+  width: 36px;
+  height: 36px;
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: transparent;
+
+  color: var(--color-text-secondary);
+
+  cursor: pointer;
+}
+
+.inventory-install__dismiss:hover,
+.inventory-install__dismiss:focus-visible {
+  background: var(--color-surface-soft);
+
+  color: var(--color-text-primary);
+}
+
 @keyframes inventory-sync-pulse {
   50% {
     opacity: 0.45;
@@ -2157,6 +2254,17 @@
 }
 
 @media (max-width: 479px) {
+  .inventory-install {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .inventory-install > .ui-button,
+  .inventory-install__ios-step {
+    grid-column: 1 / -1;
+
+    width: 100%;
+  }
+
   .inventory-health__hero {
     align-items: flex-start;
 

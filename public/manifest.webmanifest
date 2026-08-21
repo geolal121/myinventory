@@ -1,11 +1,14 @@
 {
-  "name": "Truck Inventory",
-  "short_name": "Inventory",
-  "description": "Truck inventory tracker",
+  "id": "/",
+  "name": "MyInventory Truck Inventory",
+  "short_name": "MyInventory",
+  "description": "Truck inventory tracker for parts, locations, and quarterly counts",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#f6f7f5",
   "theme_color": "#255a96",
+  "categories": ["business", "productivity", "utilities"],
   "icons": [
     {
       "src": "/icons/icon-192.png",
