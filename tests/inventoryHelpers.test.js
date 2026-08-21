@@ -30,6 +30,18 @@ test('numeric part searches add standard dashes while letters remain allowed', (
   assert.equal(formatPartNumberSearchInput('123456789'), '123-4567-89')
   assert.equal(formatPartNumberSearchInput('123-4567-89'), '123-4567-89')
   assert.equal(formatPartNumberSearchInput('1234567890'), '123-4567-890')
+  assert.equal(
+    formatPartNumberSearchInput('123', { appendTrailingSeparator: true }),
+    '123-',
+  )
+  assert.equal(
+    formatPartNumberSearchInput('1234567', {
+      appendTrailingSeparator: true,
+    }),
+    '123-4567-',
+  )
+  assert.equal(formatPartNumberSearchInput('123'), '123')
+  assert.equal(formatPartNumberSearchInput('1234567'), '123-4567')
   assert.equal(formatPartNumberSearchInput('A123'), 'A123')
   assert.equal(formatPartNumberSearchInput('123-ABC'), '123-ABC')
   assert.equal(formatPartNumberSearchInput('12b45'), '12B45')

@@ -111,7 +111,6 @@ function AddPartModal({
           name="partNumber"
           label="Part Number"
           type="text"
-          inputMode="text"
           value={formData.partNumber}
           onChange={handleChange}
           placeholder="Example: 123-4567-89"

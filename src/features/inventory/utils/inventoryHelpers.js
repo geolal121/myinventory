@@ -17,7 +17,10 @@ export const formatPartNumberInput = (value = '') => {
   return String(value).toUpperCase().replace(/[^A-Z0-9-]/g, '')
 }
 
-export const formatPartNumberSearchInput = (value = '') => {
+export const formatPartNumberSearchInput = (
+  value = '',
+  { appendTrailingSeparator = false } = {},
+) => {
   const cleanValue = formatPartNumberInput(value)
 
   if (/[A-Z]/.test(cleanValue)) {
@@ -26,8 +29,18 @@ export const formatPartNumberSearchInput = (value = '') => {
 
   const digits = cleanValue.replace(/\D/g, '')
 
-  if (digits.length <= 3) return digits
-  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`
+  if (digits.length < 3) return digits
+  if (digits.length === 3) {
+    return appendTrailingSeparator ? `${digits}-` : digits
+  }
+  if (digits.length < 7) {
+    return `${digits.slice(0, 3)}-${digits.slice(3)}`
+  }
+  if (digits.length === 7) {
+    const formattedValue = `${digits.slice(0, 3)}-${digits.slice(3)}`
+
+    return appendTrailingSeparator ? `${formattedValue}-` : formattedValue
+  }
 
   return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`
 }

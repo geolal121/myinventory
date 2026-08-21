@@ -627,7 +627,11 @@ function InventoryPage() {
       return
     }
 
-    setSearchTerm(formatPartNumberSearchInput(value))
+    setSearchTerm(
+      formatPartNumberSearchInput(value, {
+        appendTrailingSeparator: value.length > searchTerm.length,
+      }),
+    )
   }
 
   const handleSearchModeChange = (nextSearchMode) => {
@@ -1519,7 +1523,6 @@ function InventoryPage() {
                 : 'Clear part number search'
             }
             enterKeyHint="search"
-            inputMode="text"
             autoComplete="off"
             autoCapitalize={
               searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION

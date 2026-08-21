@@ -56,7 +56,7 @@ test('tablet and laptop layouts retain bounded modals and flexible columns', asy
   )
 })
 
-test('part-number fields keep the full alphanumeric mobile keyboard', async () => {
+test('part-number fields leave mobile keyboard selection at the browser default', async () => {
   const partNumberEntryFiles = await Promise.all(
     [
       'src/features/inventory/pages/InventoryPage.jsx',
@@ -69,7 +69,7 @@ test('part-number fields keep the full alphanumeric mobile keyboard', async () =
   )
 
   partNumberEntryFiles.forEach((source) => {
-    assert.match(source, /inputMode="text"/)
     assert.doesNotMatch(source, /inputMode="numeric"/)
+    assert.doesNotMatch(source, /inputMode="text"/)
   })
 })
