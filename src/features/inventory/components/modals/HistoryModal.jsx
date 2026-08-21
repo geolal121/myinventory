@@ -1,69 +1,94 @@
 import { useMemo, useState } from 'react'
+import { Download, RotateCcw } from 'lucide-react'
 
 import Button from '../../../../shared/components/Button.jsx'
 import Input from '../../../../shared/components/Input.jsx'
 import Modal from '../../../../shared/components/Modal.jsx'
+import Select from '../../../../shared/components/Select.jsx'
+import { INVENTORY_ACTION_OPTIONS } from '../../data/inventoryActions.js'
+import {
+  buildInventoryHistoryCsv,
+  createInventoryHistoryFileName,
+  filterInventoryHistory,
+  formatInventoryHistoryDate,
+  getInventoryHistoryActionLabel,
+  getInventoryHistorySummary,
+  HISTORY_DATE_OPTIONS,
+} from '../../utils/inventoryHistoryHelpers.js'
 
 function HistoryModal({ isOpen, onClose, history = [] }) {
   const [searchTerm, setSearchTerm] = useState('')
+  const [actionFilter, setActionFilter] = useState('')
+  const [dateFilter, setDateFilter] = useState('')
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'No date'
+  const filteredHistory = useMemo(
+    () =>
+      filterInventoryHistory({
+        history,
+        searchTerm,
+        actionFilter,
+        dateFilter,
+      }),
+    [history, searchTerm, actionFilter, dateFilter],
+  )
+  const summary = useMemo(
+    () => getInventoryHistorySummary(filteredHistory),
+    [filteredHistory],
+  )
+  const hasFilters = Boolean(searchTerm || actionFilter || dateFilter)
 
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    }).format(new Date(dateString))
+  const clearFilters = () => {
+    setSearchTerm('')
+    setActionFilter('')
+    setDateFilter('')
   }
 
-  const filteredHistory = useMemo(() => {
-    const query = searchTerm.trim().toLowerCase()
+  const handleClose = () => {
+    clearFilters()
+    onClose()
+  }
 
-    if (!query) return history
-
-    return history.filter((record) => {
-      const searchableText = [
-        record.action,
-        record.partNumber,
-        record.quantity,
-        record.location,
-        record.fromLocation,
-        record.toLocation,
-        record.inventoryStatus,
-        record.person,
-        record.coworker,
-        record.machine,
-        record.customer,
-        record.ticketNumber,
-        record.notes,
-        record.originalPartNumber,
-        record.originalLocation,
-        formatDate(record.createdAt),
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase()
-
-      return searchableText.includes(query)
+  const handleExport = () => {
+    const csv = buildInventoryHistoryCsv(filteredHistory)
+    const blob = new Blob([`\uFEFF${csv}`], {
+      type: 'text/csv;charset=utf-8;',
     })
-  }, [history, searchTerm])
+    const downloadUrl = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+
+    link.href = downloadUrl
+    link.download = createInventoryHistoryFileName()
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(downloadUrl)
+  }
 
   return (
     <Modal
       isOpen={isOpen}
       title="History"
-      description="Review every inventory action saved on this device."
-      onClose={onClose}
+      description="Filter, review, and export your synced inventory activity."
+      onClose={handleClose}
       footer={
-        <Button type="button" variant="secondary" onClick={onClose}>
-          Close
-        </Button>
+        <>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleExport}
+            disabled={filteredHistory.length === 0}
+          >
+            <Download size={18} aria-hidden="true" />
+            Export Shown
+          </Button>
+
+          <Button type="button" variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+        </>
       }
     >
-      <div className="inventory-history-search">
+      <div className="inventory-history-controls">
         <Input
           id="inventory-history-search"
           label="Search History"
@@ -78,92 +103,132 @@ function HistoryModal({ isOpen, onClose, history = [] }) {
           spellCheck="false"
           placeholder="Part, box, customer, machine, ticket, notes..."
         />
+
+        <div className="inventory-history-filters">
+          <Select
+            id="inventory-history-action"
+            label="Action"
+            value={actionFilter}
+            onChange={(event) => setActionFilter(event.target.value)}
+            options={INVENTORY_ACTION_OPTIONS}
+            placeholder="All actions"
+          />
+
+          <Select
+            id="inventory-history-date"
+            label="Date"
+            value={dateFilter}
+            onChange={(event) => setDateFilter(event.target.value)}
+            options={HISTORY_DATE_OPTIONS}
+            placeholder="All dates"
+          />
+        </div>
+
+        {hasFilters && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="inventory-history-clear"
+            onClick={clearFilters}
+          >
+            <RotateCcw size={16} aria-hidden="true" />
+            Clear filters
+          </Button>
+        )}
+      </div>
+
+      <div className="inventory-history-summary" aria-label="Shown history summary">
+        <div>
+          <span>Shown</span>
+          <strong>{summary.recordCount}</strong>
+        </div>
+        <div>
+          <span>Parts</span>
+          <strong>{summary.uniqueParts}</strong>
+        </div>
+        <div>
+          <span>Action types</span>
+          <strong>{summary.actionTypes}</strong>
+        </div>
       </div>
 
       {filteredHistory.length > 0 ? (
         <div className="inventory-history-list">
           {filteredHistory.map((record) => (
-            <article key={record.id} className="inventory-history-card">
+            <article
+              key={record.id}
+              className={`inventory-history-card inventory-history-card--${String(
+                record.action || 'other',
+              ).toLowerCase()}`}
+            >
               <div className="inventory-history-card__header">
-                <strong>{record.action}</strong>
-                <span>{formatDate(record.createdAt)}</span>
+                <strong>{getInventoryHistoryActionLabel(record.action)}</strong>
+                <span>{formatInventoryHistoryDate(record.createdAt)}</span>
               </div>
 
               <div className="inventory-history-card__body">
                 <p>
                   <strong>Part:</strong> {record.partNumber}
                 </p>
-
                 <p>
                   <strong>Qty:</strong> {record.quantity}
                 </p>
-
                 {record.location && (
                   <p>
                     <strong>Location:</strong> {record.location}
                   </p>
                 )}
-
                 {record.fromLocation && (
                   <p>
                     <strong>From:</strong> {record.fromLocation}
                   </p>
                 )}
-
                 {record.toLocation && (
                   <p>
                     <strong>To:</strong> {record.toLocation}
                   </p>
                 )}
-
                 {record.inventoryStatus && (
                   <p>
                     <strong>Type:</strong> {record.inventoryStatus}
                   </p>
                 )}
-
                 {record.person && (
                   <p>
                     <strong>Used By:</strong> {record.person}
                   </p>
                 )}
-
                 {record.coworker && (
                   <p>
                     <strong>Coworker:</strong> {record.coworker}
                   </p>
                 )}
-
                 {record.machine && (
                   <p>
                     <strong>Machine:</strong> {record.machine}
                   </p>
                 )}
-
                 {record.customer && (
                   <p>
                     <strong>Customer:</strong> {record.customer}
                   </p>
                 )}
-
                 {record.ticketNumber && (
                   <p>
                     <strong>Ticket:</strong> {record.ticketNumber}
                   </p>
                 )}
-
                 {record.originalPartNumber && (
                   <p>
                     <strong>Original Part:</strong> {record.originalPartNumber}
                   </p>
                 )}
-
                 {record.originalLocation && (
                   <p>
                     <strong>Original Location:</strong> {record.originalLocation}
                   </p>
                 )}
-
                 {record.notes && (
                   <p>
                     <strong>Notes:</strong> {record.notes}
@@ -175,10 +240,10 @@ function HistoryModal({ isOpen, onClose, history = [] }) {
         </div>
       ) : (
         <div className="inventory-history-empty">
-          <h3>{searchTerm ? 'No history found' : 'No history yet'}</h3>
+          <h3>{hasFilters ? 'No history found' : 'No history yet'}</h3>
           <p>
-            {searchTerm
-              ? 'Try a different part number, box, customer, machine, or ticket.'
+            {hasFilters
+              ? 'Try changing or clearing the search and filters.'
               : 'Inventory actions will show here after you add, use, give, or move parts.'}
           </p>
         </div>

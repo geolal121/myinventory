@@ -1,8 +1,64 @@
 /* PHONE APP */
 /* Default mobile styles */
 
-.inventory-history-search {
+.inventory-history-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+
   margin-bottom: var(--spacing-4);
+}
+
+.inventory-history-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-3);
+}
+
+.inventory-history-clear.ui-button {
+  align-self: flex-start;
+}
+
+.inventory-history-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-2);
+
+  margin-bottom: var(--spacing-4);
+}
+
+.inventory-history-summary > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--spacing-1);
+
+  padding: var(--spacing-3);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+
+  background: var(--gradient-surface);
+
+  box-shadow: var(--shadow-sm);
+}
+
+.inventory-history-summary span {
+  overflow: hidden;
+
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inventory-history-summary strong {
+  color: var(--color-accent);
+
+  font-size: var(--font-size-xl);
+  line-height: 1;
 }
 
 .inventory-history-list {
@@ -13,6 +69,8 @@
 
 .inventory-history-card,
 .inventory-history-card.ui-card {
+  --history-accent: var(--color-accent);
+
   display: flex;
   flex-direction: column;
   gap: var(--spacing-3);
@@ -20,6 +78,7 @@
   padding: var(--spacing-4);
 
   border: 1px solid var(--color-border);
+  border-left: 4px solid var(--history-accent);
   border-radius: var(--card-radius);
 
   background: var(--gradient-card) !important;
@@ -29,6 +88,30 @@
   box-shadow: var(--card-shadow);
 }
 
+.inventory-history-card--add {
+  --history-accent: var(--color-success);
+}
+
+.inventory-history-card--use {
+  --history-accent: var(--color-warning);
+}
+
+.inventory-history-card--give {
+  --history-accent: var(--color-info);
+}
+
+.inventory-history-card--move {
+  --history-accent: var(--color-accent-bright);
+}
+
+.inventory-history-card--edit {
+  --history-accent: var(--color-accent);
+}
+
+.inventory-history-card--delete {
+  --history-accent: var(--color-danger);
+}
+
 .inventory-history-card__header {
   display: flex;
   flex-direction: column;
@@ -36,7 +119,7 @@
 }
 
 .inventory-history-card__header strong {
-  color: var(--color-orange);
+  color: var(--history-accent);
 
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
@@ -102,6 +185,18 @@
 /* SMALL PHONE (0px - 479px) */
 
 @media (max-width: 479px) {
+  .inventory-history-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-history-summary {
+    gap: var(--spacing-1);
+  }
+
+  .inventory-history-summary > div {
+    padding: var(--spacing-2);
+  }
+
   .inventory-history-card,
   .inventory-history-card.ui-card {
     padding: var(--spacing-3);
