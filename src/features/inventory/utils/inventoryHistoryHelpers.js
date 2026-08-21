@@ -3,6 +3,7 @@ const HISTORY_ACTION_LABELS = {
   USE: 'Use Part',
   GIVE: 'Give Part',
   MOVE: 'Move Part',
+  COUNT: 'Count Inventory',
   EDIT: 'Edit Part',
   DELETE: 'Delete Part',
 }
@@ -115,6 +116,15 @@ export const filterInventoryHistory = ({
         record.notes,
         record.originalPartNumber,
         record.originalLocation,
+        record.countedPartCount,
+        record.discrepancyCount,
+        ...(record.adjustments || []).flatMap((adjustment) => [
+          adjustment.partNumber,
+          adjustment.previousOfficialQuantity,
+          adjustment.countedOfficialQuantity,
+          adjustment.previousNoiQuantity,
+          adjustment.countedNoiQuantity,
+        ]),
         formatInventoryHistoryDate(record.createdAt),
       ]
         .filter((value) => value !== undefined && value !== null && value !== '')
@@ -167,6 +177,10 @@ export const buildInventoryHistoryCsv = (history = []) => {
     'Original Part',
     'Original Location',
     'Notes',
+    'Parts Counted',
+    'Corrections',
+    'Previous Total',
+    'Counted Total',
   ]
   const rows = history.map((record) => [
     formatInventoryHistoryDate(record.createdAt),
@@ -185,6 +199,10 @@ export const buildInventoryHistoryCsv = (history = []) => {
     record.originalPartNumber,
     record.originalLocation,
     record.notes,
+    record.countedPartCount,
+    record.discrepancyCount,
+    record.previousTotalQuantity,
+    record.countedTotalQuantity,
   ])
 
   return [headers, ...rows]

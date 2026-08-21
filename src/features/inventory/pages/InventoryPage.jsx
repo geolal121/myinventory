@@ -2,7 +2,9 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowRightLeft,
   Boxes,
+  ChevronRight,
   CircleCheck,
+  ClipboardCheck,
   Download,
   FileSpreadsheet,
   Ghost,
@@ -42,6 +44,7 @@ import EditPartDescriptionModal from '../components/modals/EditPartDescriptionMo
 import GivePartModal from '../components/modals/GivePartModal.jsx'
 import HistoryModal from '../components/modals/HistoryModal.jsx'
 import InventoryBackupModal from '../components/modals/InventoryBackupModal.jsx'
+import InventoryCountModal from '../components/modals/InventoryCountModal.jsx'
 import InventorySummaryModal from '../components/modals/InventorySummaryModal.jsx'
 import ManageLocationsModal from '../components/modals/ManageLocationsModal.jsx'
 import MovePartModal from '../components/modals/MovePartModal.jsx'
@@ -68,6 +71,7 @@ import {
   mergeInventoryBackup,
 } from '../utils/inventoryBackup.js'
 import { analyzeInventoryHealth } from '../utils/inventoryHealth.js'
+import { applyInventoryCount } from '../utils/inventoryCountHelpers.js'
 import {
   applyWorkbookDescriptionsToPartCatalog,
   buildPartCatalog,
@@ -106,6 +110,7 @@ import {
 import '../styles/inventory-page.css'
 import '../styles/inventory-forms.css'
 import '../styles/inventory-history.css'
+import '../styles/inventory-count.css'
 
 const INVENTORY_VIEW_TABS = {
   BOXES: 'BOXES',
@@ -134,6 +139,7 @@ const INVENTORY_ACTION_LABELS = {
   [INVENTORY_ACTIONS.USE]: 'Part usage saved',
   [INVENTORY_ACTIONS.GIVE]: 'Part transfer saved',
   [INVENTORY_ACTIONS.MOVE]: 'Part moved',
+  [INVENTORY_ACTIONS.COUNT]: 'Inventory count saved',
   [INVENTORY_ACTIONS.EDIT]: 'Part updated',
   [INVENTORY_ACTIONS.DELETE]: 'Part deleted',
 }
@@ -866,6 +872,52 @@ function InventoryPage() {
     })
   }
 
+  const handleInventoryCount = ({ location, counts }) => {
+    const countResult = applyInventoryCount({
+      items: inventoryItems,
+      history: inventoryHistory,
+      location,
+      counts,
+    })
+
+    if (!countResult.isValid) return countResult
+
+    setInventoryItems(countResult.items)
+    setInventoryHistory(countResult.history)
+    showUndoAction({
+      type: 'inventory',
+      message:
+        countResult.review.discrepancyCount > 0
+          ? `${location} count saved · ${countResult.review.discrepancyCount} corrected`
+          : `${location} count complete`,
+      previousItems: inventoryItems,
+      currentItems: countResult.items,
+      previousHistory: inventoryHistory,
+      previousCatalog: partCatalog,
+      currentCatalog: partCatalog,
+      previousLocations: savedLocations,
+      currentLocations: savedLocations,
+      previousRemovedLocations: removedLocations,
+      historyRecordId: countResult.historyRecord.id,
+    })
+    setSyncStatus(getOnlineSyncStatus())
+
+    syncInventoryTransactionToCloud({
+      items: countResult.changedItems,
+      historyRecord: countResult.historyRecord,
+      deletedItemIds: countResult.deletedItemIds,
+    })
+      .then(() => {
+        setSyncStatus(getOnlineSyncStatus('Cloud Synced'))
+      })
+      .catch((error) => {
+        console.error('Failed to sync inventory count:', error)
+        setSyncStatus(getOnlineSyncStatus('Offline Ready'))
+      })
+
+    return countResult
+  }
+
   const handleAddLocation = (locationName) => {
     const cleanLocation = locationName.trim()
     const normalizedLocation = cleanLocation.toUpperCase()
@@ -1511,6 +1563,25 @@ function InventoryPage() {
           </Button>
         </section>
 
+        <Button
+          variant="secondary"
+          className="inventory-count-launch"
+          onClick={() => openModal('count')}
+        >
+          <span className="inventory-count-launch__icon">
+            <ClipboardCheck size={22} aria-hidden="true" />
+          </span>
+          <span className="inventory-count-launch__copy">
+            <strong>Count Inventory</strong>
+            <small>Verify a location, review differences, and save corrections.</small>
+          </span>
+          <ChevronRight
+            className="inventory-count-launch__arrow"
+            size={20}
+            aria-hidden="true"
+          />
+        </Button>
+
         <section className="inventory-page__summary" aria-label="Inventory summary">
           <Card
             as="button"
@@ -1956,6 +2027,13 @@ function InventoryPage() {
         onEditDescription={(part) =>
           openCatalogDescriptionModal(part, 'summary')
         }
+      />
+
+      <InventoryCountModal
+        isOpen={activeModal === 'count'}
+        onClose={closeModal}
+        locationGroups={activeLocationGroups}
+        onSubmit={handleInventoryCount}
       />
 
       <EditPartDescriptionModal

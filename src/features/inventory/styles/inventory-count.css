@@ -1,0 +1,425 @@
+/* GUIDED INVENTORY COUNT */
+
+.inventory-count-launch.ui-button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--spacing-3);
+
+  width: 100%;
+  padding: var(--spacing-4);
+
+  border-color: color-mix(in srgb, var(--color-accent) 28%, var(--color-border));
+
+  background:
+    radial-gradient(circle at 92% 18%, var(--color-accent-soft), transparent 9rem),
+    var(--gradient-surface);
+
+  color: var(--color-text-primary);
+  text-align: left;
+
+  box-shadow: var(--card-shadow);
+}
+
+.inventory-count-launch.ui-button:hover {
+  border-color: var(--color-accent);
+
+  background:
+    radial-gradient(circle at 92% 18%, var(--color-accent-soft), transparent 9rem),
+    var(--gradient-surface);
+}
+
+.inventory-count-launch__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 46px;
+  height: 46px;
+
+  border-radius: var(--radius-md);
+
+  background: var(--gradient-accent);
+
+  color: var(--color-text-inverse);
+}
+
+.inventory-count-launch__copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.inventory-count-launch__copy strong {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-md);
+}
+
+.inventory-count-launch__copy small {
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.4;
+}
+
+.inventory-count-launch__arrow {
+  color: var(--color-accent);
+}
+
+.inventory-count-modal {
+  max-width: 820px;
+}
+
+.inventory-count {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.inventory-count__progress {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+
+  padding: var(--spacing-3);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+
+  background: rgba(255, 255, 255, 0.96);
+
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(12px);
+}
+
+.inventory-count__progress-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+}
+
+.inventory-count__progress-heading > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.inventory-count__progress-heading strong {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-sm);
+}
+
+.inventory-count__progress-heading > strong {
+  color: var(--color-accent);
+
+  font-size: var(--font-size-lg);
+}
+
+.inventory-count__progress-heading span {
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-xs);
+}
+
+.inventory-count__progress-track {
+  height: 8px;
+
+  overflow: hidden;
+
+  border-radius: var(--radius-full);
+
+  background: var(--color-surface-elevated);
+}
+
+.inventory-count__progress-track span {
+  display: block;
+
+  height: 100%;
+
+  border-radius: inherit;
+
+  background: var(--gradient-accent);
+
+  transition: width var(--transition-normal);
+}
+
+.inventory-count__list,
+.inventory-count__review,
+.inventory-count__differences {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.inventory-count__card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--spacing-3);
+
+  background: var(--gradient-surface);
+}
+
+.inventory-count__card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+}
+
+.inventory-count__card-heading > div {
+  min-width: 0;
+}
+
+.inventory-count__card-heading h3,
+.inventory-count__difference h3,
+.inventory-count__review-heading h3,
+.inventory-count__all-clear h3,
+.inventory-count__empty h3 {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-md);
+
+  overflow-wrap: anywhere;
+}
+
+.inventory-count__card-heading p,
+.inventory-count__difference p,
+.inventory-count__review-heading p,
+.inventory-count__all-clear p,
+.inventory-count__empty p {
+  margin-top: var(--spacing-1);
+
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-xs);
+
+  overflow-wrap: anywhere;
+}
+
+.inventory-count__status {
+  flex: 0 0 auto;
+
+  padding: var(--spacing-1) var(--spacing-2);
+
+  border-radius: var(--radius-full);
+
+  background: var(--color-surface-elevated);
+
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.inventory-count__status--matched {
+  background: var(--color-success-soft);
+
+  color: var(--color-success);
+}
+
+.inventory-count__status--different {
+  background: var(--color-warning-soft);
+
+  color: var(--color-warning);
+}
+
+.inventory-count__expected,
+.inventory-count__inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-2);
+}
+
+.inventory-count__expected span {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+
+  padding: var(--spacing-2) var(--spacing-3);
+
+  border-radius: var(--radius-md);
+
+  background: var(--color-surface-soft);
+
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-xs);
+}
+
+.inventory-count__expected strong {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-lg);
+}
+
+.inventory-count__card > .ui-button {
+  align-self: flex-end;
+}
+
+.inventory-count__review-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-2);
+}
+
+.inventory-count__review-summary .ui-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--spacing-1);
+
+  background: var(--gradient-surface);
+}
+
+.inventory-count__review-summary span {
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-xs);
+}
+
+.inventory-count__review-summary strong {
+  color: var(--color-accent);
+
+  font-size: var(--font-size-xl);
+}
+
+.inventory-count__review-heading > div,
+.inventory-count__all-clear,
+.inventory-count__save-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+}
+
+.inventory-count__review-heading > div {
+  color: var(--color-warning);
+}
+
+.inventory-count__review-heading svg,
+.inventory-count__all-clear svg,
+.inventory-count__save-note svg {
+  flex: 0 0 auto;
+
+  margin-top: 1px;
+}
+
+.inventory-count__difference {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+
+  border-left: 4px solid var(--color-warning);
+
+  background: var(--gradient-surface);
+}
+
+.inventory-count__difference > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2) var(--spacing-4);
+}
+
+.inventory-count__difference span {
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-sm);
+}
+
+.inventory-count__difference strong {
+  color: var(--color-text-primary);
+}
+
+.inventory-count__all-clear,
+.inventory-count__save-note {
+  padding: var(--spacing-3);
+
+  border-radius: var(--radius-md);
+}
+
+.inventory-count__all-clear {
+  background: var(--color-success-soft);
+
+  color: var(--color-success);
+}
+
+.inventory-count__save-note {
+  background: var(--color-info-soft);
+
+  color: var(--color-info);
+}
+
+.inventory-count__save-note p {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-sm);
+}
+
+.inventory-count__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-2);
+
+  padding: var(--spacing-6);
+
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--card-radius);
+
+  background: var(--gradient-surface);
+
+  color: var(--color-accent);
+  text-align: center;
+}
+
+@media (max-width: 479px) {
+  .inventory-count-launch.ui-button {
+    padding: var(--spacing-3);
+  }
+
+  .inventory-count-launch__icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .inventory-count__progress,
+  .inventory-count__card {
+    padding: var(--spacing-3);
+  }
+
+  .inventory-count__card-heading {
+    flex-direction: column;
+    gap: var(--spacing-2);
+  }
+
+  .inventory-count__status {
+    align-self: flex-start;
+  }
+
+  .inventory-count__card > .ui-button {
+    width: 100%;
+  }
+
+  .inventory-count__review-summary {
+    gap: var(--spacing-1);
+  }
+
+  .inventory-count__review-summary .ui-card {
+    padding: var(--spacing-2);
+  }
+}
+
+@media (min-width: 1200px) {
+  .inventory-count-modal {
+    max-width: 880px;
+  }
+}

@@ -5,7 +5,10 @@ import Button from '../../../../shared/components/Button.jsx'
 import Input from '../../../../shared/components/Input.jsx'
 import Modal from '../../../../shared/components/Modal.jsx'
 import Select from '../../../../shared/components/Select.jsx'
-import { INVENTORY_ACTION_OPTIONS } from '../../data/inventoryActions.js'
+import {
+  INVENTORY_ACTION_OPTIONS,
+  INVENTORY_ACTIONS,
+} from '../../data/inventoryActions.js'
 import {
   buildInventoryHistoryCsv,
   createInventoryHistoryFileName,
@@ -168,12 +171,35 @@ function HistoryModal({ isOpen, onClose, history = [] }) {
               </div>
 
               <div className="inventory-history-card__body">
-                <p>
-                  <strong>Part:</strong> {record.partNumber}
-                </p>
-                <p>
-                  <strong>Qty:</strong> {record.quantity}
-                </p>
+                {record.action === INVENTORY_ACTIONS.COUNT ? (
+                  <>
+                    <p>
+                      <strong>Parts Checked:</strong>{' '}
+                      {record.countedPartCount || 0}
+                    </p>
+                    <p>
+                      <strong>Corrections:</strong>{' '}
+                      {record.discrepancyCount || 0}
+                    </p>
+                    <p>
+                      <strong>Previous Total:</strong>{' '}
+                      {record.previousTotalQuantity || 0}
+                    </p>
+                    <p>
+                      <strong>Counted Total:</strong>{' '}
+                      {record.countedTotalQuantity || 0}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p>
+                      <strong>Part:</strong> {record.partNumber}
+                    </p>
+                    <p>
+                      <strong>Qty:</strong> {record.quantity}
+                    </p>
+                  </>
+                )}
                 {record.location && (
                   <p>
                     <strong>Location:</strong> {record.location}

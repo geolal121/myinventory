@@ -104,6 +104,10 @@
   --history-accent: var(--color-accent-bright);
 }
 
+.inventory-history-card--count {
+  --history-accent: var(--color-success);
+}
+
 .inventory-history-card--edit {
   --history-accent: var(--color-accent);
 }
