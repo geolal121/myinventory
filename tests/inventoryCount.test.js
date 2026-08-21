@@ -7,6 +7,11 @@ import {
   createInventoryCountFileName,
   reviewInventoryCount,
 } from '../src/features/inventory/utils/inventoryCountHelpers.js'
+import {
+  deleteInventoryCountDraft,
+  loadInventoryCountDrafts,
+  saveInventoryCountDraft,
+} from '../src/features/inventory/utils/inventoryStorage.js'
 
 const inventoryItems = [
   {
@@ -143,4 +148,59 @@ test('count reports preserve descriptions and create location-specific filenames
     }),
     'inventory-count-box-1-2026-08-20.csv',
   )
+})
+
+test('unfinished counts save by location and can be resumed or discarded', () => {
+  const storedValues = new Map()
+  const originalLocalStorage = globalThis.localStorage
+
+  globalThis.localStorage = {
+    getItem: (key) => storedValues.get(key) ?? null,
+    setItem: (key, value) => storedValues.set(key, value),
+    removeItem: (key) => storedValues.delete(key),
+  }
+
+  try {
+    saveInventoryCountDraft({
+      location: 'Box 1',
+      counts: {
+        'A123__BOX 1': { officialQuantity: '3', noiQuantity: '1' },
+      },
+      step: 'COUNT',
+      savedAt: '2026-08-20T12:00:00.000Z',
+    })
+    saveInventoryCountDraft({
+      location: 'Box 2',
+      counts: {
+        'A123__BOX 2': { officialQuantity: '9', noiQuantity: '0' },
+      },
+      step: 'REVIEW',
+      savedAt: '2026-08-20T13:00:00.000Z',
+    })
+
+    const savedDrafts = loadInventoryCountDrafts()
+
+    assert.deepEqual(
+      savedDrafts.map((draft) => draft.location),
+      ['Box 2', 'Box 1'],
+    )
+    assert.equal(
+      savedDrafts[1].counts['A123__BOX 1'].officialQuantity,
+      '3',
+    )
+    assert.equal(savedDrafts[0].step, 'REVIEW')
+
+    deleteInventoryCountDraft('box 2')
+
+    assert.deepEqual(
+      loadInventoryCountDrafts().map((draft) => draft.location),
+      ['Box 1'],
+    )
+  } finally {
+    if (originalLocalStorage === undefined) {
+      delete globalThis.localStorage
+    } else {
+      globalThis.localStorage = originalLocalStorage
+    }
+  }
 })

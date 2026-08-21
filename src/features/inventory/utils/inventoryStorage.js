@@ -6,6 +6,7 @@ const INVENTORY_STORAGE_KEYS = {
   removedLocations: 'truck_inventory_removed_locations',
   archivedLocations: 'truck_inventory_archived_locations',
   pendingSync: 'truck_inventory_pending_sync',
+  inventoryCountDrafts: 'truck_inventory_count_drafts',
 }
 
 const readStorage = (key, fallbackValue = []) => {
@@ -87,6 +88,92 @@ export const loadPendingSync = () => {
 
 export const savePendingSync = (pendingSyncItems) => {
   return writeStorage(INVENTORY_STORAGE_KEYS.pendingSync, pendingSyncItems)
+}
+
+const normalizeInventoryCountDraft = (draft = {}) => {
+  const location = String(draft?.location || '').trim()
+
+  if (!location) return null
+
+  const counts = Object.entries(draft?.counts || {}).reduce(
+    (cleanCounts, [itemId, entry]) => {
+      if (!itemId || !entry || typeof entry !== 'object') return cleanCounts
+
+      const cleanEntry = {}
+
+      if (entry.officialQuantity !== undefined) {
+        cleanEntry.officialQuantity = String(entry.officialQuantity)
+      }
+
+      if (entry.noiQuantity !== undefined) {
+        cleanEntry.noiQuantity = String(entry.noiQuantity)
+      }
+
+      if (Object.keys(cleanEntry).length > 0) {
+        cleanCounts[itemId] = cleanEntry
+      }
+
+      return cleanCounts
+    },
+    {},
+  )
+  const savedDate = new Date(draft.savedAt || '')
+
+  return {
+    version: 1,
+    location,
+    counts,
+    step: draft.step === 'REVIEW' ? 'REVIEW' : 'COUNT',
+    savedAt: Number.isNaN(savedDate.getTime())
+      ? new Date().toISOString()
+      : savedDate.toISOString(),
+  }
+}
+
+const getInventoryCountDraftKey = (location = '') => {
+  return String(location).trim().toUpperCase()
+}
+
+export const loadInventoryCountDrafts = () => {
+  const storedDrafts = readStorage(INVENTORY_STORAGE_KEYS.inventoryCountDrafts, [])
+
+  if (!Array.isArray(storedDrafts)) return []
+
+  return storedDrafts
+    .map(normalizeInventoryCountDraft)
+    .filter(Boolean)
+    .sort((first, second) => second.savedAt.localeCompare(first.savedAt))
+}
+
+export const saveInventoryCountDraft = (draft) => {
+  const cleanDraft = normalizeInventoryCountDraft(draft)
+  const currentDrafts = loadInventoryCountDrafts()
+
+  if (!cleanDraft) return currentDrafts
+
+  const draftKey = getInventoryCountDraftKey(cleanDraft.location)
+  const nextDrafts = [
+    cleanDraft,
+    ...currentDrafts.filter(
+      (currentDraft) =>
+        getInventoryCountDraftKey(currentDraft.location) !== draftKey,
+    ),
+  ]
+
+  writeStorage(INVENTORY_STORAGE_KEYS.inventoryCountDrafts, nextDrafts)
+
+  return nextDrafts
+}
+
+export const deleteInventoryCountDraft = (location) => {
+  const draftKey = getInventoryCountDraftKey(location)
+  const nextDrafts = loadInventoryCountDrafts().filter(
+    (draft) => getInventoryCountDraftKey(draft.location) !== draftKey,
+  )
+
+  writeStorage(INVENTORY_STORAGE_KEYS.inventoryCountDrafts, nextDrafts)
+
+  return nextDrafts
 }
 
 export const clearInventoryStorage = () => {

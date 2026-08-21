@@ -1,9 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Check,
   ClipboardCheck,
   Download,
   RotateCcw,
+  Save,
+  Trash2,
   TriangleAlert,
 } from 'lucide-react'
 
@@ -17,10 +19,35 @@ import {
   createInventoryCountFileName,
   reviewInventoryCount,
 } from '../../utils/inventoryCountHelpers.js'
+import {
+  deleteInventoryCountDraft,
+  loadInventoryCountDrafts,
+  saveInventoryCountDraft,
+} from '../../utils/inventoryStorage.js'
 
 const COUNT_STEPS = {
   COUNT: 'COUNT',
   REVIEW: 'REVIEW',
+}
+
+const isSameLocation = (firstLocation = '', secondLocation = '') => {
+  return (
+    String(firstLocation).trim().toUpperCase() ===
+    String(secondLocation).trim().toUpperCase()
+  )
+}
+
+const formatDraftTime = (savedAt) => {
+  const savedDate = new Date(savedAt || '')
+
+  if (Number.isNaN(savedDate.getTime())) return 'Saved automatically'
+
+  return `Saved ${new Intl.DateTimeFormat(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(savedDate)}`
 }
 
 function InventoryCountModal({
@@ -33,6 +60,9 @@ function InventoryCountModal({
   const [counts, setCounts] = useState({})
   const [step, setStep] = useState(COUNT_STEPS.COUNT)
   const [errorMessage, setErrorMessage] = useState('')
+  const [savedDrafts, setSavedDrafts] = useState([])
+  const [pendingResumeDraft, setPendingResumeDraft] = useState(null)
+  const initializedForOpenRef = useRef(false)
 
   const countableLocationGroups = useMemo(
     () => locationGroups.filter((locationGroup) => locationGroup.items.length > 0),
@@ -49,6 +79,29 @@ function InventoryCountModal({
     () => selectedLocationGroup?.items || [],
     [selectedLocationGroup],
   )
+  const activeDraft = useMemo(
+    () =>
+      savedDrafts.find((draft) =>
+        isSameLocation(draft.location, selectedLocation),
+      ) || null,
+    [savedDrafts, selectedLocation],
+  )
+  const pendingResumeLocationGroup = useMemo(
+    () =>
+      countableLocationGroups.find((locationGroup) =>
+        isSameLocation(locationGroup.location, pendingResumeDraft?.location),
+      ),
+    [countableLocationGroups, pendingResumeDraft],
+  )
+  const pendingResumeReview = useMemo(
+    () =>
+      reviewInventoryCount({
+        items: pendingResumeLocationGroup?.items || [],
+        location: pendingResumeDraft?.location || '',
+        counts: pendingResumeDraft?.counts || {},
+      }),
+    [pendingResumeDraft, pendingResumeLocationGroup],
+  )
   const review = useMemo(
     () =>
       reviewInventoryCount({
@@ -61,18 +114,65 @@ function InventoryCountModal({
   const progressPercentage = review.totalParts
     ? Math.round((review.countedParts / review.totalParts) * 100)
     : 0
-  const locationOptions = countableLocationGroups.map((locationGroup) => ({
-    value: locationGroup.location,
-    label: `${locationGroup.location} · ${locationGroup.partCount} part${
-      locationGroup.partCount === 1 ? '' : 's'
-    }`,
-  }))
+  const locationOptions = countableLocationGroups.map((locationGroup) => {
+    const hasSavedDraft = savedDrafts.some((draft) =>
+      isSameLocation(draft.location, locationGroup.location),
+    )
+
+    return {
+      value: locationGroup.location,
+      label: `${locationGroup.location} · ${locationGroup.partCount} part${
+        locationGroup.partCount === 1 ? '' : 's'
+      }${hasSavedDraft ? ' · Draft saved' : ''}`,
+    }
+  })
+
+  useEffect(() => {
+    if (!isOpen) {
+      initializedForOpenRef.current = false
+      return
+    }
+
+    if (initializedForOpenRef.current) return
+
+    const validLocationNames = new Set(
+      countableLocationGroups.map((locationGroup) =>
+        locationGroup.location.trim().toUpperCase(),
+      ),
+    )
+    const storedDrafts = loadInventoryCountDrafts().filter((draft) =>
+      validLocationNames.has(draft.location.trim().toUpperCase()),
+    )
+
+    setSavedDrafts(storedDrafts)
+    setPendingResumeDraft(storedDrafts[0] || null)
+    initializedForOpenRef.current = true
+  }, [countableLocationGroups, isOpen])
+
+  const persistDraft = ({
+    location = selectedLocation,
+    nextCounts = counts,
+    nextStep = step,
+  } = {}) => {
+    if (!location || Object.keys(nextCounts).length === 0) return
+
+    const nextDrafts = saveInventoryCountDraft({
+      location,
+      counts: nextCounts,
+      step: nextStep,
+      savedAt: new Date().toISOString(),
+    })
+
+    setSavedDrafts(nextDrafts)
+  }
 
   const resetModal = () => {
     setSelectedLocation('')
     setCounts({})
     setStep(COUNT_STEPS.COUNT)
     setErrorMessage('')
+    setSavedDrafts([])
+    setPendingResumeDraft(null)
   }
 
   const handleClose = () => {
@@ -81,31 +181,84 @@ function InventoryCountModal({
   }
 
   const handleLocationChange = (event) => {
-    setSelectedLocation(event.target.value)
+    const nextLocation = event.target.value
+    const savedDraft = savedDrafts.find((draft) =>
+      isSameLocation(draft.location, nextLocation),
+    )
+
+    if (savedDraft) {
+      resumeDraft(savedDraft)
+      return
+    }
+
+    setSelectedLocation(nextLocation)
     setCounts({})
     setStep(COUNT_STEPS.COUNT)
     setErrorMessage('')
+    setPendingResumeDraft(null)
+  }
+
+  const resumeDraft = (draft) => {
+    const draftLocationGroup = countableLocationGroups.find((locationGroup) =>
+      isSameLocation(locationGroup.location, draft.location),
+    )
+    const draftReview = reviewInventoryCount({
+      items: draftLocationGroup?.items || [],
+      location: draft.location,
+      counts: draft.counts,
+    })
+
+    setSelectedLocation(draftLocationGroup?.location || draft.location)
+    setCounts(draft.counts)
+    setStep(
+      draft.step === COUNT_STEPS.REVIEW && draftReview.isComplete
+        ? COUNT_STEPS.REVIEW
+        : COUNT_STEPS.COUNT,
+    )
+    setErrorMessage('')
+    setPendingResumeDraft(null)
+  }
+
+  const discardDraft = (location) => {
+    const nextDrafts = deleteInventoryCountDraft(location)
+
+    setSavedDrafts(nextDrafts)
+    setPendingResumeDraft((currentDraft) =>
+      isSameLocation(currentDraft?.location, location) ? null : currentDraft,
+    )
+
+    if (isSameLocation(selectedLocation, location)) {
+      setCounts({})
+      setStep(COUNT_STEPS.COUNT)
+      setErrorMessage('')
+    }
   }
 
   const updateCount = (itemId, field, value) => {
-    setCounts((currentCounts) => ({
-      ...currentCounts,
+    const nextCounts = {
+      ...counts,
       [itemId]: {
-        ...(currentCounts[itemId] || {}),
+        ...(counts[itemId] || {}),
         [field]: value,
       },
-    }))
+    }
+
+    setCounts(nextCounts)
+    persistDraft({ nextCounts })
     setErrorMessage('')
   }
 
   const markAsMatching = (item) => {
-    setCounts((currentCounts) => ({
-      ...currentCounts,
+    const nextCounts = {
+      ...counts,
       [item.id]: {
         officialQuantity: String(Number(item.officialQuantity || 0)),
         noiQuantity: String(Number(item.noiQuantity || 0)),
       },
-    }))
+    }
+
+    setCounts(nextCounts)
+    persistDraft({ nextCounts })
     setErrorMessage('')
   }
 
@@ -121,6 +274,7 @@ function InventoryCountModal({
 
     setErrorMessage('')
     setStep(COUNT_STEPS.REVIEW)
+    persistDraft({ nextStep: COUNT_STEPS.REVIEW })
   }
 
   const handleSave = () => {
@@ -134,6 +288,7 @@ function InventoryCountModal({
       return
     }
 
+    deleteInventoryCountDraft(selectedLocation)
     handleClose()
   }
 
@@ -167,6 +322,7 @@ function InventoryCountModal({
           onClick={() => {
             setStep(COUNT_STEPS.COUNT)
             setErrorMessage('')
+            persistDraft({ nextStep: COUNT_STEPS.COUNT })
           }}
         >
           Back to Count
@@ -207,6 +363,40 @@ function InventoryCountModal({
     >
       {countableLocationGroups.length > 0 ? (
         <div className="inventory-count">
+          {pendingResumeDraft && pendingResumeLocationGroup && (
+            <section className="inventory-count__resume" aria-label="Saved count draft">
+              <div className="inventory-count__resume-heading">
+                <Save size={21} aria-hidden="true" />
+                <div>
+                  <strong>Continue counting {pendingResumeDraft.location}?</strong>
+                  <span>
+                    {pendingResumeReview.countedParts} of{' '}
+                    {pendingResumeReview.totalParts} parts entered ·{' '}
+                    {formatDraftTime(pendingResumeDraft.savedAt)}
+                  </span>
+                </div>
+              </div>
+              <div className="inventory-count__resume-actions">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => discardDraft(pendingResumeDraft.location)}
+                >
+                  <Trash2 size={16} aria-hidden="true" />
+                  Discard
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => resumeDraft(pendingResumeDraft)}
+                >
+                  Resume Count
+                </Button>
+              </div>
+            </section>
+          )}
+
           <Select
             id="inventory-count-location"
             label="Location to Count"
@@ -218,6 +408,26 @@ function InventoryCountModal({
 
           {selectedItems.length > 0 && (
             <>
+              {activeDraft && (
+                <div className="inventory-count__draft-status" aria-live="polite">
+                  <div>
+                    <Save size={17} aria-hidden="true" />
+                    <span>
+                      <strong>Draft saves automatically</strong>
+                      {formatDraftTime(activeDraft.savedAt)} on this device
+                    </span>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => discardDraft(selectedLocation)}
+                  >
+                    Restart
+                  </Button>
+                </div>
+              )}
+
               <section className="inventory-count__progress" aria-live="polite">
                 <div className="inventory-count__progress-heading">
                   <div>

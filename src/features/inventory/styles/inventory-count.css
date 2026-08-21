@@ -79,6 +79,77 @@
   gap: var(--spacing-4);
 }
 
+.inventory-count__resume,
+.inventory-count__draft-status {
+  border: 1px solid color-mix(in srgb, var(--color-accent) 28%, var(--color-border));
+  border-radius: var(--radius-lg);
+
+  background: var(--color-info-soft);
+}
+
+.inventory-count__resume {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+
+  padding: var(--spacing-3);
+}
+
+.inventory-count__resume-heading,
+.inventory-count__draft-status > div {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+
+  color: var(--color-accent);
+}
+
+.inventory-count__resume-heading svg,
+.inventory-count__draft-status svg {
+  flex: 0 0 auto;
+
+  margin-top: 2px;
+}
+
+.inventory-count__resume-heading > div,
+.inventory-count__draft-status span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.inventory-count__resume-heading strong,
+.inventory-count__draft-status strong {
+  color: var(--color-text-primary);
+
+  font-size: var(--font-size-sm);
+}
+
+.inventory-count__resume-heading span,
+.inventory-count__draft-status span {
+  color: var(--color-text-secondary);
+
+  font-size: var(--font-size-xs);
+}
+
+.inventory-count__resume-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--spacing-2);
+}
+
+.inventory-count__draft-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+
+  padding: var(--spacing-2) var(--spacing-3);
+}
+
 .inventory-count__progress {
   position: sticky;
   top: 0;
@@ -394,6 +465,23 @@
   .inventory-count__progress,
   .inventory-count__card {
     padding: var(--spacing-3);
+  }
+
+  .inventory-count__resume {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .inventory-count__resume-actions {
+    width: 100%;
+  }
+
+  .inventory-count__resume-actions .ui-button {
+    flex: 1 1 0;
+  }
+
+  .inventory-count__draft-status {
+    align-items: flex-start;
   }
 
   .inventory-count__card-heading {
