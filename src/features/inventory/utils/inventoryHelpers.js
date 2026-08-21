@@ -17,6 +17,21 @@ export const formatPartNumberInput = (value = '') => {
   return String(value).toUpperCase().replace(/[^A-Z0-9-]/g, '')
 }
 
+export const formatPartNumberSearchInput = (value = '') => {
+  const cleanValue = formatPartNumberInput(value)
+
+  if (/[A-Z]/.test(cleanValue)) {
+    return cleanValue
+  }
+
+  const digits = cleanValue.replace(/\D/g, '')
+
+  if (digits.length <= 3) return digits
+  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`
+
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`
+}
+
 export const normalizeText = (text = '') => {
   return text.trim()
 }

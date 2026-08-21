@@ -88,6 +88,48 @@ export const syncSavedLocationsToCloud = async (locations = []) => {
   )
 }
 
+export const syncRemovedLocationsToCloud = async (locations = []) => {
+  await Promise.all(
+    locations.map((location) => saveRemovedLocationToFirebase(location)),
+  )
+}
+
+export const syncArchivedLocationsToCloud = async (archives = []) => {
+  await Promise.all(
+    archives.map((archive) =>
+      saveArchivedLocationToFirebase({
+        location: archive.location,
+        items: archive.items,
+        deletedAt: archive.deletedAt,
+      }),
+    ),
+  )
+}
+
+export const mergeInventoryBackupToCloud = async ({
+  inventoryItems = [],
+  partCatalog = [],
+  inventoryHistory = [],
+  savedLocations = [],
+  removedLocations = [],
+  archivedLocations = [],
+}) => {
+  await Promise.all([
+    syncInventoryItemsToCloud(inventoryItems),
+    syncPartCatalogToCloud(partCatalog),
+    syncInventoryHistoryToCloud(inventoryHistory),
+    syncSavedLocationsToCloud(savedLocations),
+    syncRemovedLocationsToCloud(removedLocations),
+    syncArchivedLocationsToCloud(archivedLocations),
+    ...savedLocations.map((location) =>
+      deleteRemovedLocationFromFirebase(location),
+    ),
+    ...savedLocations.map((location) =>
+      deleteArchivedLocationFromFirebase(location),
+    ),
+  ])
+}
+
 export const syncInventoryTransactionToCloud = async ({
   items = [],
   historyRecord = null,

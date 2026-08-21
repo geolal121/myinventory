@@ -15,9 +15,11 @@ import {
   PackageMinus,
   PackagePlus,
   RotateCcw,
+  ShieldCheck,
   TrendingUp,
   TextSearch,
   TriangleAlert,
+  Upload,
   X,
 } from 'lucide-react'
 
@@ -37,6 +39,7 @@ import EditPartModal from '../components/modals/EditPartModal.jsx'
 import EditPartDescriptionModal from '../components/modals/EditPartDescriptionModal.jsx'
 import GivePartModal from '../components/modals/GivePartModal.jsx'
 import HistoryModal from '../components/modals/HistoryModal.jsx'
+import InventoryBackupModal from '../components/modals/InventoryBackupModal.jsx'
 import InventorySummaryModal from '../components/modals/InventorySummaryModal.jsx'
 import ManageLocationsModal from '../components/modals/ManageLocationsModal.jsx'
 import MovePartModal from '../components/modals/MovePartModal.jsx'
@@ -49,7 +52,7 @@ import {
   buildInventoryTransaction,
   downloadInventoryCsv,
   findInventoryItemsByPartNumber,
-  formatPartNumberInput,
+  formatPartNumberSearchInput,
   getInventorySummary,
   getMostUsedParts,
   groupInventoryByLocation,
@@ -57,6 +60,11 @@ import {
   removeRedundantZeroLocationItems,
   renameInventoryLocation,
 } from '../utils/inventoryHelpers.js'
+import {
+  createInventoryBackup,
+  createInventoryBackupFileName,
+  mergeInventoryBackup,
+} from '../utils/inventoryBackup.js'
 import {
   applyWorkbookDescriptionsToPartCatalog,
   buildPartCatalog,
@@ -83,6 +91,7 @@ import {
   addInventoryLocationToCloud,
   deleteInventoryLocationFromCloud,
   loadInventoryCloudData,
+  mergeInventoryBackupToCloud,
   renameInventoryLocationInCloud,
   restoreInventoryLocationToCloud,
   syncInventoryTransactionToCloud,
@@ -596,7 +605,7 @@ function InventoryPage() {
       return
     }
 
-    setSearchTerm(formatPartNumberInput(value))
+    setSearchTerm(formatPartNumberSearchInput(value))
   }
 
   const handleSearchModeChange = (nextSearchMode) => {
@@ -1245,6 +1254,59 @@ function InventoryPage() {
     downloadInventoryCsv(inventoryItemsWithCatalogDescriptions, partCatalog)
   }
 
+  const handleDownloadInventoryBackup = () => {
+    const backup = createInventoryBackup({
+      inventoryItems,
+      partCatalog,
+      inventoryHistory,
+      savedLocations,
+      removedLocations,
+      archivedLocations,
+    })
+    const blob = new Blob([JSON.stringify(backup, null, 2)], {
+      type: 'application/json',
+    })
+    const downloadUrl = URL.createObjectURL(blob)
+    const downloadLink = document.createElement('a')
+
+    downloadLink.href = downloadUrl
+    downloadLink.download = createInventoryBackupFileName(backup.exportedAt)
+    document.body.appendChild(downloadLink)
+    downloadLink.click()
+    downloadLink.remove()
+    window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000)
+  }
+
+  const handleRestoreInventoryBackup = async (backup) => {
+    const mergedInventory = mergeInventoryBackup({
+      current: {
+        inventoryItems,
+        partCatalog,
+        inventoryHistory,
+        savedLocations,
+        removedLocations,
+        archivedLocations,
+      },
+      backup,
+    })
+
+    setInventoryItems(mergedInventory.inventoryItems)
+    setPartCatalog(mergedInventory.partCatalog)
+    setInventoryHistory(mergedInventory.inventoryHistory)
+    setSavedLocations(mergedInventory.savedLocations)
+    setRemovedLocations(mergedInventory.removedLocations)
+    setArchivedLocations(mergedInventory.archivedLocations)
+    setSyncStatus(getOnlineSyncStatus())
+
+    try {
+      await mergeInventoryBackupToCloud(mergedInventory)
+      setSyncStatus(getOnlineSyncStatus('Cloud Synced'))
+    } catch (error) {
+      console.error('Failed to sync restored inventory backup:', error)
+      setSyncStatus(getOnlineSyncStatus('Offline Ready'))
+    }
+  }
+
   const openUseFromItem = (item) => {
     openModalWithItem('use', item)
   }
@@ -1268,53 +1330,55 @@ function InventoryPage() {
   return (
     <main className="inventory-page page-shell">
       <div className="inventory-page__container site-container">
-        <div className="inventory-page__history-button-wrapper">
-          <Button
-            className="inventory-page__history-button"
-            variant="secondary"
-            size="sm"
-            onClick={() => openModal('history')}
-          >
-            <HistoryIcon size={17} aria-hidden="true" />
-            History
-          </Button>
-
-          <Button
-            className="inventory-page__sign-out-button"
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              signOut().catch((error) => {
-                console.error('Failed to sign out of inventory:', error)
-              })
-            }}
-            aria-label="Sign out"
-            title="Sign out"
-          >
-            <LogOut size={17} aria-hidden="true" />
-          </Button>
-        </div>
-
         <header className="inventory-page__header">
-          <div>
+          <div className="inventory-page__header-toolbar">
+            <div
+              className={`inventory-page__sync-status ${
+                syncStatus === 'Saved Offline' || syncStatus === 'Offline Ready'
+                  ? 'inventory-page__sync-status--offline'
+                  : syncStatus.includes('Syncing') || syncStatus.includes('Checking')
+                    ? 'inventory-page__sync-status--syncing'
+                    : ''
+              }`}
+            >
+              <span className="inventory-page__sync-dot"></span>
+              <span>{syncStatus}</span>
+            </div>
+
+            <div className="inventory-page__history-button-wrapper">
+              <Button
+                className="inventory-page__history-button"
+                variant="secondary"
+                size="sm"
+                onClick={() => openModal('history')}
+              >
+                <HistoryIcon size={17} aria-hidden="true" />
+                History
+              </Button>
+
+              <Button
+                className="inventory-page__sign-out-button"
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  signOut().catch((error) => {
+                    console.error('Failed to sign out of inventory:', error)
+                  })
+                }}
+                aria-label="Sign out"
+                title="Sign out"
+              >
+                <LogOut size={17} aria-hidden="true" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="inventory-page__header-copy">
             <p className="inventory-page__eyebrow">Truck Inventory</p>
             <h1>My Inventory</h1>
             <p className="inventory-page__subtitle">
               Track parts, boxes, tickets, machines, customers, and history.
             </p>
-          </div>
-
-          <div
-            className={`inventory-page__sync-status ${
-              syncStatus === 'Saved Offline' || syncStatus === 'Offline Ready'
-                ? 'inventory-page__sync-status--offline'
-                : syncStatus.includes('Syncing') || syncStatus.includes('Checking')
-                  ? 'inventory-page__sync-status--syncing'
-                  : ''
-            }`}
-          >
-            <span className="inventory-page__sync-dot"></span>
-            <span>{syncStatus}</span>
           </div>
         </header>
 
@@ -1402,7 +1466,7 @@ function InventoryPage() {
             helperText={
               searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION
                 ? 'Search any word from the saved part description.'
-                : 'Letters and numbers are both supported.'
+                : 'Numeric parts are formatted automatically. Letters still work.'
             }
           />
         </section>
@@ -1700,6 +1764,33 @@ function InventoryPage() {
                     Export CSV
                   </Button>
                 </Card>
+
+                <Card className="inventory-page__export-card">
+                  <div className="inventory-page__export-card-icon">
+                    <ShieldCheck size={22} aria-hidden="true" />
+                  </div>
+                  <div>
+                    <h3>Backup &amp; Restore</h3>
+                    <p>
+                      Save parts, descriptions, locations, deleted-location
+                      archives, and history in one backup file.
+                    </p>
+                  </div>
+
+                  <div className="inventory-page__backup-actions">
+                    <Button
+                      variant="secondary"
+                      onClick={handleDownloadInventoryBackup}
+                    >
+                      <Download size={18} aria-hidden="true" />
+                      Download Backup
+                    </Button>
+                    <Button onClick={() => openModal('backup')}>
+                      <Upload size={18} aria-hidden="true" />
+                      Restore Backup
+                    </Button>
+                  </div>
+                </Card>
               </div>
             </>
           )}
@@ -1844,6 +1935,12 @@ function InventoryPage() {
           />
         </Suspense>
       )}
+
+      <InventoryBackupModal
+        isOpen={activeModal === 'backup'}
+        onClose={closeModal}
+        onRestore={handleRestoreInventoryBackup}
+      />
 
       <HistoryModal
         isOpen={activeModal === 'history'}
