@@ -23,8 +23,8 @@ test('inventory workbench has distinct native-style phone and desktop navigation
     styles,
     /@media \(min-width: 1120px\)[\s\S]*?grid-template-columns: 17rem minmax\(0, 1fr\)/,
   )
-  assert.match(colors, /--color-brand-deep:\s*#112d30;/)
-  assert.match(colors, /--color-utility:\s*#f0a267;/)
+  assert.match(colors, /--color-brand-deep:\s*#17181a;/)
+  assert.match(colors, /--color-utility:\s*#f1c84b;/)
   assert.match(colors, /--gradient-page:\s*var\(--color-background\);/)
 })
 
