@@ -239,7 +239,7 @@
 .stock-app .stock-app__finder .ui-input:focus {
   border: 0;
 
-  box-shadow: 0 0 0 4px rgba(241, 200, 75, 0.42);
+  box-shadow: 0 0 0 4px rgba(38, 40, 43, 0.2);
 }
 
 .stock-app .stock-app__finder .ui-input-field__helper {
@@ -532,9 +532,13 @@
 }
 
 .stock-app .stock-app__mobile-nav .inventory-page__tab:focus-visible,
-.stock-app .stock-app__task-strip .ui-button:focus-visible,
-.stock-app .inventory-page__location-card:focus-visible {
+.stock-app .stock-app__task-strip .ui-button:focus-visible {
   outline: 3px solid var(--color-utility);
+  outline-offset: 2px;
+}
+
+.stock-app .inventory-page__location-card:focus-visible {
+  outline: 3px solid var(--color-accent);
   outline-offset: 2px;
 }
 
@@ -777,10 +781,11 @@
 
 @media (min-width: 768px) and (max-width: 1119px) {
   .stock-app__shell.site-container {
-    padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+    padding-bottom: var(--spacing-8);
   }
 
   .stock-app .stock-app__topbar,
+  .stock-app .stock-app__mobile-nav,
   .stock-app .stock-app__finder,
   .stock-app .stock-app__snapshot,
   .stock-app .stock-app__content,
@@ -788,14 +793,61 @@
   .stock-app .stock-app__task-strip,
   .stock-app .inventory-install,
   .stock-app .inventory-page__error-card {
-    width: min(calc(100% - 3rem), 64rem);
+    width: min(calc(100% - 4rem), 68rem);
     margin-right: auto;
     margin-left: auto;
   }
 
   .stock-app .stock-app__topbar {
     width: 100%;
-    padding-inline: max(var(--spacing-6), calc((100% - 61rem) / 2));
+    padding-inline: max(var(--spacing-6), calc((100% - 64rem) / 2));
+  }
+
+  .stock-app .stock-app__mobile-nav {
+    position: static;
+    order: 2;
+
+    gap: var(--spacing-1);
+
+    margin-top: var(--spacing-4);
+    padding: var(--spacing-1);
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+
+    background: var(--color-surface);
+
+    box-shadow: none;
+  }
+
+  .stock-app .stock-app__mobile-nav .inventory-page__tab {
+    flex-direction: row;
+    gap: var(--spacing-2);
+
+    min-height: 3.25rem;
+    padding: var(--spacing-2) var(--spacing-3);
+
+    color: var(--color-text-secondary);
+
+    font-size: var(--font-size-sm);
+  }
+
+  .stock-app .stock-app__mobile-nav .inventory-page__tab--active {
+    background: var(--color-brand-deep);
+
+    color: var(--color-text-inverse);
+  }
+
+  .stock-app .stock-app__mobile-nav .inventory-page__tab:focus-visible {
+    outline-color: var(--color-accent);
+  }
+
+  .stock-app .inventory-install {
+    order: 3;
+  }
+
+  .stock-app .inventory-page__error-card {
+    order: 3;
   }
 
   .stock-app .stock-app__finder {
@@ -829,14 +881,25 @@
   }
 
   .stock-app .stock-app__task-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--spacing-2);
+
+    padding: 0;
+
     overflow: visible;
   }
 
   .stock-app .stock-app__task-strip .ui-button,
   .stock-app .stock-app__task-strip .ui-button:nth-child(2),
   .stock-app .stock-app__task-strip .ui-button:nth-child(4) {
-    flex: 1 1 0;
+    flex-direction: row;
+    gap: var(--spacing-2);
+
     width: auto;
+    min-height: 3.75rem;
+
+    border-radius: var(--radius-sm);
   }
 
   .stock-app .inventory-page__location-list {

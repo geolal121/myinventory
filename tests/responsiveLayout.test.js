@@ -24,7 +24,7 @@ test('inventory workbench has distinct native-style phone and desktop navigation
     /@media \(min-width: 1120px\)[\s\S]*?grid-template-columns: 17rem minmax\(0, 1fr\)/,
   )
   assert.match(colors, /--color-brand-deep:\s*#17181a;/)
-  assert.match(colors, /--color-utility:\s*#f1c84b;/)
+  assert.match(colors, /--color-utility:\s*#d9dadc;/)
   assert.match(colors, /--gradient-page:\s*var\(--color-background\);/)
 })
 
@@ -44,6 +44,21 @@ test('inventory workbench protects narrow phones and keeps desktop location rows
   assert.match(
     styles,
     /@media \(min-width: 1120px\)[\s\S]*?\.inventory-page__location-card-stats\s*\{[\s\S]*?grid-column: 2;[\s\S]*?border-top: 0;/,
+  )
+})
+
+test('tablet layout uses an inline navigation bar and compact action row', async () => {
+  const styles = await readProjectFile(
+    'src/features/inventory/styles/inventory-rebuild.css',
+  )
+
+  assert.match(
+    styles,
+    /@media \(min-width: 768px\) and \(max-width: 1119px\)[\s\S]*?\.stock-app \.stock-app__mobile-nav\s*\{[\s\S]*?position: static;[\s\S]*?background: var\(--color-surface\);/,
+  )
+  assert.match(
+    styles,
+    /@media \(min-width: 768px\) and \(max-width: 1119px\)[\s\S]*?\.stock-app \.stock-app__task-strip\s*\{[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/,
   )
 })
 
