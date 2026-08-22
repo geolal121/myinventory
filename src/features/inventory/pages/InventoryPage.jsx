@@ -1410,8 +1410,9 @@ function InventoryPage() {
                   ? 'inventory-page__sync-status--offline'
                   : syncStatus.includes('Syncing') || syncStatus.includes('Checking')
                     ? 'inventory-page__sync-status--syncing'
-                    : ''
+                  : ''
               }`}
+              aria-label={`Cloud status: ${syncStatus}`}
             >
               <span className="inventory-page__sync-dot"></span>
               <span>{syncStatus}</span>
@@ -1425,7 +1426,7 @@ function InventoryPage() {
                 onClick={() => openModal('history')}
               >
                 <HistoryIcon size={17} aria-hidden="true" />
-                History
+                <span>History</span>
               </Button>
 
               <Button

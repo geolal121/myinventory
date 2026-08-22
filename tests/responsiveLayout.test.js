@@ -58,14 +58,18 @@ test('the inventory dashboard groups search, quick actions, and snapshot panels'
   )
 })
 
-test('phone navigation stays accessible while scrolling inventory', async () => {
+test('phone dashboard keeps controls compact and navigation in the page flow', async () => {
   const styles = await readProjectFile(
     'src/features/inventory/styles/inventory-page.css',
   )
 
   assert.match(
     styles,
-    /@media \(max-width: 767px\)[\s\S]*?\.inventory-page__tabs\s*\{[\s\S]*?position: sticky;[\s\S]*?safe-area-inset-bottom/,
+    /@media \(max-width: 767px\)[\s\S]*?\.inventory-page__actions\s*\{[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/,
+  )
+  assert.match(
+    styles,
+    /@media \(max-width: 767px\)[\s\S]*?\.inventory-page__tabs\s*\{[\s\S]*?position: static;/,
   )
 })
 
