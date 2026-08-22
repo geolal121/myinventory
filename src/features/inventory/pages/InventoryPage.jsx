@@ -22,7 +22,6 @@ import {
   TextSearch,
   TriangleAlert,
   Upload,
-  Wrench,
   X,
 } from 'lucide-react'
 
@@ -168,7 +167,6 @@ function InventoryPage() {
   const [searchMode, setSearchMode] = useState(
     INVENTORY_SEARCH_MODES.PART_NUMBER,
   )
-  const [mobileToolsOpen, setMobileToolsOpen] = useState(false)
   const [activeInventoryView, setActiveInventoryView] = useState(
     INVENTORY_VIEW_TABS.BOXES,
   )
@@ -623,10 +621,6 @@ function InventoryPage() {
 
   const handleSearchChange = (event) => {
     const { value } = event.target
-
-    if (value.trim()) {
-      setActiveInventoryView(INVENTORY_VIEW_TABS.BOXES)
-    }
 
     if (searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION) {
       setSearchTerm(value)
@@ -1405,18 +1399,9 @@ function InventoryPage() {
     openModalWithItem('delete', item)
   }
 
-  const openInventoryAction = (modalName) => {
-    setMobileToolsOpen(false)
-    openModal(modalName)
-  }
-
   return (
     <main className="inventory-page page-shell">
-      <div
-        className={`inventory-page__container site-container ${
-          isSearching ? 'inventory-page__container--searching' : ''
-        }`}
-      >
+      <div className="inventory-page__container site-container">
         <header className="inventory-page__header">
           <div className="inventory-page__header-toolbar">
             <div
@@ -1425,9 +1410,8 @@ function InventoryPage() {
                   ? 'inventory-page__sync-status--offline'
                   : syncStatus.includes('Syncing') || syncStatus.includes('Checking')
                     ? 'inventory-page__sync-status--syncing'
-                  : ''
+                    : ''
               }`}
-              aria-label={`Cloud status: ${syncStatus}`}
             >
               <span className="inventory-page__sync-dot"></span>
               <span>{syncStatus}</span>
@@ -1441,7 +1425,7 @@ function InventoryPage() {
                 onClick={() => openModal('history')}
               >
                 <HistoryIcon size={17} aria-hidden="true" />
-                <span>History</span>
+                History
               </Button>
 
               <Button
@@ -1561,86 +1545,52 @@ function InventoryPage() {
           />
         </section>
 
-        {mobileToolsOpen && (
-          <button
-            type="button"
-            className="inventory-page__mobile-action-backdrop"
-            onClick={() => setMobileToolsOpen(false)}
-            aria-label="Close inventory actions"
-          />
-        )}
-
-        <section
-          className={`inventory-page__actions ${
-            mobileToolsOpen ? 'inventory-page__actions--open' : ''
-          }`}
-          aria-label="Inventory actions"
-        >
-          <button
-            type="button"
-            className="inventory-page__mobile-section-toggle"
-            onClick={() => setMobileToolsOpen((isOpen) => !isOpen)}
-            aria-expanded={mobileToolsOpen}
-          >
-            <span>
-              <Wrench size={18} aria-hidden="true" />
-              {mobileToolsOpen ? 'Part Actions' : 'Actions'}
-            </span>
-            {mobileToolsOpen && <X size={19} aria-hidden="true" />}
-          </button>
-
-          <h2 className="inventory-page__panel-title">Quick Actions</h2>
-
-          <Button fullWidth onClick={() => openInventoryAction('add')}>
+        <section className="inventory-page__actions" aria-label="Inventory actions">
+          <Button fullWidth onClick={() => openModal('add')}>
             <PackagePlus size={19} aria-hidden="true" />
             Add Part
           </Button>
 
-          <Button fullWidth onClick={() => openInventoryAction('use')}>
+          <Button fullWidth onClick={() => openModal('use')}>
             <PackageMinus size={19} aria-hidden="true" />
             Use Part
           </Button>
 
-          <Button fullWidth onClick={() => openInventoryAction('give')}>
+          <Button fullWidth onClick={() => openModal('give')}>
             <HandHelping size={19} aria-hidden="true" />
             Give Part
           </Button>
 
-          <Button fullWidth onClick={() => openInventoryAction('move')}>
+          <Button fullWidth onClick={() => openModal('move')}>
             <ArrowRightLeft size={19} aria-hidden="true" />
             Move Part
           </Button>
-
-          <Button
-            variant="secondary"
-            className="inventory-count-launch"
-            onClick={() => openInventoryAction('count')}
-          >
-            <span className="inventory-count-launch__icon">
-              <ClipboardCheck size={22} aria-hidden="true" />
-            </span>
-            <span className="inventory-count-launch__copy">
-              <strong>Count Inventory</strong>
-              <small>Verify a location and save corrections.</small>
-            </span>
-            <ChevronRight
-              className="inventory-count-launch__arrow"
-              size={20}
-              aria-hidden="true"
-            />
-          </Button>
         </section>
 
-        <section
-          className="inventory-page__summary"
-          aria-label="Inventory summary"
+        <Button
+          variant="secondary"
+          className="inventory-count-launch"
+          onClick={() => openModal('count')}
         >
-          <h2 className="inventory-page__panel-title">Inventory Snapshot</h2>
+          <span className="inventory-count-launch__icon">
+            <ClipboardCheck size={22} aria-hidden="true" />
+          </span>
+          <span className="inventory-count-launch__copy">
+            <strong>Count Inventory</strong>
+            <small>Verify a location, review differences, and save corrections.</small>
+          </span>
+          <ChevronRight
+            className="inventory-count-launch__arrow"
+            size={20}
+            aria-hidden="true"
+          />
+        </Button>
 
+        <section className="inventory-page__summary" aria-label="Inventory summary">
           <Card
             as="button"
             type="button"
-            className="inventory-page__summary-card inventory-page__summary-card--total"
+            className="inventory-page__summary-card"
             onClick={() => openSummaryModal(INVENTORY_SUMMARY_VIEWS.TOTAL)}
             aria-haspopup="dialog"
           >
@@ -1654,7 +1604,7 @@ function InventoryPage() {
           <Card
             as="button"
             type="button"
-            className="inventory-page__summary-card inventory-page__summary-card--official"
+            className="inventory-page__summary-card"
             onClick={() => openSummaryModal(INVENTORY_SUMMARY_VIEWS.OFFICIAL)}
             aria-haspopup="dialog"
           >
@@ -1668,7 +1618,7 @@ function InventoryPage() {
           <Card
             as="button"
             type="button"
-            className="inventory-page__summary-card inventory-page__summary-card--noi"
+            className="inventory-page__summary-card"
             onClick={() => openSummaryModal(INVENTORY_SUMMARY_VIEWS.NOI)}
             aria-haspopup="dialog"
           >
@@ -1682,7 +1632,7 @@ function InventoryPage() {
           <Card
             as="button"
             type="button"
-            className="inventory-page__summary-card inventory-page__summary-card--out-of-stock"
+            className="inventory-page__summary-card"
             onClick={() =>
               openSummaryModal(INVENTORY_SUMMARY_VIEWS.OUT_OF_STOCK)
             }
@@ -1775,7 +1725,7 @@ function InventoryPage() {
                     ? searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION
                       ? 'Description Matches'
                       : 'Part Locations'
-                    : 'Locations'}
+                    : 'Boxes'}
                 </h2>
 
                 {!isSearching && (

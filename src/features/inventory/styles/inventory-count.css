@@ -11,7 +11,9 @@
 
   border-color: color-mix(in srgb, var(--color-accent) 28%, var(--color-border));
 
-  background: var(--color-surface);
+  background:
+    radial-gradient(circle at 92% 18%, var(--color-accent-soft), transparent 9rem),
+    var(--gradient-surface);
 
   color: var(--color-text-primary);
   text-align: left;
@@ -22,7 +24,9 @@
 .inventory-count-launch.ui-button:hover {
   border-color: var(--color-accent);
 
-  background: var(--color-surface-soft);
+  background:
+    radial-gradient(circle at 92% 18%, var(--color-accent-soft), transparent 9rem),
+    var(--gradient-surface);
 }
 
 .inventory-count-launch__icon {
@@ -35,7 +39,7 @@
 
   border-radius: var(--radius-md);
 
-  background: var(--color-accent);
+  background: var(--gradient-accent);
 
   color: var(--color-text-inverse);
 }
@@ -63,40 +67,6 @@
 
 .inventory-count-launch__arrow {
   color: var(--color-accent);
-}
-
-.inventory-page__actions .inventory-count-launch.ui-button {
-  grid-column: 1 / -1;
-
-  min-height: 68px;
-  margin-top: var(--spacing-1);
-  padding: var(--spacing-3);
-
-  border-color: color-mix(in srgb, var(--color-utility) 45%, var(--color-border));
-
-  background: var(--color-utility-soft);
-
-  box-shadow: none;
-}
-
-.inventory-page__actions .inventory-count-launch.ui-button:hover {
-  border-color: var(--color-utility);
-
-  background: var(--color-utility-soft);
-}
-
-.inventory-page__actions .inventory-count-launch__icon {
-  width: 42px;
-  height: 42px;
-
-  background: var(--color-utility);
-
-  color: var(--color-brand-deep);
-}
-
-.inventory-page__actions .inventory-count-launch__icon svg,
-.inventory-page__actions .inventory-count-launch__arrow {
-  color: var(--color-brand-deep);
 }
 
 .inventory-count-modal {
@@ -194,9 +164,10 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
 
-  background: var(--color-surface);
+  background: rgba(255, 255, 255, 0.96);
 
   box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(12px);
 }
 
 .inventory-count__progress-heading {
@@ -247,7 +218,7 @@
 
   border-radius: inherit;
 
-  background: var(--color-accent);
+  background: var(--gradient-accent);
 
   transition: width var(--transition-normal);
 }
@@ -266,7 +237,7 @@
   flex-direction: column;
   gap: var(--spacing-3);
 
-  background: var(--color-surface);
+  background: var(--gradient-surface);
 }
 
 .inventory-count__card-heading {
@@ -378,7 +349,7 @@
   flex-direction: column;
   gap: var(--spacing-1);
 
-  background: var(--color-surface);
+  background: var(--gradient-surface);
 }
 
 .inventory-count__review-summary span {
@@ -420,7 +391,7 @@
 
   border-left: 4px solid var(--color-warning);
 
-  background: var(--color-surface);
+  background: var(--gradient-surface);
 }
 
 .inventory-count__difference > div {
@@ -475,7 +446,7 @@
   border: 1px dashed var(--color-border-strong);
   border-radius: var(--card-radius);
 
-  background: var(--color-surface-soft);
+  background: var(--gradient-surface);
 
   color: var(--color-accent);
   text-align: center;

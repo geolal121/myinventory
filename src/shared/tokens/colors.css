@@ -1,46 +1,39 @@
 :root {
   /* BACKGROUNDS */
-  --color-background: #f5f6f4;
-  --color-background-soft: #fafaf8;
-  --color-background-elevated: #e9ecea;
+  --color-background: #eaf1f7;
+  --color-background-soft: #f4f7fb;
+  --color-background-elevated: #dce7f1;
 
   /* SURFACES */
   --color-surface: #ffffff;
-  --color-surface-soft: #f7f8f6;
-  --color-surface-elevated: #eef1ef;
+  --color-surface-soft: #f7fafd;
+  --color-surface-elevated: #edf3f8;
 
   /* BORDERS */
-  --color-border: #dce1df;
-  --color-border-strong: #b9c4c0;
+  --color-border: rgba(29, 57, 84, 0.11);
+  --color-border-strong: rgba(29, 57, 84, 0.22);
 
   /* TEXT */
-  --color-text-primary: #202b30;
-  --color-text-secondary: #637078;
-  --color-text-muted: #8a959a;
+  --color-text-primary: #183047;
+  --color-text-secondary: #587086;
+  --color-text-muted: #8496a8;
   --color-text-inverse: #ffffff;
 
   /* PRIMARY ACCENT */
-  --color-accent: #356f8c;
-  --color-accent-hover: #285c76;
-  --color-accent-bright: #4a88a5;
-  --color-accent-soft: rgba(53, 111, 140, 0.10);
-
-  /* APP CHROME */
-  --color-brand: #202b30;
-  --color-brand-deep: #162126;
-  --color-brand-surface: #344249;
-  --color-utility: #0f9f78;
-  --color-utility-soft: rgba(15, 159, 120, 0.11);
+  --color-accent: #21639b;
+  --color-accent-hover: #1688ad;
+  --color-accent-bright: #12a0b7;
+  --color-accent-soft: rgba(33, 99, 155, 0.11);
 
   /* SECONDARY ACCENT */
-  --color-accent-secondary: #dfe9ed;
-  --color-accent-secondary-hover: #cfdee4;
-  --color-accent-secondary-soft: rgba(53, 111, 140, 0.07);
+  --color-accent-secondary: #d9e8f4;
+  --color-accent-secondary-hover: #c9dfef;
+  --color-accent-secondary-soft: rgba(18, 160, 183, 0.08);
 
   /* CARD COLORS */
   --color-card: #ffffff;
-  --color-card-hover: #fafbf9;
-  --color-card-text: #202b30;
+  --color-card-hover: #f8fbfd;
+  --color-card-text: #183047;
 
   /* STATUS COLORS */
   --color-success: #26866a;
@@ -62,6 +55,34 @@
   --color-noi: var(--color-warning);
 
   /* OVERLAYS */
-  --color-overlay: rgba(15, 23, 42, 0.48);
-  --color-overlay-soft: rgba(15, 23, 42, 0.13);
+  --color-overlay: rgba(36, 51, 69, 0.40);
+  --color-overlay-soft: rgba(36, 51, 69, 0.16);
+
+  /* GRADIENTS */
+  --gradient-page:
+    radial-gradient(circle at 12% 0%, rgba(18, 160, 183, 0.11), transparent 28rem),
+    radial-gradient(circle at 92% 12%, rgba(33, 99, 155, 0.10), transparent 24rem),
+    linear-gradient(180deg, #f4f8fb 0%, var(--color-background) 58%, #e5edf5 100%);
+
+  --gradient-surface:
+    linear-gradient(
+      150deg,
+      var(--color-surface) 0%,
+      var(--color-surface-soft) 100%
+    );
+
+  --gradient-card:
+    linear-gradient(
+      150deg,
+      var(--color-card) 0%,
+      var(--color-card-hover) 100%
+    );
+
+  --gradient-accent:
+    linear-gradient(
+      130deg,
+      var(--color-accent) 0%,
+      var(--color-accent-hover) 70%,
+      var(--color-accent-bright) 100%
+    );
 }

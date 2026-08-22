@@ -146,9 +146,9 @@ select {
 /* SELECTION */
 
 ::selection {
-  background: var(--color-accent-soft);
+  background: var(--color-accent);
 
-  color: var(--color-accent-hover);
+  color: var(--color-text-primary);
 }
 
 /* UTILITIES */

@@ -1,4 +1,4 @@
-import { Box, ChevronRight, CircleCheck, Ghost, Package } from 'lucide-react'
+import { Box, CircleCheck, Ghost, Package } from 'lucide-react'
 
 import Card from '../../../shared/components/Card.jsx'
 
@@ -51,12 +51,6 @@ function InventoryLocationCard({ locationGroup, onOpen }) {
           <strong>{locationGroup.noiQuantity}</strong>
         </div>
       </div>
-
-      <ChevronRight
-        className="inventory-page__location-card-arrow"
-        size={19}
-        aria-hidden="true"
-      />
     </Card>
   )
 }

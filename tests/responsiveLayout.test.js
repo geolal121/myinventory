@@ -1,97 +1,9 @@
 import assert from 'node:assert/strict'
-import { readFile, readdir } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 
 const readProjectFile = (relativePath) =>
   readFile(new URL(`../${relativePath}`, import.meta.url), 'utf8')
-
-const readCssFiles = async (directory = new URL('../src/', import.meta.url)) => {
-  const entries = await readdir(directory, { withFileTypes: true })
-  const files = await Promise.all(
-    entries.map(async (entry) => {
-      const url = new URL(entry.name, directory)
-
-      if (entry.isDirectory()) {
-        return readCssFiles(new URL(`${entry.name}/`, directory))
-      }
-
-      return entry.name.endsWith('.css') ? readFile(url, 'utf8') : []
-    }),
-  )
-
-  return files.flat()
-}
-
-test('the app theme uses solid surfaces instead of decorative gradients', async () => {
-  const [styles, colors, buttons, cards] = await Promise.all([
-    readCssFiles(),
-    readProjectFile('src/shared/tokens/colors.css'),
-    readProjectFile('src/shared/styles/components/button.css'),
-    readProjectFile('src/shared/styles/components/card.css'),
-  ])
-
-  styles.forEach((source) => {
-    assert.doesNotMatch(source, /(?:linear|radial)-gradient\s*\(/)
-  })
-  assert.match(colors, /--color-background:\s*#f5f6f4;/)
-  assert.match(colors, /--color-accent:\s*#356f8c;/)
-  assert.match(colors, /--color-utility:\s*#0f9f78;/)
-  assert.match(buttons, /\.ui-button--primary\s*\{[\s\S]*?background: var\(--color-accent\);/)
-  assert.match(cards, /\.ui-card\s*\{[\s\S]*?background: var\(--color-surface\);/)
-})
-
-test('the inventory dashboard groups search, quick actions, and snapshot panels', async () => {
-  const [component, styles] = await Promise.all([
-    readProjectFile('src/features/inventory/pages/InventoryPage.jsx'),
-    readProjectFile('src/features/inventory/styles/inventory-page.css'),
-  ])
-
-  assert.match(component, /inventory-page__panel-title">Quick Actions</)
-  assert.match(component, /inventory-page__panel-title">Inventory Snapshot</)
-  assert.match(
-    component,
-    /inventory-page__actions[\s\S]*?className="inventory-count-launch"[\s\S]*?<\/section>/,
-  )
-  assert.match(
-    styles,
-    /@media \(min-width: 1200px\)[\s\S]*?\.inventory-page__container\s*\{[\s\S]*?grid-template-columns: repeat\(12, minmax\(0, 1fr\)\)/,
-  )
-})
-
-test('phone dashboard uses an action sheet and compact inventory rows', async () => {
-  const [component, locationCard, styles] = await Promise.all([
-    readProjectFile('src/features/inventory/pages/InventoryPage.jsx'),
-    readProjectFile(
-      'src/features/inventory/components/InventoryLocationCard.jsx',
-    ),
-    readProjectFile('src/features/inventory/styles/inventory-page.css'),
-  ])
-
-  assert.match(component, /mobileToolsOpen/)
-  assert.match(component, /inventory-page__mobile-action-backdrop/)
-  assert.match(component, /inventory-page__container--searching/)
-  assert.match(locationCard, /inventory-page__location-card-arrow/)
-  assert.match(
-    styles,
-    /@media \(max-width: 767px\)[\s\S]*?\.inventory-page__actions--open\s*\{[\s\S]*?position: fixed;/,
-  )
-  assert.match(
-    styles,
-    /\.inventory-page__actions:not\(\.inventory-page__actions--open\) > \.ui-button\s*\{\s*display: none;/,
-  )
-  assert.match(
-    styles,
-    /\.inventory-page__summary\s*\{[\s\S]*?overflow-x: auto;/,
-  )
-  assert.match(
-    styles,
-    /@media \(max-width: 767px\)[\s\S]*?\.inventory-page__location-card,[\s\S]*?grid-template-columns: minmax\(0, 1fr\) auto auto;/,
-  )
-  assert.match(
-    styles,
-    /@media \(max-width: 767px\)[\s\S]*?\.inventory-page__tabs\s*\{[\s\S]*?position: static;/,
-  )
-})
 
 test('inventory summary cards use the responsive summary modal layout', async () => {
   const [component, styles] = await Promise.all([
@@ -132,7 +44,7 @@ test('tablet and laptop layouts retain bounded modals and flexible columns', asy
 
   assert.match(
     styles,
-    /@media \(min-width: 768px\) and \(max-width: 1099px\)[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/,
+    /@media \(min-width: 768px\) and \(max-width: 1099px\)[\s\S]*?grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/,
   )
   assert.match(
     styles,

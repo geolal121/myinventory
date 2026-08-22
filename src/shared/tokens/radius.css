@@ -18,11 +18,11 @@
      COMPONENT RADIUS
   ========================================================= */
 
-  --button-radius: var(--radius-md);
-  --input-radius: var(--radius-md);
+  --button-radius: var(--radius-lg);
+  --input-radius: var(--radius-lg);
 
-  --card-radius: var(--radius-lg);
-  --modal-radius: var(--radius-xl);
+  --card-radius: var(--radius-xl);
+  --modal-radius: var(--radius-2xl);
 
   --badge-radius: var(--radius-full);
 }
@@ -31,11 +31,11 @@
 
 @media (max-width: 479px) {
   :root {
-    --button-radius: var(--radius-sm);
-    --input-radius: var(--radius-sm);
+    --button-radius: var(--radius-md);
+    --input-radius: var(--radius-md);
 
-    --card-radius: var(--radius-md);
-    --modal-radius: var(--radius-lg);
+    --card-radius: var(--radius-lg);
+    --modal-radius: var(--radius-xl);
   }
 }
 
@@ -43,7 +43,7 @@
 
 @media (max-width: 767px) and (orientation: landscape) {
   :root {
-    --modal-radius: var(--radius-lg);
+    --modal-radius: var(--radius-xl);
   }
 }
 
@@ -51,8 +51,8 @@
 
 @media (min-width: 768px) and (max-width: 1099px) {
   :root {
-    --card-radius: var(--radius-lg);
-    --modal-radius: var(--radius-xl);
+    --card-radius: var(--radius-xl);
+    --modal-radius: var(--radius-2xl);
   }
 }
 
@@ -60,8 +60,8 @@
 
 @media (min-width: 1100px) and (max-width: 1199px) and (orientation: landscape) {
   :root {
-    --card-radius: var(--radius-lg);
-    --modal-radius: var(--radius-xl);
+    --card-radius: var(--radius-xl);
+    --modal-radius: var(--radius-2xl);
   }
 }
 
@@ -69,8 +69,8 @@
 
 @media (min-width: 1200px) {
   :root {
-    --card-radius: var(--radius-lg);
-    --modal-radius: var(--radius-xl);
+    --card-radius: var(--radius-2xl);
+    --modal-radius: calc(var(--radius-2xl) + 4px);
   }
 }
 
@@ -78,7 +78,7 @@
 
 @media (min-width: 1440px) {
   :root {
-    --card-radius: var(--radius-lg);
+    --card-radius: calc(var(--radius-2xl) + 2px);
   }
 }
 
@@ -86,8 +86,8 @@
 
 @media (min-width: 1920px) {
   :root {
-    --card-radius: var(--radius-xl);
-    --modal-radius: var(--radius-2xl);
+    --card-radius: calc(var(--radius-2xl) + 4px);
+    --modal-radius: calc(var(--radius-2xl) + 8px);
   }
 }
 
@@ -96,7 +96,7 @@
 @supports (-webkit-touch-callout: none) {
   @media (max-width: 767px) {
     :root {
-      --modal-radius: var(--radius-lg);
+      --modal-radius: var(--radius-xl);
     }
   }
 }

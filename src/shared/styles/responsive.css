@@ -37,8 +37,8 @@ Safari / mobile browser fixes only.
 
 .page-shell {
   min-height: 100vh;
-  padding-top: max(var(--spacing-4), env(safe-area-inset-top));
-  padding-bottom: max(var(--spacing-4), env(safe-area-inset-bottom));
+  padding-top: var(--spacing-4);
+  padding-bottom: var(--spacing-4);
 }
 
 .site-container {
@@ -58,8 +58,8 @@ Safari / mobile browser fixes only.
 /* PHONE LANDSCAPE */
 @media (max-width: 767px) and (orientation: landscape) {
   .page-shell {
-    padding-top: max(var(--spacing-3), env(safe-area-inset-top));
-    padding-bottom: max(var(--spacing-3), env(safe-area-inset-bottom));
+    padding-top: var(--spacing-3);
+    padding-bottom: var(--spacing-3);
   }
 
   .site-container {
