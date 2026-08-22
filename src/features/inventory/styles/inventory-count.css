@@ -11,9 +11,7 @@
 
   border-color: color-mix(in srgb, var(--color-accent) 28%, var(--color-border));
 
-  background:
-    radial-gradient(circle at 92% 18%, var(--color-accent-soft), transparent 9rem),
-    var(--gradient-surface);
+  background: var(--color-surface);
 
   color: var(--color-text-primary);
   text-align: left;
@@ -24,9 +22,7 @@
 .inventory-count-launch.ui-button:hover {
   border-color: var(--color-accent);
 
-  background:
-    radial-gradient(circle at 92% 18%, var(--color-accent-soft), transparent 9rem),
-    var(--gradient-surface);
+  background: var(--color-surface);
 }
 
 .inventory-count-launch__icon {

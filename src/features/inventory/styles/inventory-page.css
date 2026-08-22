@@ -75,9 +75,7 @@
   border: 1px solid rgba(255, 255, 255, 0.72);
   border-radius: var(--card-radius);
 
-  background:
-    radial-gradient(circle at 88% 24%, rgba(18, 160, 183, 0.22), transparent 10rem),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(241, 247, 252, 0.9));
+  background: var(--color-surface);
 
   box-shadow: var(--shadow-md);
 }
@@ -201,8 +199,7 @@
   border: 1px solid color-mix(in srgb, var(--color-accent) 24%, var(--color-border));
   border-radius: var(--card-radius);
 
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(235, 247, 252, 0.92));
+  background: var(--color-surface);
 
   box-shadow: var(--shadow-sm);
 }
@@ -617,7 +614,7 @@
 
 .inventory-page__actions .ui-button:nth-child(2),
 .inventory-page__actions .ui-button:nth-child(4) {
-  background: linear-gradient(130deg, #245b91, #217fa7);
+  background: var(--color-brand);
 }
 
 /* SUMMARY */
@@ -1005,9 +1002,7 @@
 
   border-color: color-mix(in srgb, var(--health-color) 32%, var(--color-border));
 
-  background:
-    radial-gradient(circle at 92% 18%, color-mix(in srgb, var(--health-color) 16%, transparent), transparent 9rem),
-    var(--gradient-surface);
+  background: var(--color-surface);
 }
 
 .inventory-health__hero--good_with_suggestions {
@@ -1391,11 +1386,7 @@
   position: absolute;
   inset: 0;
 
-  background: radial-gradient(
-    circle at 100% 0%,
-    rgba(18, 160, 183, 0.11),
-    transparent 9rem
-  );
+  background: transparent;
 
   pointer-events: none;
 }
@@ -1408,11 +1399,7 @@
 
   height: 3px;
 
-  background: linear-gradient(
-    90deg,
-    var(--color-accent),
-    var(--color-accent-bright)
-  );
+  background: var(--color-accent);
 }
 
 .inventory-page__location-card:hover {

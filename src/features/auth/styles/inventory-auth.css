@@ -6,7 +6,7 @@
   padding: max(var(--spacing-4), env(safe-area-inset-top)) var(--spacing-4)
     max(var(--spacing-4), env(safe-area-inset-bottom));
 
-  background: var(--gradient-page);
+  background: var(--color-brand-deep);
 }
 
 .inventory-auth__card {
@@ -16,25 +16,16 @@
 
   overflow: hidden;
 
-  background:
-    radial-gradient(circle at 100% 0%, rgba(18, 160, 183, 0.15), transparent 15rem),
-    var(--gradient-surface);
+  border: 1px solid var(--color-border-strong);
+  border-top: 6px solid var(--color-utility);
+
+  background: var(--color-surface);
+
+  box-shadow: var(--shadow-lg);
 }
 
 .inventory-auth__card::after {
-  content: '';
-
-  position: absolute;
-  top: -5rem;
-  right: -5rem;
-
-  width: 10rem;
-  height: 10rem;
-
-  border: 1.25rem solid rgba(33, 99, 155, 0.05);
-  border-radius: 50%;
-
-  pointer-events: none;
+  display: none;
 }
 
 .inventory-auth__brand {
@@ -49,9 +40,9 @@
 
   border-radius: var(--radius-lg);
 
-  background: var(--gradient-accent);
+  background: var(--color-utility);
 
-  color: var(--color-text-inverse);
+  color: var(--color-brand-deep);
 
   box-shadow: var(--button-shadow);
 }

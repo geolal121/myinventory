@@ -148,7 +148,7 @@ select {
 ::selection {
   background: var(--color-accent);
 
-  color: var(--color-text-primary);
+  color: var(--color-text-inverse);
 }
 
 /* UTILITIES */

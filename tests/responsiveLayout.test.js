@@ -5,6 +5,24 @@ import test from 'node:test'
 const readProjectFile = (relativePath) =>
   readFile(new URL(`../${relativePath}`, import.meta.url), 'utf8')
 
+test('field ledger layout has distinct phone and desktop workspaces', async () => {
+  const [component, styles, colors] = await Promise.all([
+    readProjectFile('src/features/inventory/pages/InventoryPage.jsx'),
+    readProjectFile('src/features/inventory/styles/inventory-console.css'),
+    readProjectFile('src/shared/tokens/colors.css'),
+  ])
+
+  assert.match(component, /Field stock · Tech 72485/)
+  assert.match(component, /inventory-page__panel-heading/)
+  assert.match(styles, /grid-template-areas:[\s\S]*?'header'[\s\S]*?'content'/)
+  assert.match(
+    styles,
+    /@media \(min-width: 1100px\)[\s\S]*?grid-template-columns: 18rem minmax\(0, 1fr\)/,
+  )
+  assert.match(colors, /--color-brand-deep:\s*#111813;/)
+  assert.match(colors, /--gradient-page:\s*var\(--color-background\);/)
+})
+
 test('inventory summary cards use the responsive summary modal layout', async () => {
   const [component, styles] = await Promise.all([
     readProjectFile(

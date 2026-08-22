@@ -111,6 +111,7 @@ import '../styles/inventory-page.css'
 import '../styles/inventory-forms.css'
 import '../styles/inventory-history.css'
 import '../styles/inventory-count.css'
+import '../styles/inventory-console.css'
 
 const INVENTORY_VIEW_TABS = {
   BOXES: 'BOXES',
@@ -1401,7 +1402,11 @@ function InventoryPage() {
 
   return (
     <main className="inventory-page page-shell">
-      <div className="inventory-page__container site-container">
+      <div
+        className={`inventory-page__container site-container ${
+          isSearching ? 'inventory-page__container--searching' : ''
+        }`}
+      >
         <header className="inventory-page__header">
           <div className="inventory-page__header-toolbar">
             <div
@@ -1412,6 +1417,8 @@ function InventoryPage() {
                     ? 'inventory-page__sync-status--syncing'
                     : ''
               }`}
+              role="status"
+              aria-label={`Cloud status: ${syncStatus}`}
             >
               <span className="inventory-page__sync-dot"></span>
               <span>{syncStatus}</span>
@@ -1423,6 +1430,8 @@ function InventoryPage() {
                 variant="secondary"
                 size="sm"
                 onClick={() => openModal('history')}
+                aria-label="Open inventory history"
+                title="History"
               >
                 <HistoryIcon size={17} aria-hidden="true" />
                 History
@@ -1446,10 +1455,10 @@ function InventoryPage() {
           </div>
 
           <div className="inventory-page__header-copy">
-            <p className="inventory-page__eyebrow">Truck Inventory</p>
-            <h1>My Inventory</h1>
+            <p className="inventory-page__eyebrow">Field stock · Tech 72485</p>
+            <h1>Truck Stock</h1>
             <p className="inventory-page__subtitle">
-              Track parts, boxes, tickets, machines, customers, and history.
+              Know what you have and exactly where it lives.
             </p>
           </div>
         </header>
@@ -1464,6 +1473,14 @@ function InventoryPage() {
         )}
 
         <section className="inventory-page__search-section">
+          <div className="inventory-page__panel-heading inventory-page__search-heading">
+            <div>
+              <span>Part finder</span>
+              <h2>Search truck stock</h2>
+            </div>
+            <p>{inventorySummary.totalParts} known parts</p>
+          </div>
+
           <div
             className="inventory-page__search-mode"
             role="group"
@@ -1546,6 +1563,13 @@ function InventoryPage() {
         </section>
 
         <section className="inventory-page__actions" aria-label="Inventory actions">
+          <div className="inventory-page__panel-heading">
+            <div>
+              <span>Work</span>
+              <h2>Update stock</h2>
+            </div>
+          </div>
+
           <Button fullWidth onClick={() => openModal('add')}>
             <PackagePlus size={19} aria-hidden="true" />
             Add Part
@@ -1587,10 +1611,17 @@ function InventoryPage() {
         </Button>
 
         <section className="inventory-page__summary" aria-label="Inventory summary">
+          <div className="inventory-page__panel-heading">
+            <div>
+              <span>Today</span>
+              <h2>At a glance</h2>
+            </div>
+          </div>
+
           <Card
             as="button"
             type="button"
-            className="inventory-page__summary-card"
+            className="inventory-page__summary-card inventory-page__summary-card--total"
             onClick={() => openSummaryModal(INVENTORY_SUMMARY_VIEWS.TOTAL)}
             aria-haspopup="dialog"
           >
@@ -1604,7 +1635,7 @@ function InventoryPage() {
           <Card
             as="button"
             type="button"
-            className="inventory-page__summary-card"
+            className="inventory-page__summary-card inventory-page__summary-card--official"
             onClick={() => openSummaryModal(INVENTORY_SUMMARY_VIEWS.OFFICIAL)}
             aria-haspopup="dialog"
           >
@@ -1618,7 +1649,7 @@ function InventoryPage() {
           <Card
             as="button"
             type="button"
-            className="inventory-page__summary-card"
+            className="inventory-page__summary-card inventory-page__summary-card--noi"
             onClick={() => openSummaryModal(INVENTORY_SUMMARY_VIEWS.NOI)}
             aria-haspopup="dialog"
           >
@@ -1632,7 +1663,7 @@ function InventoryPage() {
           <Card
             as="button"
             type="button"
-            className="inventory-page__summary-card"
+            className="inventory-page__summary-card inventory-page__summary-card--out-of-stock"
             onClick={() =>
               openSummaryModal(INVENTORY_SUMMARY_VIEWS.OUT_OF_STOCK)
             }
@@ -1647,6 +1678,8 @@ function InventoryPage() {
         </section>
 
         <section className="inventory-page__tabs" aria-label="Inventory views">
+          <p className="inventory-page__tabs-label">Browse</p>
+
           <button
             type="button"
             className={`inventory-page__tab ${
