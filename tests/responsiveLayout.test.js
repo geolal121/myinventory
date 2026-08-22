@@ -23,9 +23,9 @@ test('inventory workbench has distinct native-style phone and desktop navigation
     styles,
     /@media \(min-width: 1120px\) and \(hover: hover\) and \(pointer: fine\)[\s\S]*?grid-template-columns: 17rem minmax\(0, 1fr\)/,
   )
-  assert.match(colors, /--color-background:\s*#f4f5f4;/)
-  assert.match(colors, /--color-brand-deep:\s*#16191c;/)
-  assert.match(colors, /--color-utility:\s*#e5e8e6;/)
+  assert.match(colors, /--color-background:\s*#f7f7fb;/)
+  assert.match(colors, /--color-brand-deep:\s*#19181f;/)
+  assert.match(colors, /--color-utility:\s*#4df5a5;/)
   assert.match(colors, /--gradient-page:\s*var\(--color-background\);/)
 })
 
@@ -45,6 +45,22 @@ test('phone layout uses compact two-column summaries and actions', async () => {
   assert.match(
     styles,
     /@media \(max-width: 767px\) and \(orientation: landscape\)[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/,
+  )
+})
+
+test('every phone view can scroll its final content above the fixed tab bar', async () => {
+  const styles = await readProjectFile(
+    'src/features/inventory/styles/inventory-rebuild.css',
+  )
+
+  assert.match(styles, /--mobile-tabbar-clearance:/)
+  assert.match(
+    styles,
+    /@media \(max-width: 767px\)[\s\S]*?\.stock-app__shell\.site-container::after\s*\{[\s\S]*?order: 10;[\s\S]*?min-height: var\(--mobile-tabbar-clearance\);/,
+  )
+  assert.match(
+    styles,
+    /\.stock-app__shell--searching\.site-container::after\s*\{\s*display: none;/,
   )
 })
 
