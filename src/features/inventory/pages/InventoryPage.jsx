@@ -1453,6 +1453,7 @@ function InventoryPage() {
         className={`inventory-page__container stock-app__shell ${
           isSearching ? 'inventory-page__container--searching stock-app__shell--searching' : ''
         }`}
+        data-active-view={activeInventoryView}
       >
         <aside className="stock-app__rail" aria-label="Inventory workspace">
           <div className="stock-app__brand">

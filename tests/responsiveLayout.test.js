@@ -23,28 +23,30 @@ test('inventory workbench has distinct native-style phone and desktop navigation
     styles,
     /@media \(min-width: 1120px\) and \(hover: hover\) and \(pointer: fine\)[\s\S]*?grid-template-columns: 17rem minmax\(0, 1fr\)/,
   )
-  assert.match(colors, /--color-background:\s*#f7f7fb;/)
-  assert.match(colors, /--color-brand-deep:\s*#19181f;/)
-  assert.match(colors, /--color-utility:\s*#4df5a5;/)
+  assert.match(colors, /--color-background:\s*#f5f5f2;/)
+  assert.match(colors, /--color-brand-deep:\s*#20231f;/)
+  assert.match(colors, /--color-utility:\s*#e3e7e1;/)
   assert.match(colors, /--gradient-page:\s*var\(--color-background\);/)
 })
 
-test('phone layout uses compact two-column summaries and actions', async () => {
-  const styles = await readProjectFile(
-    'src/features/inventory/styles/inventory-rebuild.css',
-  )
+test('phone layout uses compact four-column summaries and actions', async () => {
+  const [component, styles] = await Promise.all([
+    readProjectFile('src/features/inventory/pages/InventoryPage.jsx'),
+    readProjectFile('src/features/inventory/styles/inventory-rebuild.css'),
+  ])
 
+  assert.match(component, /data-active-view=\{activeInventoryView\}/)
   assert.match(
     styles,
-    /\.stock-app \.stock-app__snapshot\s*\{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/,
+    /\/\* SIMPLE PHONE WORKSPACE \*\/[\s\S]*?\.stock-app \.stock-app__task-strip\s*\{[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/,
   )
   assert.match(
     styles,
-    /\.stock-app \.stock-app__task-strip\s*\{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/,
+    /\/\* SIMPLE PHONE WORKSPACE \*\/[\s\S]*?\.stock-app \.stock-app__snapshot\s*\{[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/,
   )
   assert.match(
     styles,
-    /@media \(max-width: 767px\) and \(orientation: landscape\)[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/,
+    /:not\(\[data-active-view='BOXES'\]\)[\s\S]*?\.stock-app__task-strip,[\s\S]*?\.inventory-count-launch,[\s\S]*?\.stock-app__snapshot\s*\{\s*display: none;/,
   )
 })
 
