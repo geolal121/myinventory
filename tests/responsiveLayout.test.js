@@ -23,9 +23,28 @@ test('inventory workbench has distinct native-style phone and desktop navigation
     styles,
     /@media \(min-width: 1120px\)[\s\S]*?grid-template-columns: 17rem minmax\(0, 1fr\)/,
   )
-  assert.match(colors, /--color-brand-deep:\s*#121826;/)
-  assert.match(colors, /--color-utility:\s*#ff7547;/)
+  assert.match(colors, /--color-brand-deep:\s*#21192b;/)
+  assert.match(colors, /--color-utility:\s*#45d3ae;/)
   assert.match(colors, /--gradient-page:\s*var\(--color-background\);/)
+})
+
+test('inventory workbench protects narrow phones and keeps desktop location rows aligned', async () => {
+  const styles = await readProjectFile(
+    'src/features/inventory/styles/inventory-rebuild.css',
+  )
+
+  assert.match(
+    styles,
+    /@media \(max-width: 420px\)[\s\S]*?\.stock-app \.stock-app__finder,[\s\S]*?margin-right: var\(--spacing-3\);[\s\S]*?margin-left: var\(--spacing-3\);/,
+  )
+  assert.match(
+    styles,
+    /@media \(max-width: 420px\)[\s\S]*?\.inventory-page__section-heading \.ui-button\s*\{\s*width: 100%;/,
+  )
+  assert.match(
+    styles,
+    /@media \(min-width: 1120px\)[\s\S]*?\.inventory-page__location-card-stats\s*\{[\s\S]*?grid-column: 2;[\s\S]*?border-top: 0;/,
+  )
 })
 
 test('inventory summary cards use the responsive summary modal layout', async () => {

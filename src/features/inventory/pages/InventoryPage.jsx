@@ -129,25 +129,25 @@ const INVENTORY_NAV_ITEMS = [
   {
     value: INVENTORY_VIEW_TABS.BOXES,
     label: 'Stock',
-    title: 'Truck stock',
+    title: 'Inventory',
     Icon: Boxes,
   },
   {
     value: INVENTORY_VIEW_TABS.MOST_USED,
     label: 'Usage',
-    title: 'Part usage',
+    title: 'Usage',
     Icon: TrendingUp,
   },
   {
     value: INVENTORY_VIEW_TABS.HEALTH,
     label: 'Checkup',
-    title: 'Inventory checkup',
+    title: 'Checkup',
     Icon: ShieldCheck,
   },
   {
     value: INVENTORY_VIEW_TABS.EXPORT,
     label: 'Files',
-    title: 'Files and reports',
+    title: 'Files',
     Icon: Download,
   },
 ]
