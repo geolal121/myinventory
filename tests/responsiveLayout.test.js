@@ -33,8 +33,8 @@ test('the app theme uses solid surfaces instead of decorative gradients', async 
   styles.forEach((source) => {
     assert.doesNotMatch(source, /(?:linear|radial)-gradient\s*\(/)
   })
-  assert.match(colors, /--color-background:\s*#f4f7fb;/)
-  assert.match(colors, /--color-accent:\s*#2563eb;/)
+  assert.match(colors, /--color-background:\s*#f5f6f4;/)
+  assert.match(colors, /--color-accent:\s*#356f8c;/)
   assert.match(colors, /--color-utility:\s*#0f9f78;/)
   assert.match(buttons, /\.ui-button--primary\s*\{[\s\S]*?background: var\(--color-accent\);/)
   assert.match(cards, /\.ui-card\s*\{[\s\S]*?background: var\(--color-surface\);/)
@@ -50,7 +50,7 @@ test('the inventory dashboard groups search, quick actions, and snapshot panels'
   assert.match(component, /inventory-page__panel-title">Inventory Snapshot</)
   assert.match(
     component,
-    /<section className="inventory-page__actions"[\s\S]*?className="inventory-count-launch"[\s\S]*?<\/section>/,
+    /inventory-page__actions[\s\S]*?className="inventory-count-launch"[\s\S]*?<\/section>/,
   )
   assert.match(
     styles,
@@ -58,14 +58,26 @@ test('the inventory dashboard groups search, quick actions, and snapshot panels'
   )
 })
 
-test('phone dashboard keeps controls compact and navigation in the page flow', async () => {
-  const styles = await readProjectFile(
-    'src/features/inventory/styles/inventory-page.css',
-  )
+test('phone dashboard uses progressive disclosure and focuses searches', async () => {
+  const [component, styles] = await Promise.all([
+    readProjectFile('src/features/inventory/pages/InventoryPage.jsx'),
+    readProjectFile('src/features/inventory/styles/inventory-page.css'),
+  ])
 
+  assert.match(component, /mobileToolsOpen/)
+  assert.match(component, /mobileOverviewOpen/)
+  assert.match(component, /inventory-page__container--searching/)
   assert.match(
     styles,
-    /@media \(max-width: 767px\)[\s\S]*?\.inventory-page__actions\s*\{[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/,
+    /@media \(max-width: 767px\)[\s\S]*?\.inventory-page__mobile-section-toggle\s*\{[\s\S]*?display: flex;/,
+  )
+  assert.match(
+    styles,
+    /\.inventory-page__actions:not\(\.inventory-page__actions--open\) > \.ui-button\s*\{\s*display: none;/,
+  )
+  assert.match(
+    styles,
+    /\.inventory-page__container--searching > \.inventory-page__actions,[\s\S]*?\.inventory-page__container--searching > \.inventory-page__tabs\s*\{\s*display: none;/,
   )
   assert.match(
     styles,

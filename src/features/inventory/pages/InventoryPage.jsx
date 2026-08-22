@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowRightLeft,
   Boxes,
+  ChevronDown,
   ChevronRight,
   CircleCheck,
   ClipboardCheck,
@@ -22,6 +23,7 @@ import {
   TextSearch,
   TriangleAlert,
   Upload,
+  Wrench,
   X,
 } from 'lucide-react'
 
@@ -167,6 +169,8 @@ function InventoryPage() {
   const [searchMode, setSearchMode] = useState(
     INVENTORY_SEARCH_MODES.PART_NUMBER,
   )
+  const [mobileToolsOpen, setMobileToolsOpen] = useState(false)
+  const [mobileOverviewOpen, setMobileOverviewOpen] = useState(false)
   const [activeInventoryView, setActiveInventoryView] = useState(
     INVENTORY_VIEW_TABS.BOXES,
   )
@@ -621,6 +625,10 @@ function InventoryPage() {
 
   const handleSearchChange = (event) => {
     const { value } = event.target
+
+    if (value.trim()) {
+      setActiveInventoryView(INVENTORY_VIEW_TABS.BOXES)
+    }
 
     if (searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION) {
       setSearchTerm(value)
@@ -1401,7 +1409,11 @@ function InventoryPage() {
 
   return (
     <main className="inventory-page page-shell">
-      <div className="inventory-page__container site-container">
+      <div
+        className={`inventory-page__container site-container ${
+          isSearching ? 'inventory-page__container--searching' : ''
+        }`}
+      >
         <header className="inventory-page__header">
           <div className="inventory-page__header-toolbar">
             <div
@@ -1546,7 +1558,25 @@ function InventoryPage() {
           />
         </section>
 
-        <section className="inventory-page__actions" aria-label="Inventory actions">
+        <section
+          className={`inventory-page__actions ${
+            mobileToolsOpen ? 'inventory-page__actions--open' : ''
+          }`}
+          aria-label="Inventory actions"
+        >
+          <button
+            type="button"
+            className="inventory-page__mobile-section-toggle"
+            onClick={() => setMobileToolsOpen((isOpen) => !isOpen)}
+            aria-expanded={mobileToolsOpen}
+          >
+            <span>
+              <Wrench size={18} aria-hidden="true" />
+              Inventory Actions
+            </span>
+            <ChevronDown size={18} aria-hidden="true" />
+          </button>
+
           <h2 className="inventory-page__panel-title">Quick Actions</h2>
 
           <Button fullWidth onClick={() => openModal('add')}>
@@ -1589,13 +1619,34 @@ function InventoryPage() {
           </Button>
         </section>
 
-        <section className="inventory-page__summary" aria-label="Inventory summary">
+        <section
+          className={`inventory-page__summary ${
+            mobileOverviewOpen ? 'inventory-page__summary--open' : ''
+          }`}
+          aria-label="Inventory summary"
+        >
+          <button
+            type="button"
+            className="inventory-page__mobile-section-toggle inventory-page__overview-toggle"
+            onClick={() => setMobileOverviewOpen((isOpen) => !isOpen)}
+            aria-expanded={mobileOverviewOpen}
+          >
+            <span>
+              <Package size={18} aria-hidden="true" />
+              Inventory Overview
+            </span>
+            <span className="inventory-page__overview-total">
+              {inventorySummary.totalParts} parts
+            </span>
+            <ChevronDown size={18} aria-hidden="true" />
+          </button>
+
           <h2 className="inventory-page__panel-title">Inventory Snapshot</h2>
 
           <Card
             as="button"
             type="button"
-            className="inventory-page__summary-card"
+            className="inventory-page__summary-card inventory-page__summary-card--total"
             onClick={() => openSummaryModal(INVENTORY_SUMMARY_VIEWS.TOTAL)}
             aria-haspopup="dialog"
           >
@@ -1609,7 +1660,7 @@ function InventoryPage() {
           <Card
             as="button"
             type="button"
-            className="inventory-page__summary-card"
+            className="inventory-page__summary-card inventory-page__summary-card--official"
             onClick={() => openSummaryModal(INVENTORY_SUMMARY_VIEWS.OFFICIAL)}
             aria-haspopup="dialog"
           >
@@ -1623,7 +1674,7 @@ function InventoryPage() {
           <Card
             as="button"
             type="button"
-            className="inventory-page__summary-card"
+            className="inventory-page__summary-card inventory-page__summary-card--noi"
             onClick={() => openSummaryModal(INVENTORY_SUMMARY_VIEWS.NOI)}
             aria-haspopup="dialog"
           >
@@ -1637,7 +1688,7 @@ function InventoryPage() {
           <Card
             as="button"
             type="button"
-            className="inventory-page__summary-card"
+            className="inventory-page__summary-card inventory-page__summary-card--out-of-stock"
             onClick={() =>
               openSummaryModal(INVENTORY_SUMMARY_VIEWS.OUT_OF_STOCK)
             }
@@ -1730,7 +1781,7 @@ function InventoryPage() {
                     ? searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION
                       ? 'Description Matches'
                       : 'Part Locations'
-                    : 'Boxes'}
+                    : 'Locations'}
                 </h2>
 
                 {!isSearching && (

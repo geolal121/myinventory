@@ -1,46 +1,46 @@
 :root {
   /* BACKGROUNDS */
-  --color-background: #f4f7fb;
-  --color-background-soft: #f8fafc;
-  --color-background-elevated: #e8edf5;
+  --color-background: #f5f6f4;
+  --color-background-soft: #fafaf8;
+  --color-background-elevated: #e9ecea;
 
   /* SURFACES */
   --color-surface: #ffffff;
-  --color-surface-soft: #f7f9fc;
-  --color-surface-elevated: #edf2f7;
+  --color-surface-soft: #f7f8f6;
+  --color-surface-elevated: #eef1ef;
 
   /* BORDERS */
-  --color-border: #dbe3ec;
-  --color-border-strong: #b9c6d4;
+  --color-border: #dce1df;
+  --color-border-strong: #b9c4c0;
 
   /* TEXT */
-  --color-text-primary: #172033;
-  --color-text-secondary: #5d6b7c;
-  --color-text-muted: #8996a8;
+  --color-text-primary: #202b30;
+  --color-text-secondary: #637078;
+  --color-text-muted: #8a959a;
   --color-text-inverse: #ffffff;
 
   /* PRIMARY ACCENT */
-  --color-accent: #2563eb;
-  --color-accent-hover: #1d4ed8;
-  --color-accent-bright: #3b82f6;
-  --color-accent-soft: rgba(37, 99, 235, 0.10);
+  --color-accent: #356f8c;
+  --color-accent-hover: #285c76;
+  --color-accent-bright: #4a88a5;
+  --color-accent-soft: rgba(53, 111, 140, 0.10);
 
   /* APP CHROME */
-  --color-brand: #172033;
-  --color-brand-deep: #0f172a;
-  --color-brand-surface: #273449;
+  --color-brand: #202b30;
+  --color-brand-deep: #162126;
+  --color-brand-surface: #344249;
   --color-utility: #0f9f78;
   --color-utility-soft: rgba(15, 159, 120, 0.11);
 
   /* SECONDARY ACCENT */
-  --color-accent-secondary: #dfe8fb;
-  --color-accent-secondary-hover: #cbdafa;
-  --color-accent-secondary-soft: rgba(37, 99, 235, 0.07);
+  --color-accent-secondary: #dfe9ed;
+  --color-accent-secondary-hover: #cfdee4;
+  --color-accent-secondary-soft: rgba(53, 111, 140, 0.07);
 
   /* CARD COLORS */
   --color-card: #ffffff;
-  --color-card-hover: #f8faff;
-  --color-card-text: #172033;
+  --color-card-hover: #fafbf9;
+  --color-card-text: #202b30;
 
   /* STATUS COLORS */
   --color-success: #26866a;
