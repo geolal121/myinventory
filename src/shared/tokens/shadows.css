@@ -4,13 +4,13 @@
   ========================================================= */
 
   --shadow-sm:
-    0 1px 2px rgba(22, 42, 62, 0.07);
+    0 1px 2px rgba(0, 0, 0, 0.28);
 
   --shadow-md:
-    0 8px 24px rgba(22, 42, 62, 0.10);
+    0 8px 24px rgba(0, 0, 0, 0.34);
 
   --shadow-lg:
-    0 20px 60px rgba(22, 42, 62, 0.18);
+    0 20px 60px rgba(0, 0, 0, 0.48);
 
   /* =========================================================
      COMPONENT SHADOWS
@@ -26,17 +26,17 @@
     var(--shadow-lg);
 
   --button-shadow:
-    0 2px 5px rgba(22, 42, 62, 0.14);
+    0 2px 5px rgba(0, 0, 0, 0.32);
 
   --button-shadow-hover:
-    0 5px 12px rgba(22, 42, 62, 0.17);
+    0 5px 12px rgba(0, 0, 0, 0.4);
 
   /* =========================================================
      GLOWS
   ========================================================= */
 
   --glow-accent:
-    0 0 0 4px rgba(49, 95, 156, 0.18);
+    0 0 0 4px rgba(255, 255, 255, 0.13);
 
   --glow-danger:
     0 0 16px rgba(209, 107, 107, 0.18);
@@ -53,22 +53,22 @@
 @media (max-width: 479px) {
   :root {
     --shadow-sm:
-      0 1px 2px rgba(22, 42, 62, 0.07);
+      0 1px 2px rgba(0, 0, 0, 0.28);
 
     --shadow-md:
-      0 6px 18px rgba(22, 42, 62, 0.10);
+      0 6px 18px rgba(0, 0, 0, 0.34);
 
     --shadow-lg:
-      0 16px 40px rgba(22, 42, 62, 0.17);
+      0 16px 40px rgba(0, 0, 0, 0.46);
 
     --button-shadow:
-      0 2px 5px rgba(22, 42, 62, 0.13);
+      0 2px 5px rgba(0, 0, 0, 0.32);
 
     --button-shadow-hover:
-      0 4px 10px rgba(22, 42, 62, 0.16);
+      0 4px 10px rgba(0, 0, 0, 0.38);
 
     --glow-accent:
-      0 0 0 3px rgba(49, 95, 156, 0.18);
+      0 0 0 3px rgba(255, 255, 255, 0.13);
   }
 }
 
@@ -107,7 +107,7 @@
       0 24px 64px rgba(0, 0, 0, 0.20);
 
     --button-shadow-hover:
-      0 14px 36px rgba(22, 42, 62, 0.20);
+      0 14px 36px rgba(0, 0, 0, 0.42);
   }
 }
 
@@ -128,7 +128,7 @@
       0 36px 88px rgba(0, 0, 0, 0.24);
 
     --glow-accent:
-      0 0 24px rgba(49, 95, 156, 0.18);
+      0 0 24px rgba(255, 255, 255, 0.12);
   }
 }
 

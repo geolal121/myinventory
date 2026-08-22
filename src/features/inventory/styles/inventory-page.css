@@ -90,7 +90,7 @@
   width: 9rem;
   height: 9rem;
 
-  border: 1.25rem solid rgba(49, 95, 156, 0.07);
+  border: 1.25rem solid rgba(255, 255, 255, 0.035);
   border-radius: 50%;
 
   pointer-events: none;

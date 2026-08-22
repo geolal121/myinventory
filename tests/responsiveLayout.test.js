@@ -23,9 +23,29 @@ test('inventory workbench has distinct native-style phone and desktop navigation
     styles,
     /@media \(min-width: 900px\) and \(orientation: landscape\), \(min-width: 1120px\)[\s\S]*?grid-template-columns: 17rem minmax\(0, 1fr\)/,
   )
-  assert.match(colors, /--color-brand-deep:\s*#162a3e;/)
-  assert.match(colors, /--color-utility:\s*#dbe7f3;/)
+  assert.match(colors, /--color-background:\s*#090a0c;/)
+  assert.match(colors, /--color-brand-deep:\s*#050607;/)
+  assert.match(colors, /--color-utility:\s*#e6e8eb;/)
   assert.match(colors, /--gradient-page:\s*var\(--color-background\);/)
+})
+
+test('phone layout uses compact two-column summaries and actions', async () => {
+  const styles = await readProjectFile(
+    'src/features/inventory/styles/inventory-rebuild.css',
+  )
+
+  assert.match(
+    styles,
+    /\.stock-app \.stock-app__snapshot\s*\{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/,
+  )
+  assert.match(
+    styles,
+    /\.stock-app \.stock-app__task-strip\s*\{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/,
+  )
+  assert.match(
+    styles,
+    /@media \(max-width: 767px\) and \(orientation: landscape\)[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/,
+  )
 })
 
 test('inventory workbench protects narrow phones and keeps desktop location rows aligned', async () => {
