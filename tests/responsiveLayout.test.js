@@ -50,20 +50,21 @@ test('phone layout uses compact four-column summaries and actions', async () => 
   )
 })
 
-test('every phone view can scroll its final content above the fixed tab bar', async () => {
+test('phone content scrolls in a viewport that ends above the fixed tab bar', async () => {
   const styles = await readProjectFile(
     'src/features/inventory/styles/inventory-rebuild.css',
   )
 
-  assert.match(styles, /--mobile-tabbar-clearance:/)
+  assert.match(styles, /--mobile-tabbar-height:/)
   assert.match(
     styles,
-    /@media \(max-width: 767px\)[\s\S]*?\.stock-app__shell\.site-container::after\s*\{[\s\S]*?order: 10;[\s\S]*?min-height: var\(--mobile-tabbar-clearance\);/,
+    /@media \(max-width: 767px\)[\s\S]*?\.stock-app\.page-shell\s*\{[\s\S]*?height: 100dvh;[\s\S]*?padding-bottom: var\(--mobile-tabbar-height\);[\s\S]*?overflow: hidden;/,
   )
   assert.match(
     styles,
-    /\.stock-app__shell--searching\.site-container::after\s*\{\s*display: none;/,
+    /@media \(max-width: 767px\)[\s\S]*?\.stock-app__shell\.site-container\s*\{[\s\S]*?height: 100%;[\s\S]*?min-height: 0;[\s\S]*?overflow-y: auto;/,
   )
+  assert.doesNotMatch(styles, /mobile-tabbar-clearance/)
 })
 
 test('inventory workbench protects narrow phones and keeps desktop location rows aligned', async () => {

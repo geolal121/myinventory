@@ -1,6 +1,8 @@
 /* MYINVENTORY 2.0 — RESPONSIVE WORKBENCH */
 
 .stock-app.page-shell {
+  --mobile-tabbar-height: calc(4.375rem + env(safe-area-inset-bottom));
+
   min-height: 100dvh;
   padding: 0;
 
@@ -8,8 +10,6 @@
 }
 
 .stock-app__shell.site-container {
-  --mobile-tabbar-clearance: calc(6.75rem + max(env(safe-area-inset-bottom), 1rem));
-
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -21,24 +21,24 @@
 }
 
 @media (max-width: 767px) {
+  .stock-app.page-shell {
+    height: 100dvh;
+    min-height: 0;
+    padding-bottom: var(--mobile-tabbar-height);
+
+    overflow: hidden;
+  }
+
   .stock-app__shell.site-container {
-    scroll-padding-bottom: var(--mobile-tabbar-clearance);
-  }
+    height: 100%;
+    min-height: 0;
+    padding-bottom: var(--spacing-4);
 
-  .stock-app__shell.site-container::after {
-    content: '';
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scroll-padding-bottom: var(--spacing-4);
 
-    order: 10;
-    flex: 0 0 var(--mobile-tabbar-clearance);
-
-    width: 100%;
-    min-height: var(--mobile-tabbar-clearance);
-
-    pointer-events: none;
-  }
-
-  .stock-app__shell--searching.site-container::after {
-    display: none;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -807,8 +807,7 @@
 
 .stock-app__shell--searching .stock-app__snapshot,
 .stock-app__shell--searching .stock-app__task-strip,
-.stock-app__shell--searching .inventory-count-launch,
-.stock-app__shell--searching .stock-app__mobile-nav {
+.stock-app__shell--searching .inventory-count-launch {
   display: none;
 }
 
