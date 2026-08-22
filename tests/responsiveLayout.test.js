@@ -23,9 +23,9 @@ test('inventory workbench has distinct native-style phone and desktop navigation
     styles,
     /@media \(min-width: 1120px\) and \(hover: hover\) and \(pointer: fine\)[\s\S]*?grid-template-columns: 17rem minmax\(0, 1fr\)/,
   )
-  assert.match(colors, /--color-background:\s*#f5f5f2;/)
-  assert.match(colors, /--color-brand-deep:\s*#20231f;/)
-  assert.match(colors, /--color-utility:\s*#e3e7e1;/)
+  assert.match(colors, /--color-background:\s*#f4f5f6;/)
+  assert.match(colors, /--color-brand-deep:\s*#191a1c;/)
+  assert.match(colors, /--color-utility:\s*#e7e8ea;/)
   assert.match(colors, /--gradient-page:\s*var\(--color-background\);/)
 })
 
