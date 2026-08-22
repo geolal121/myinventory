@@ -47,72 +47,81 @@ function InventoryLogin() {
 
   return (
     <main className="inventory-auth page-shell">
-      <Card as="section" className="inventory-auth__card" padding="lg">
-        <div className="inventory-auth__brand" aria-hidden="true">
-          <PackageCheck size={29} />
-        </div>
+      <section className="inventory-auth__shell">
+        <aside className="inventory-auth__intro">
+          <div className="inventory-auth__brand" aria-hidden="true">
+            <PackageCheck size={29} />
+          </div>
+          <div>
+            <p>MyInventory</p>
+            <h2>Your truck, organized.</h2>
+            <span>Find parts quickly. Know every location.</span>
+          </div>
+        </aside>
 
-        <header className="inventory-auth__header">
-          <p className="inventory-auth__eyebrow">Truck Inventory</p>
-          <h1>Welcome Back</h1>
-          <p>Enter your work identity and private password.</p>
-        </header>
+        <Card as="section" className="inventory-auth__card" padding="lg">
+          <header className="inventory-auth__header">
+            <p className="inventory-auth__eyebrow">Technician access</p>
+            <h1>Open your inventory</h1>
+            <p>Use your branch, technician ID, and private password.</p>
+          </header>
 
-        <form className="inventory-auth__form" onSubmit={handleSubmit}>
-          {errorMessage && (
-            <div className="inventory-auth__error" role="alert">
-              <strong>Could not sign in</strong>
-              <p>{errorMessage}</p>
-            </div>
-          )}
+          <form className="inventory-auth__form" onSubmit={handleSubmit}>
+            {errorMessage && (
+              <div className="inventory-auth__error" role="alert">
+                <strong>Could not sign in</strong>
+                <p>{errorMessage}</p>
+              </div>
+            )}
 
-          <Input
-            name="branch"
-            label="Branch"
-            type="text"
-            value={formData.branch}
-            onChange={handleChange}
-            autoComplete="organization"
-            autoCapitalize="words"
-            required
-          />
+            <Input
+              name="branch"
+              label="Branch"
+              type="text"
+              value={formData.branch}
+              onChange={handleChange}
+              autoComplete="organization"
+              autoCapitalize="words"
+              required
+            />
 
-          <Input
-            name="technicianId"
-            label="Tech ID"
-            type="text"
-            inputMode="numeric"
-            value={formData.technicianId}
-            onChange={handleChange}
-            autoComplete="username"
-            required
-          />
+            <Input
+              name="technicianId"
+              label="Tech ID"
+              type="text"
+              inputMode="numeric"
+              value={formData.technicianId}
+              onChange={handleChange}
+              autoComplete="username"
+              required
+            />
 
-          <Input
-            name="password"
-            label="Private Password"
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            autoComplete="current-password"
-            minLength="6"
-            required
-          />
+            <Input
+              name="password"
+              label="Private Password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              autoComplete="current-password"
+              minLength="6"
+              required
+            />
 
-          <Button type="submit" fullWidth disabled={isSigningIn}>
-            <KeyRound size={18} aria-hidden="true" />
-            {isSigningIn ? 'Signing In…' : 'Open My Inventory'}
-          </Button>
-        </form>
+            <Button type="submit" fullWidth disabled={isSigningIn}>
+              <KeyRound size={18} aria-hidden="true" />
+              {isSigningIn ? 'Signing In…' : 'Open My Inventory'}
+            </Button>
+          </form>
 
-        <div className="inventory-auth__security-note">
-          <ShieldCheck size={18} aria-hidden="true" />
-          <p>
-            Your password is verified securely by Firebase and is never stored
-            in this app.
-          </p>
-        </div>
-      </Card>
+          <div className="inventory-auth__security-note">
+            <ShieldCheck size={18} aria-hidden="true" />
+            <p>
+              Your password is verified securely by Firebase and is never stored
+              in this app.
+            </p>
+          </div>
+        </Card>
+      </section>
     </main>
   )
 }

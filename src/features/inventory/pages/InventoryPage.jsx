@@ -111,7 +111,7 @@ import '../styles/inventory-page.css'
 import '../styles/inventory-forms.css'
 import '../styles/inventory-history.css'
 import '../styles/inventory-count.css'
-import '../styles/inventory-console.css'
+import '../styles/inventory-rebuild.css'
 
 const INVENTORY_VIEW_TABS = {
   BOXES: 'BOXES',
@@ -124,6 +124,40 @@ const INVENTORY_SEARCH_MODES = {
   PART_NUMBER: 'PART_NUMBER',
   DESCRIPTION: 'DESCRIPTION',
 }
+
+const INVENTORY_NAV_ITEMS = [
+  {
+    value: INVENTORY_VIEW_TABS.BOXES,
+    label: 'Stock',
+    title: 'Truck stock',
+    Icon: Boxes,
+  },
+  {
+    value: INVENTORY_VIEW_TABS.MOST_USED,
+    label: 'Usage',
+    title: 'Part usage',
+    Icon: TrendingUp,
+  },
+  {
+    value: INVENTORY_VIEW_TABS.HEALTH,
+    label: 'Checkup',
+    title: 'Inventory checkup',
+    Icon: ShieldCheck,
+  },
+  {
+    value: INVENTORY_VIEW_TABS.EXPORT,
+    label: 'Files',
+    title: 'Files and reports',
+    Icon: Download,
+  },
+]
+
+const INVENTORY_QUICK_ACTIONS = [
+  { modal: 'add', label: 'Add', Icon: PackagePlus },
+  { modal: 'use', label: 'Use', Icon: PackageMinus },
+  { modal: 'give', label: 'Give', Icon: HandHelping },
+  { modal: 'move', label: 'Move', Icon: ArrowRightLeft },
+]
 
 const InventoryWorkbookModal = lazy(() =>
   import('../components/modals/InventoryWorkbookModal.jsx'),
@@ -623,6 +657,10 @@ function InventoryPage() {
   const handleSearchChange = (event) => {
     const { value } = event.target
 
+    if (value) {
+      setActiveInventoryView(INVENTORY_VIEW_TABS.BOXES)
+    }
+
     if (searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION) {
       setSearchTerm(value)
       return
@@ -639,6 +677,11 @@ function InventoryPage() {
     if (nextSearchMode === searchMode) return
 
     setSearchMode(nextSearchMode)
+    setSearchTerm('')
+  }
+
+  const handleInventoryViewChange = (nextView) => {
+    setActiveInventoryView(nextView)
     setSearchTerm('')
   }
 
@@ -1400,15 +1443,64 @@ function InventoryPage() {
     openModalWithItem('delete', item)
   }
 
+  const activeViewTitle =
+    INVENTORY_NAV_ITEMS.find((item) => item.value === activeInventoryView)
+      ?.title || 'Truck stock'
+
   return (
-    <main className="inventory-page page-shell">
+    <main className="inventory-page stock-app page-shell">
       <div
-        className={`inventory-page__container site-container ${
-          isSearching ? 'inventory-page__container--searching' : ''
+        className={`inventory-page__container stock-app__shell ${
+          isSearching ? 'inventory-page__container--searching stock-app__shell--searching' : ''
         }`}
       >
-        <header className="inventory-page__header">
-          <div className="inventory-page__header-toolbar">
+        <aside className="stock-app__rail" aria-label="Inventory workspace">
+          <div className="stock-app__brand">
+            <span className="stock-app__brand-mark">MI</span>
+            <div>
+              <strong>MyInventory</strong>
+              <small>Tech 72485</small>
+            </div>
+          </div>
+
+          <nav className="stock-app__rail-nav" aria-label="Main inventory views">
+            <p>Workspace</p>
+            {INVENTORY_NAV_ITEMS.map(({ value, label, Icon }) => (
+              <button
+                key={value}
+                type="button"
+                className={activeInventoryView === value ? 'is-active' : ''}
+                onClick={() => handleInventoryViewChange(value)}
+                aria-current={activeInventoryView === value ? 'page' : undefined}
+              >
+                <Icon size={19} aria-hidden="true" />
+                <span>{label}</span>
+              </button>
+            ))}
+          </nav>
+
+          <div className="stock-app__rail-tasks">
+            <p>Update inventory</p>
+            {INVENTORY_QUICK_ACTIONS.map(({ modal, label, Icon }) => (
+              <button key={modal} type="button" onClick={() => openModal(modal)}>
+                <Icon size={18} aria-hidden="true" />
+                <span>{label} part</span>
+              </button>
+            ))}
+            <button type="button" onClick={() => openModal('count')}>
+              <ClipboardCheck size={18} aria-hidden="true" />
+              <span>Count a location</span>
+            </button>
+          </div>
+
+          <div className="stock-app__rail-foot">
+            <span aria-hidden="true" />
+            <span>{syncStatus}</span>
+          </div>
+        </aside>
+
+        <header className="inventory-page__header stock-app__topbar">
+          <div className="inventory-page__header-toolbar stock-app__topbar-tools">
             <div
               className={`inventory-page__sync-status ${
                 syncStatus === 'Saved Offline' || syncStatus === 'Offline Ready'
@@ -1454,11 +1546,11 @@ function InventoryPage() {
             </div>
           </div>
 
-          <div className="inventory-page__header-copy">
-            <p className="inventory-page__eyebrow">Field stock · Tech 72485</p>
-            <h1>Truck Stock</h1>
+          <div className="inventory-page__header-copy stock-app__topbar-copy">
+            <p className="inventory-page__eyebrow">MyInventory / 72485</p>
+            <h1>{isSearching ? 'Find a part' : activeViewTitle}</h1>
             <p className="inventory-page__subtitle">
-              Know what you have and exactly where it lives.
+              Fast access to every part on your truck.
             </p>
           </div>
         </header>
@@ -1472,13 +1564,13 @@ function InventoryPage() {
           </Card>
         )}
 
-        <section className="inventory-page__search-section">
+        <section className="inventory-page__search-section stock-app__finder">
           <div className="inventory-page__panel-heading inventory-page__search-heading">
             <div>
               <span>Part finder</span>
-              <h2>Search truck stock</h2>
+              <h2>Where is it?</h2>
             </div>
-            <p>{inventorySummary.totalParts} known parts</p>
+            <p>{inventorySummary.totalParts} parts on file</p>
           </div>
 
           <div
@@ -1562,11 +1654,11 @@ function InventoryPage() {
           />
         </section>
 
-        <section className="inventory-page__actions" aria-label="Inventory actions">
+        <section className="inventory-page__actions stock-app__task-strip" aria-label="Inventory actions">
           <div className="inventory-page__panel-heading">
             <div>
-              <span>Work</span>
-              <h2>Update stock</h2>
+              <span>Quick tasks</span>
+              <h2>Update inventory</h2>
             </div>
           </div>
 
@@ -1610,11 +1702,11 @@ function InventoryPage() {
           />
         </Button>
 
-        <section className="inventory-page__summary" aria-label="Inventory summary">
+        <section className="inventory-page__summary stock-app__snapshot" aria-label="Inventory summary">
           <div className="inventory-page__panel-heading">
             <div>
-              <span>Today</span>
-              <h2>At a glance</h2>
+              <span>Truck snapshot</span>
+              <h2>What you have</h2>
             </div>
           </div>
 
@@ -1677,8 +1769,8 @@ function InventoryPage() {
           </Card>
         </section>
 
-        <section className="inventory-page__tabs" aria-label="Inventory views">
-          <p className="inventory-page__tabs-label">Browse</p>
+        <section className="inventory-page__tabs stock-app__mobile-nav" aria-label="Inventory views">
+          <p className="inventory-page__tabs-label">Workspace</p>
 
           <button
             type="button"
@@ -1687,14 +1779,14 @@ function InventoryPage() {
                 ? 'inventory-page__tab--active'
                 : ''
             }`}
-            onClick={() => setActiveInventoryView(INVENTORY_VIEW_TABS.BOXES)}
+            onClick={() => handleInventoryViewChange(INVENTORY_VIEW_TABS.BOXES)}
           >
             <Boxes
               className="inventory-page__tab-icon"
               size={18}
               aria-hidden="true"
             />
-            <span>Locations</span>
+            <span>Stock</span>
           </button>
 
           <button
@@ -1704,14 +1796,14 @@ function InventoryPage() {
                 ? 'inventory-page__tab--active'
                 : ''
             }`}
-            onClick={() => setActiveInventoryView(INVENTORY_VIEW_TABS.MOST_USED)}
+            onClick={() => handleInventoryViewChange(INVENTORY_VIEW_TABS.MOST_USED)}
           >
             <TrendingUp
               className="inventory-page__tab-icon"
               size={18}
               aria-hidden="true"
             />
-            <span>Most Used</span>
+            <span>Usage</span>
           </button>
 
           <button
@@ -1721,14 +1813,14 @@ function InventoryPage() {
                 ? 'inventory-page__tab--active'
                 : ''
             }`}
-            onClick={() => setActiveInventoryView(INVENTORY_VIEW_TABS.HEALTH)}
+            onClick={() => handleInventoryViewChange(INVENTORY_VIEW_TABS.HEALTH)}
           >
             <ShieldCheck
               className="inventory-page__tab-icon"
               size={18}
               aria-hidden="true"
             />
-            <span>Health</span>
+            <span>Checkup</span>
           </button>
 
           <button
@@ -1738,18 +1830,18 @@ function InventoryPage() {
                 ? 'inventory-page__tab--active'
                 : ''
             }`}
-            onClick={() => setActiveInventoryView(INVENTORY_VIEW_TABS.EXPORT)}
+            onClick={() => handleInventoryViewChange(INVENTORY_VIEW_TABS.EXPORT)}
           >
             <Download
               className="inventory-page__tab-icon"
               size={18}
               aria-hidden="true"
             />
-            <span>Export</span>
+            <span>Files</span>
           </button>
         </section>
 
-        <section className="inventory-page__content">
+        <section className="inventory-page__content stock-app__content">
           {activeInventoryView === INVENTORY_VIEW_TABS.BOXES && (
             <>
               <div className="inventory-page__section-heading">
@@ -1758,7 +1850,7 @@ function InventoryPage() {
                     ? searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION
                       ? 'Description Matches'
                       : 'Part Locations'
-                    : 'Boxes'}
+                    : 'Your Locations'}
                 </h2>
 
                 {!isSearching && (
@@ -1768,7 +1860,7 @@ function InventoryPage() {
                     onClick={() => openModal('manageLocations')}
                   >
                     <MapPin size={16} aria-hidden="true" />
-                    Manage Locations
+                    Edit Locations
                   </Button>
                 )}
               </div>

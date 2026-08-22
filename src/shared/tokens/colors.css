@@ -1,60 +1,60 @@
 :root {
   /* BACKGROUNDS */
-  --color-background: #f0eee7;
-  --color-background-soft: #f7f5ef;
-  --color-background-elevated: #e4e1d8;
+  --color-background: #eef1f6;
+  --color-background-soft: #f6f7fa;
+  --color-background-elevated: #e2e6ee;
 
   /* SURFACES */
-  --color-surface: #fffdf7;
-  --color-surface-soft: #f8f5ed;
-  --color-surface-elevated: #ebe7dc;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f7f8fb;
+  --color-surface-elevated: #e9edf4;
 
   /* BORDERS */
-  --color-border: rgba(30, 41, 34, 0.14);
-  --color-border-strong: rgba(30, 41, 34, 0.28);
+  --color-border: #d9dee8;
+  --color-border-strong: #bec6d5;
 
   /* TEXT */
-  --color-text-primary: #1e2922;
-  --color-text-secondary: #667069;
-  --color-text-muted: #929991;
+  --color-text-primary: #161c29;
+  --color-text-secondary: #657087;
+  --color-text-muted: #929caf;
   --color-text-inverse: #ffffff;
 
   /* PRIMARY ACCENT */
-  --color-accent: #27634d;
-  --color-accent-hover: #1e4d3d;
-  --color-accent-bright: #3e8066;
-  --color-accent-soft: rgba(39, 99, 77, 0.11);
+  --color-accent: #315ee8;
+  --color-accent-hover: #2448b9;
+  --color-accent-bright: #5278f5;
+  --color-accent-soft: rgba(49, 94, 232, 0.11);
 
   /* APP CHROME */
-  --color-brand: #18241d;
-  --color-brand-deep: #111813;
-  --color-brand-surface: #26372d;
-  --color-utility: #e5b94b;
-  --color-utility-soft: rgba(229, 185, 75, 0.18);
+  --color-brand: #1e293f;
+  --color-brand-deep: #121826;
+  --color-brand-surface: #202a3d;
+  --color-utility: #ff7547;
+  --color-utility-soft: #fff0ea;
 
   /* SECONDARY ACCENT */
-  --color-accent-secondary: #dce7df;
-  --color-accent-secondary-hover: #cbdccf;
-  --color-accent-secondary-soft: rgba(39, 99, 77, 0.07);
+  --color-accent-secondary: #dce4fb;
+  --color-accent-secondary-hover: #cad7f8;
+  --color-accent-secondary-soft: rgba(49, 94, 232, 0.07);
 
   /* CARD COLORS */
-  --color-card: #fffdf7;
-  --color-card-hover: #f8f5ed;
-  --color-card-text: #1e2922;
+  --color-card: #ffffff;
+  --color-card-hover: #f7f8fb;
+  --color-card-text: #161c29;
 
   /* STATUS COLORS */
-  --color-success: #3a7c5d;
-  --color-success-soft: rgba(58, 124, 93, 0.13);
+  --color-success: #25966f;
+  --color-success-soft: rgba(37, 150, 111, 0.13);
 
-  --color-warning: #a96f1f;
-  --color-warning-soft: rgba(169, 111, 31, 0.13);
+  --color-warning: #b86b12;
+  --color-warning-soft: rgba(184, 107, 18, 0.13);
   --color-orange: var(--color-warning);
 
-  --color-danger: #b84d4d;
-  --color-danger-soft: rgba(184, 77, 77, 0.12);
+  --color-danger: #d24f55;
+  --color-danger-soft: rgba(210, 79, 85, 0.12);
 
-  --color-info: #315f7a;
-  --color-info-soft: rgba(49, 95, 122, 0.12);
+  --color-info: #315ee8;
+  --color-info-soft: rgba(49, 94, 232, 0.12);
 
   /* INVENTORY STATUS */
   --color-in-stock: var(--color-success);
@@ -62,8 +62,8 @@
   --color-noi: var(--color-warning);
 
   /* OVERLAYS */
-  --color-overlay: rgba(17, 24, 19, 0.52);
-  --color-overlay-soft: rgba(17, 24, 19, 0.16);
+  --color-overlay: rgba(18, 24, 38, 0.58);
+  --color-overlay-soft: rgba(18, 24, 38, 0.18);
 
   /* LEGACY ALIASES NOW RESOLVE TO SOLID SURFACES */
   --gradient-page: var(--color-background);
