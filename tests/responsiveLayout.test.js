@@ -47,9 +47,10 @@ test('phone layout uses readable two-column summaries and actions', async () => 
 })
 
 test('phone navigation stays in normal page flow and never overlays content', async () => {
-  const styles = await readProjectFile(
-    'src/features/inventory/styles/inventory-clean.css',
-  )
+  const [component, styles] = await Promise.all([
+    readProjectFile('src/features/inventory/pages/InventoryPage.jsx'),
+    readProjectFile('src/features/inventory/styles/inventory-clean.css'),
+  ])
 
   assert.match(
     styles,
@@ -57,9 +58,10 @@ test('phone navigation stays in normal page flow and never overlays content', as
   )
   assert.doesNotMatch(styles, /mobile-tabbar-height/)
   assert.doesNotMatch(styles, /stock-app__mobile-nav\s*\{[^}]*position: fixed;/)
+  assert.match(component, /className="stock-app__bottom-space"/)
   assert.match(
     styles,
-    /padding: 0 0 calc\(var\(--spacing-10\) \+ env\(safe-area-inset-bottom\)\);/,
+    /\.stock-app \.stock-app__bottom-space\s*\{[\s\S]*?height: calc\(var\(--spacing-16\) \+ env\(safe-area-inset-bottom\)\);[\s\S]*?min-height: calc\(var\(--spacing-16\) \+ env\(safe-area-inset-bottom\)\);/,
   )
 })
 

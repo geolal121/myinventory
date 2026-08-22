@@ -2005,6 +2005,8 @@ function InventoryPage() {
             </>
           )}
         </section>
+
+        <div className="stock-app__bottom-space" aria-hidden="true" />
       </div>
 
       <AddPartModal
