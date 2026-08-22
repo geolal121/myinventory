@@ -13,7 +13,7 @@
   width: 100%;
   max-width: none;
   min-height: 100dvh;
-  padding: 0 0 max(var(--spacing-8), env(safe-area-inset-bottom));
+  padding: 0 0 calc(var(--spacing-10) + env(safe-area-inset-bottom));
 }
 
 .stock-app__rail {
@@ -98,6 +98,7 @@
 }
 
 .stock-app .inventory-page__sync-status,
+.stock-app .inventory-page__vehicle-button.ui-button,
 .stock-app .inventory-page__history-button,
 .stock-app .inventory-page__sign-out-button.ui-button {
   width: 2.75rem !important;
@@ -119,6 +120,10 @@
 .stock-app .inventory-page__sync-status > span:last-child,
 .stock-app .inventory-page__history-button {
   font-size: 0;
+}
+
+.stock-app .inventory-page__vehicle-button span {
+  display: none;
 }
 
 .stock-app .inventory-page__sync-dot {
@@ -702,6 +707,93 @@
   background: var(--color-surface);
 }
 
+/* VEHICLE ACCESS */
+
+.stock-app .vehicle-access-modal {
+  max-width: 30rem;
+}
+
+.stock-app .vehicle-access {
+  display: grid;
+  gap: var(--spacing-4);
+}
+
+.stock-app .vehicle-access__vehicle,
+.stock-app .vehicle-access__pin-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.stock-app .vehicle-access__vehicle {
+  justify-content: flex-start;
+}
+
+.stock-app .vehicle-access__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.stock-app .vehicle-access__vehicle span:not(.vehicle-access__icon),
+.stock-app .vehicle-access__pin-row span {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.stock-app .vehicle-access__vehicle strong,
+.stock-app .vehicle-access__pin-row strong {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xl);
+  letter-spacing: 0.05em;
+}
+
+.stock-app .vehicle-access__form {
+  display: grid;
+  gap: var(--spacing-3);
+}
+
+.stock-app .vehicle-access__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-2);
+}
+
+.stock-app .vehicle-access__privacy-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-soft);
+}
+
+.stock-app .vehicle-access__privacy-note svg {
+  flex: 0 0 auto;
+  color: var(--color-accent);
+}
+
+.stock-app .vehicle-access__privacy-note p {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  line-height: 1.45;
+}
+
 /* FOCUSED STATES */
 
 .stock-app__shell--searching .stock-app__snapshot,
@@ -952,6 +1044,15 @@
     width: auto !important;
     padding-inline: var(--spacing-3) !important;
     font-size: var(--font-size-sm);
+  }
+
+  .stock-app .inventory-page__vehicle-button.ui-button {
+    width: auto !important;
+    padding-inline: var(--spacing-3) !important;
+  }
+
+  .stock-app .inventory-page__vehicle-button span {
+    display: inline;
   }
 
   .stock-app .inventory-page__location-list {

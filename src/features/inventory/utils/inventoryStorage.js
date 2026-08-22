@@ -7,6 +7,7 @@ const INVENTORY_STORAGE_KEYS = {
   archivedLocations: 'truck_inventory_archived_locations',
   pendingSync: 'truck_inventory_pending_sync',
   inventoryCountDrafts: 'truck_inventory_count_drafts',
+  vehicleGasPin: 'myinventory_vehicle_gas_pin',
 }
 
 const readStorage = (key, fallbackValue = []) => {
@@ -80,6 +81,26 @@ export const loadArchivedLocations = () => {
 
 export const saveArchivedLocations = (locations) => {
   return writeStorage(INVENTORY_STORAGE_KEYS.archivedLocations, locations)
+}
+
+export const loadVehicleGasPin = () => {
+  const storedPin = readStorage(INVENTORY_STORAGE_KEYS.vehicleGasPin, '')
+
+  return typeof storedPin === 'string' ? storedPin : ''
+}
+
+export const saveVehicleGasPin = (pin) => {
+  return writeStorage(INVENTORY_STORAGE_KEYS.vehicleGasPin, String(pin || ''))
+}
+
+export const clearVehicleGasPin = () => {
+  try {
+    localStorage.removeItem(INVENTORY_STORAGE_KEYS.vehicleGasPin)
+    return true
+  } catch (error) {
+    console.error('Failed to clear the vehicle gas PIN from this device', error)
+    return false
+  }
 }
 
 export const loadPendingSync = () => {

@@ -13,7 +13,7 @@ test('inventory workbench uses one clear navigation system across devices', asyn
   ])
 
   assert.match(component, /stock-app__mobile-nav/)
-  assert.match(component, /MyInventory \/ 72485/)
+  assert.match(component, /Tech 72485 · Vehicle/)
   assert.match(
     styles,
     /\.stock-app \.stock-app__mobile-nav\s*\{[\s\S]*?position: static;[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/,
@@ -57,6 +57,10 @@ test('phone navigation stays in normal page flow and never overlays content', as
   )
   assert.doesNotMatch(styles, /mobile-tabbar-height/)
   assert.doesNotMatch(styles, /stock-app__mobile-nav\s*\{[^}]*position: fixed;/)
+  assert.match(
+    styles,
+    /padding: 0 0 calc\(var\(--spacing-10\) \+ env\(safe-area-inset-bottom\)\);/,
+  )
 })
 
 test('inventory workbench protects narrow phones and keeps desktop location rows aligned', async () => {

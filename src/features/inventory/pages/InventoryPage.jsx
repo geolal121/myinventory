@@ -7,6 +7,7 @@ import {
   ClipboardCheck,
   Download,
   FileSpreadsheet,
+  Fuel,
   Ghost,
   HandHelping,
   Hash,
@@ -49,6 +50,7 @@ import InventorySummaryModal from '../components/modals/InventorySummaryModal.js
 import ManageLocationsModal from '../components/modals/ManageLocationsModal.jsx'
 import MovePartModal from '../components/modals/MovePartModal.jsx'
 import UsePartModal from '../components/modals/UsePartModal.jsx'
+import VehicleAccessModal from '../components/modals/VehicleAccessModal.jsx'
 
 import { INVENTORY_ACTIONS } from '../data/inventoryActions.js'
 import { getLocationOptions } from '../data/inventoryLocations.js'
@@ -124,6 +126,8 @@ const INVENTORY_SEARCH_MODES = {
   PART_NUMBER: 'PART_NUMBER',
   DESCRIPTION: 'DESCRIPTION',
 }
+
+const INVENTORY_VEHICLE_NUMBER = '25077'
 
 const INVENTORY_NAV_ITEMS = [
   {
@@ -1519,6 +1523,18 @@ function InventoryPage() {
 
             <div className="inventory-page__history-button-wrapper">
               <Button
+                className="inventory-page__vehicle-button"
+                variant="secondary"
+                size="sm"
+                onClick={() => openModal('vehicle')}
+                aria-label={`Open vehicle ${INVENTORY_VEHICLE_NUMBER} and gas PIN`}
+                title={`Vehicle ${INVENTORY_VEHICLE_NUMBER}`}
+              >
+                <Fuel size={17} aria-hidden="true" />
+                <span>{INVENTORY_VEHICLE_NUMBER}</span>
+              </Button>
+
+              <Button
                 className="inventory-page__history-button"
                 variant="secondary"
                 size="sm"
@@ -1548,7 +1564,9 @@ function InventoryPage() {
           </div>
 
           <div className="inventory-page__header-copy stock-app__topbar-copy">
-            <p className="inventory-page__eyebrow">MyInventory / 72485</p>
+            <p className="inventory-page__eyebrow">
+              Tech 72485 · Vehicle {INVENTORY_VEHICLE_NUMBER}
+            </p>
             <h1>{isSearching ? 'Find a part' : activeViewTitle}</h1>
             <p className="inventory-page__subtitle">
               Fast access to every part on your truck.
@@ -2141,6 +2159,12 @@ function InventoryPage() {
         isOpen={activeModal === 'backup'}
         onClose={closeModal}
         onRestore={handleRestoreInventoryBackup}
+      />
+
+      <VehicleAccessModal
+        isOpen={activeModal === 'vehicle'}
+        onClose={closeModal}
+        vehicleNumber={INVENTORY_VEHICLE_NUMBER}
       />
 
       <HistoryModal
