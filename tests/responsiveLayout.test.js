@@ -19,10 +19,15 @@ test('inventory workbench uses one clear navigation system across devices', asyn
     /\.stock-app \.stock-app__mobile-nav\s*\{[\s\S]*?position: static;[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/,
   )
   assert.match(styles, /\.stock-app__rail\s*\{\s*display: none !important;/)
-  assert.match(colors, /--color-background:\s*#f5f7f7;/)
-  assert.match(colors, /--color-brand-deep:\s*#193640;/)
-  assert.match(colors, /--color-utility:\s*#e0ebed;/)
+  assert.match(colors, /--color-background:\s*#f5f7fa;/)
+  assert.match(colors, /--color-accent:\s*#365f8d;/)
+  assert.match(colors, /--color-brand-deep:\s*#20364f;/)
+  assert.match(colors, /--color-utility:\s*#e1e8f0;/)
   assert.match(colors, /--gradient-page:\s*var\(--color-background\);/)
+  assert.doesNotMatch(
+    styles,
+    /\.stock-app \.stock-app__task-strip \.ui-button:nth-child\(2\)\s*\{\s*border-color:/,
+  )
 })
 
 test('phone layout uses readable two-column summaries and actions', async () => {

@@ -1,50 +1,50 @@
 :root {
   /* BACKGROUNDS */
-  --color-background: #f5f7f7;
-  --color-background-soft: #fafbfb;
-  --color-background-elevated: #edf1f2;
+  --color-background: #f5f7fa;
+  --color-background-soft: #fafbfd;
+  --color-background-elevated: #eef2f6;
 
   /* SURFACES */
   --color-surface: #ffffff;
-  --color-surface-soft: #fafbfb;
-  --color-surface-elevated: #eff3f3;
+  --color-surface-soft: #fafbfd;
+  --color-surface-elevated: #f0f3f7;
 
   /* BORDERS */
-  --color-border: #dfe5e6;
-  --color-border-strong: #bdc9cc;
+  --color-border: #dde3eb;
+  --color-border-strong: #bdc8d6;
 
   /* TEXT */
-  --color-text-primary: #1d2d36;
-  --color-text-secondary: #63747b;
-  --color-text-muted: #8d9a9f;
+  --color-text-primary: #202b3a;
+  --color-text-secondary: #637083;
+  --color-text-muted: #8a95a5;
   --color-text-inverse: #ffffff;
 
   /* PRIMARY ACCENT */
-  --color-accent: #316a73;
-  --color-accent-hover: #25545c;
-  --color-accent-bright: #4a8088;
-  --color-accent-soft: rgba(49, 106, 115, 0.1);
+  --color-accent: #365f8d;
+  --color-accent-hover: #294d76;
+  --color-accent-bright: #4e78a8;
+  --color-accent-soft: rgba(54, 95, 141, 0.1);
 
   /* APP CHROME */
-  --color-brand: #23434d;
-  --color-brand-deep: #193640;
-  --color-brand-surface: #2c5660;
-  --color-utility: #e0ebed;
-  --color-utility-soft: #f0f5f5;
+  --color-brand: #2a4868;
+  --color-brand-deep: #20364f;
+  --color-brand-surface: #385a7c;
+  --color-utility: #e1e8f0;
+  --color-utility-soft: #f1f4f8;
 
   /* SECONDARY ACCENT */
-  --color-accent-secondary: #e7edef;
-  --color-accent-secondary-hover: #d8e3e5;
-  --color-accent-secondary-soft: rgba(49, 106, 115, 0.06);
+  --color-accent-secondary: #e8edf3;
+  --color-accent-secondary-hover: #d8e1ec;
+  --color-accent-secondary-soft: rgba(54, 95, 141, 0.06);
 
   /* CARD COLORS */
   --color-card: #ffffff;
-  --color-card-hover: #fafbfb;
-  --color-card-text: #1d2d36;
+  --color-card-hover: #fafbfd;
+  --color-card-text: #202b3a;
 
   /* STATUS COLORS */
-  --color-success: #39745c;
-  --color-success-soft: rgba(57, 116, 92, 0.12);
+  --color-success: #47709b;
+  --color-success-soft: rgba(71, 112, 155, 0.12);
 
   --color-warning: #8a6a32;
   --color-warning-soft: rgba(138, 106, 50, 0.12);
