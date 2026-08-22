@@ -15,7 +15,7 @@
   width: 100%;
   max-width: none;
   min-height: 100dvh;
-  padding: 0 0 calc(5.75rem + env(safe-area-inset-bottom));
+  padding: 0 0 calc(7.5rem + env(safe-area-inset-bottom));
 }
 
 .stock-app__rail {
@@ -49,7 +49,7 @@
 
   background: color-mix(in srgb, var(--color-surface) 94%, transparent);
 
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.26);
+  box-shadow: 0 8px 30px rgba(22, 25, 28, 0.05);
 
   backdrop-filter: blur(18px);
 }
@@ -175,7 +175,7 @@
 
   background: var(--color-brand-deep);
 
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.42);
+  box-shadow: 0 18px 40px rgba(22, 25, 28, 0.14);
 
   backdrop-filter: none;
 }
@@ -239,7 +239,7 @@
 .stock-app .stock-app__finder .ui-input:focus {
   border: 0;
 
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.16);
+  box-shadow: 0 0 0 4px rgba(62, 69, 75, 0.22);
 }
 
 .stock-app .stock-app__finder .ui-input-field__helper {
@@ -510,7 +510,7 @@
 
   background: var(--color-brand-deep);
 
-  box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.46);
+  box-shadow: 0 -12px 30px rgba(22, 25, 28, 0.16);
 }
 
 .stock-app .stock-app__mobile-nav .inventory-page__tabs-label {
@@ -521,7 +521,7 @@
   flex-direction: column;
   gap: 0.2rem;
 
-  min-height: 3.65rem;
+  min-height: 3.25rem;
   padding: var(--spacing-2);
 
   border-radius: var(--radius-md);
@@ -564,7 +564,7 @@
   gap: var(--spacing-3);
 
   margin: 0 var(--spacing-4) var(--spacing-4);
-  padding: 0;
+  padding: 0 0 var(--spacing-4);
 
   border: 0;
   border-radius: 0;
@@ -723,7 +723,7 @@
 
   background: var(--color-surface) !important;
 
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.36);
+  box-shadow: 0 8px 20px rgba(22, 25, 28, 0.08);
 
   transform: none;
 }
@@ -749,7 +749,7 @@
 
   background: var(--color-background-soft);
 
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.66);
+  box-shadow: 0 30px 90px rgba(22, 25, 28, 0.28);
 }
 
 .stock-app .ui-modal__header {
@@ -791,7 +791,9 @@
 
 /* TABLETS */
 
-@media (min-width: 768px) and (max-width: 1119px) {
+@media (min-width: 768px) and (max-width: 1119px),
+  (min-width: 1120px) and (hover: none),
+  (min-width: 1120px) and (pointer: coarse) {
   .stock-app__shell.site-container {
     padding-bottom: var(--spacing-8);
   }
@@ -936,7 +938,7 @@
 
 /* LAPTOPS AND DESKTOPS */
 
-@media (min-width: 900px) and (orientation: landscape), (min-width: 1120px) {
+@media (min-width: 1120px) and (hover: hover) and (pointer: fine) {
   .stock-app__shell.site-container {
     display: grid;
     grid-template-columns: 17rem minmax(0, 1fr);
@@ -1236,97 +1238,6 @@
   }
 }
 
-/* TABLET LANDSCAPE WORKSPACE */
-
-@media (min-width: 900px) and (max-width: 1119px) and (orientation: landscape) {
-  .stock-app__shell.site-container {
-    grid-template-columns: 13rem minmax(0, 1fr);
-  }
-
-  .stock-app__rail {
-    gap: var(--spacing-4);
-
-    padding: var(--spacing-4);
-  }
-
-  .stock-app__brand-mark {
-    width: 2.5rem;
-    height: 2.5rem;
-  }
-
-  .stock-app__rail-nav button,
-  .stock-app__rail-tasks button {
-    min-height: 2.45rem;
-    padding: var(--spacing-2);
-  }
-
-  .stock-app__rail-tasks {
-    padding-top: var(--spacing-3);
-  }
-
-  .stock-app .stock-app__topbar,
-  .stock-app .stock-app__finder,
-  .stock-app .stock-app__snapshot,
-  .stock-app .stock-app__content,
-  .stock-app .inventory-install,
-  .stock-app .inventory-page__error-card {
-    margin-right: var(--spacing-4);
-    margin-left: var(--spacing-4);
-  }
-
-  .stock-app .stock-app__topbar {
-    margin: 0;
-    padding: var(--spacing-4);
-  }
-
-  .stock-app .stock-app__topbar h1 {
-    font-size: var(--font-size-xl);
-  }
-
-  .stock-app .stock-app__finder {
-    grid-template-columns: minmax(0, 1fr) 14rem;
-    gap: var(--spacing-3);
-
-    margin-top: var(--spacing-4);
-    padding: var(--spacing-5);
-  }
-
-  .stock-app .stock-app__finder .ui-input {
-    min-height: 3.5rem;
-  }
-
-  .stock-app .stock-app__snapshot .inventory-page__panel-heading {
-    padding: var(--spacing-3) var(--spacing-4);
-  }
-
-  .stock-app .stock-app__snapshot .inventory-page__summary-card,
-  .stock-app .stock-app__snapshot .inventory-page__summary-card:first-of-type {
-    min-height: 5.25rem;
-  }
-
-  .stock-app .stock-app__snapshot .inventory-page__summary-card:first-of-type strong {
-    font-size: 2.1rem;
-  }
-
-  .stock-app .stock-app__content {
-    gap: var(--spacing-2);
-    padding-bottom: var(--spacing-4);
-  }
-
-  .stock-app .inventory-page__location-card,
-  .stock-app .inventory-page__location-card.ui-card {
-    grid-template-columns: minmax(7rem, 0.8fr) minmax(10rem, 1.2fr) 1rem;
-    gap: var(--spacing-2);
-
-    padding: var(--spacing-3);
-  }
-
-  .stock-app .inventory-page__location-card-icon {
-    width: 2.15rem;
-    height: 2.15rem;
-  }
-}
-
 @media (min-width: 1500px) {
   .stock-app__shell.site-container {
     grid-template-columns: 18.5rem minmax(0, 1fr);
@@ -1373,8 +1284,9 @@
   }
 
   .stock-app .stock-app__task-strip {
-    padding-right: var(--spacing-3);
-    padding-left: var(--spacing-3);
+    margin-right: var(--spacing-3);
+    margin-left: var(--spacing-3);
+    padding: 0;
   }
 
   .stock-app .inventory-page__sync-status {

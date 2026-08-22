@@ -21,7 +21,7 @@
 
   background: var(--color-surface);
 
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 30px 80px rgba(22, 25, 28, 0.14);
 }
 
 .inventory-auth__intro {
