@@ -1,46 +1,46 @@
 :root {
   /* BACKGROUNDS */
-  --color-background: #f3f1ec;
-  --color-background-soft: #faf9f6;
-  --color-background-elevated: #e8e5de;
+  --color-background: #f4f7fb;
+  --color-background-soft: #f8fafc;
+  --color-background-elevated: #e8edf5;
 
   /* SURFACES */
-  --color-surface: #fffefb;
-  --color-surface-soft: #f8f6f1;
-  --color-surface-elevated: #ece8df;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f7f9fc;
+  --color-surface-elevated: #edf2f7;
 
   /* BORDERS */
-  --color-border: #d9d5cc;
-  --color-border-strong: #b8b1a5;
+  --color-border: #dbe3ec;
+  --color-border-strong: #b9c6d4;
 
   /* TEXT */
-  --color-text-primary: #172f40;
-  --color-text-secondary: #5c6d77;
-  --color-text-muted: #879299;
+  --color-text-primary: #172033;
+  --color-text-secondary: #5d6b7c;
+  --color-text-muted: #8996a8;
   --color-text-inverse: #ffffff;
 
   /* PRIMARY ACCENT */
-  --color-accent: #0b7285;
-  --color-accent-hover: #075c6b;
-  --color-accent-bright: #128ca0;
-  --color-accent-soft: rgba(11, 114, 133, 0.11);
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+  --color-accent-bright: #3b82f6;
+  --color-accent-soft: rgba(37, 99, 235, 0.10);
 
   /* APP CHROME */
-  --color-brand: #17364a;
-  --color-brand-deep: #102a3b;
-  --color-brand-surface: #24495e;
-  --color-utility: #d58a25;
-  --color-utility-soft: rgba(213, 138, 37, 0.14);
+  --color-brand: #172033;
+  --color-brand-deep: #0f172a;
+  --color-brand-surface: #273449;
+  --color-utility: #0f9f78;
+  --color-utility-soft: rgba(15, 159, 120, 0.11);
 
   /* SECONDARY ACCENT */
-  --color-accent-secondary: #dbe8e9;
-  --color-accent-secondary-hover: #c8dcde;
-  --color-accent-secondary-soft: rgba(11, 114, 133, 0.08);
+  --color-accent-secondary: #dfe8fb;
+  --color-accent-secondary-hover: #cbdafa;
+  --color-accent-secondary-soft: rgba(37, 99, 235, 0.07);
 
   /* CARD COLORS */
-  --color-card: #fffefb;
-  --color-card-hover: #faf8f3;
-  --color-card-text: #172f40;
+  --color-card: #ffffff;
+  --color-card-hover: #f8faff;
+  --color-card-text: #172033;
 
   /* STATUS COLORS */
   --color-success: #26866a;
@@ -62,6 +62,6 @@
   --color-noi: var(--color-warning);
 
   /* OVERLAYS */
-  --color-overlay: rgba(16, 42, 59, 0.52);
-  --color-overlay-soft: rgba(16, 42, 59, 0.14);
+  --color-overlay: rgba(15, 23, 42, 0.48);
+  --color-overlay-soft: rgba(15, 23, 42, 0.13);
 }

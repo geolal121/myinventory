@@ -33,9 +33,9 @@ test('the app theme uses solid surfaces instead of decorative gradients', async 
   styles.forEach((source) => {
     assert.doesNotMatch(source, /(?:linear|radial)-gradient\s*\(/)
   })
-  assert.match(colors, /--color-background:\s*#f3f1ec;/)
-  assert.match(colors, /--color-brand:\s*#17364a;/)
-  assert.match(colors, /--color-utility:\s*#d58a25;/)
+  assert.match(colors, /--color-background:\s*#f4f7fb;/)
+  assert.match(colors, /--color-accent:\s*#2563eb;/)
+  assert.match(colors, /--color-utility:\s*#0f9f78;/)
   assert.match(buttons, /\.ui-button--primary\s*\{[\s\S]*?background: var\(--color-accent\);/)
   assert.match(cards, /\.ui-card\s*\{[\s\S]*?background: var\(--color-surface\);/)
 })
@@ -55,6 +55,17 @@ test('the inventory dashboard groups search, quick actions, and snapshot panels'
   assert.match(
     styles,
     /@media \(min-width: 1200px\)[\s\S]*?\.inventory-page__container\s*\{[\s\S]*?grid-template-columns: repeat\(12, minmax\(0, 1fr\)\)/,
+  )
+})
+
+test('phone navigation stays accessible while scrolling inventory', async () => {
+  const styles = await readProjectFile(
+    'src/features/inventory/styles/inventory-page.css',
+  )
+
+  assert.match(
+    styles,
+    /@media \(max-width: 767px\)[\s\S]*?\.inventory-page__tabs\s*\{[\s\S]*?position: sticky;[\s\S]*?safe-area-inset-bottom/,
   )
 })
 
@@ -97,7 +108,7 @@ test('tablet and laptop layouts retain bounded modals and flexible columns', asy
 
   assert.match(
     styles,
-    /@media \(min-width: 768px\) and \(max-width: 1099px\)[\s\S]*?grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/,
+    /@media \(min-width: 768px\) and \(max-width: 1099px\)[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/,
   )
   assert.match(
     styles,
