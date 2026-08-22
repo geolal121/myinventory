@@ -17,15 +17,15 @@ test('inventory workbench has distinct native-style phone and desktop navigation
   assert.match(component, /MyInventory \/ 72485/)
   assert.match(
     styles,
-    /\.stock-app \.stock-app__mobile-nav\s*\{[\s\S]*?position: fixed;[\s\S]*?bottom: 0;/,
+    /\.stock-app \.stock-app__mobile-nav\s*\{[\s\S]*?position: static;[\s\S]*?order: 2;/,
   )
   assert.match(
     styles,
     /@media \(min-width: 1120px\) and \(hover: hover\) and \(pointer: fine\)[\s\S]*?grid-template-columns: 17rem minmax\(0, 1fr\)/,
   )
-  assert.match(colors, /--color-background:\s*#f4f5f6;/)
-  assert.match(colors, /--color-brand-deep:\s*#191a1c;/)
-  assert.match(colors, /--color-utility:\s*#e7e8ea;/)
+  assert.match(colors, /--color-background:\s*#f7f5f2;/)
+  assert.match(colors, /--color-brand-deep:\s*#25211e;/)
+  assert.match(colors, /--color-utility:\s*#ebe6e0;/)
   assert.match(colors, /--gradient-page:\s*var\(--color-background\);/)
 })
 
@@ -50,21 +50,17 @@ test('phone layout uses compact four-column summaries and actions', async () => 
   )
 })
 
-test('phone content scrolls in a viewport that ends above the fixed tab bar', async () => {
+test('phone navigation stays in normal page flow and never overlays content', async () => {
   const styles = await readProjectFile(
     'src/features/inventory/styles/inventory-rebuild.css',
   )
 
-  assert.match(styles, /--mobile-tabbar-height:/)
   assert.match(
     styles,
-    /@media \(max-width: 767px\)[\s\S]*?\.stock-app\.page-shell\s*\{[\s\S]*?height: 100dvh;[\s\S]*?padding-bottom: var\(--mobile-tabbar-height\);[\s\S]*?overflow: hidden;/,
+    /\.stock-app \.stock-app__mobile-nav\s*\{[\s\S]*?position: static;[\s\S]*?margin: var\(--spacing-3\) var\(--spacing-4\) 0;/,
   )
-  assert.match(
-    styles,
-    /@media \(max-width: 767px\)[\s\S]*?\.stock-app__shell\.site-container\s*\{[\s\S]*?height: 100%;[\s\S]*?min-height: 0;[\s\S]*?overflow-y: auto;/,
-  )
-  assert.doesNotMatch(styles, /mobile-tabbar-clearance/)
+  assert.doesNotMatch(styles, /mobile-tabbar-height/)
+  assert.doesNotMatch(styles, /stock-app__mobile-nav\s*\{[^}]*position: fixed;/)
 })
 
 test('inventory workbench protects narrow phones and keeps desktop location rows aligned', async () => {

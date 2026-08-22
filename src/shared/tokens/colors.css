@@ -1,46 +1,46 @@
 :root {
   /* BACKGROUNDS */
-  --color-background: #f4f5f6;
-  --color-background-soft: #fafafa;
-  --color-background-elevated: #eceeef;
+  --color-background: #f7f5f2;
+  --color-background-soft: #fbfaf8;
+  --color-background-elevated: #eeeae5;
 
   /* SURFACES */
   --color-surface: #ffffff;
-  --color-surface-soft: #f7f7f8;
-  --color-surface-elevated: #eff0f1;
+  --color-surface-soft: #faf9f7;
+  --color-surface-elevated: #f2efeb;
 
   /* BORDERS */
-  --color-border: #dedfe2;
-  --color-border-strong: #bfc1c5;
+  --color-border: #e4e0da;
+  --color-border-strong: #c4bdb5;
 
   /* TEXT */
-  --color-text-primary: #191a1c;
-  --color-text-secondary: #62656a;
-  --color-text-muted: #92959a;
+  --color-text-primary: #282522;
+  --color-text-secondary: #6f6963;
+  --color-text-muted: #9a938c;
   --color-text-inverse: #ffffff;
 
   /* PRIMARY ACCENT */
-  --color-accent: #2b2d30;
-  --color-accent-hover: #151618;
-  --color-accent-bright: #4d5055;
-  --color-accent-soft: rgba(43, 45, 48, 0.1);
+  --color-accent: #423b35;
+  --color-accent-hover: #28231f;
+  --color-accent-bright: #6a6058;
+  --color-accent-soft: rgba(66, 59, 53, 0.1);
 
   /* APP CHROME */
-  --color-brand: #27292c;
-  --color-brand-deep: #191a1c;
-  --color-brand-surface: #34363a;
-  --color-utility: #e7e8ea;
-  --color-utility-soft: #f2f3f4;
+  --color-brand: #302c28;
+  --color-brand-deep: #25211e;
+  --color-brand-surface: #3d3833;
+  --color-utility: #ebe6e0;
+  --color-utility-soft: #f5f2ee;
 
   /* SECONDARY ACCENT */
-  --color-accent-secondary: #e9eaec;
-  --color-accent-secondary-hover: #dcdee1;
-  --color-accent-secondary-soft: rgba(43, 45, 48, 0.06);
+  --color-accent-secondary: #eee9e3;
+  --color-accent-secondary-hover: #e1dad2;
+  --color-accent-secondary-soft: rgba(66, 59, 53, 0.06);
 
   /* CARD COLORS */
   --color-card: #ffffff;
-  --color-card-hover: #f7f7f8;
-  --color-card-text: #191a1c;
+  --color-card-hover: #faf9f7;
+  --color-card-text: #282522;
 
   /* STATUS COLORS */
   --color-success: #4f735e;
@@ -62,8 +62,8 @@
   --color-noi: var(--color-warning);
 
   /* OVERLAYS */
-  --color-overlay: rgba(25, 26, 28, 0.62);
-  --color-overlay-soft: rgba(25, 26, 28, 0.18);
+  --color-overlay: rgba(37, 33, 30, 0.62);
+  --color-overlay-soft: rgba(37, 33, 30, 0.18);
 
   /* LEGACY ALIASES NOW RESOLVE TO SOLID SURFACES */
   --gradient-page: var(--color-background);

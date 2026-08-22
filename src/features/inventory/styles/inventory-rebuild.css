@@ -1,8 +1,6 @@
 /* MYINVENTORY 2.0 — RESPONSIVE WORKBENCH */
 
 .stock-app.page-shell {
-  --mobile-tabbar-height: calc(4.375rem + env(safe-area-inset-bottom));
-
   min-height: 100dvh;
   padding: 0;
 
@@ -18,28 +16,6 @@
   max-width: none;
   min-height: 100dvh;
   padding: 0;
-}
-
-@media (max-width: 767px) {
-  .stock-app.page-shell {
-    height: 100dvh;
-    min-height: 0;
-    padding-bottom: var(--mobile-tabbar-height);
-
-    overflow: hidden;
-  }
-
-  .stock-app__shell.site-container {
-    height: 100%;
-    min-height: 0;
-    padding-bottom: var(--spacing-4);
-
-    overflow-y: auto;
-    overscroll-behavior-y: contain;
-    scroll-padding-bottom: var(--spacing-4);
-
-    -webkit-overflow-scrolling: touch;
-  }
 }
 
 .stock-app__rail {
@@ -165,7 +141,7 @@
 /* INSTALL AND ERROR MESSAGES */
 
 .stock-app .inventory-install {
-  order: 2;
+  order: 3;
 
   margin: var(--spacing-3) var(--spacing-4) 0;
 
@@ -199,7 +175,7 @@
 
   background: var(--color-surface);
 
-  box-shadow: 0 18px 40px rgba(25, 24, 31, 0.08);
+  box-shadow: 0 18px 40px rgba(37, 33, 30, 0.08);
 
   backdrop-filter: none;
 }
@@ -511,33 +487,24 @@
 /* APP NAVIGATION */
 
 .stock-app .stock-app__mobile-nav {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 30;
-  order: 9;
+  position: static;
+  order: 2;
 
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--spacing-1);
 
-  margin: 0;
-  padding:
-    var(--spacing-2)
-    max(var(--spacing-3), env(safe-area-inset-right))
-    calc(var(--spacing-2) + env(safe-area-inset-bottom))
-    max(var(--spacing-3), env(safe-area-inset-left));
+  margin: var(--spacing-3) var(--spacing-4) 0;
+  padding: var(--spacing-1);
 
-  border: 0;
-  border-top: 1px solid var(--color-border);
-  border-radius: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
 
   background: color-mix(in srgb, var(--color-surface) 96%, transparent);
 
-  box-shadow: 0 -12px 30px rgba(25, 24, 31, 0.1);
+  box-shadow: none;
 
-  backdrop-filter: blur(18px);
+  backdrop-filter: none;
 }
 
 .stock-app .stock-app__mobile-nav .inventory-page__tabs-label {
@@ -1340,12 +1307,16 @@
 /* SIMPLE PHONE WORKSPACE */
 
 @media (max-width: 767px) {
+  .stock-app__shell.site-container {
+    padding-bottom: var(--spacing-6);
+  }
+
   .stock-app .stock-app__topbar {
     padding-right: var(--spacing-3);
     padding-bottom: var(--spacing-2);
     padding-left: var(--spacing-3);
 
-    box-shadow: 0 5px 18px rgba(32, 35, 31, 0.05);
+    box-shadow: 0 5px 18px rgba(37, 33, 30, 0.05);
   }
 
   .stock-app .stock-app__finder {
@@ -1475,11 +1446,11 @@
   }
 
   .stock-app .stock-app__mobile-nav .inventory-page__tab--active {
-    background: var(--color-accent-soft);
+    background: var(--color-brand-deep);
 
-    color: var(--color-accent);
+    color: var(--color-text-inverse);
 
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 18%, transparent);
+    box-shadow: none;
   }
 
   .stock-app__shell.site-container:not([data-active-view='BOXES'])
