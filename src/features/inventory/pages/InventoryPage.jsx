@@ -2,7 +2,6 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowRightLeft,
   Boxes,
-  ChevronDown,
   ChevronRight,
   CircleCheck,
   ClipboardCheck,
@@ -170,7 +169,6 @@ function InventoryPage() {
     INVENTORY_SEARCH_MODES.PART_NUMBER,
   )
   const [mobileToolsOpen, setMobileToolsOpen] = useState(false)
-  const [mobileOverviewOpen, setMobileOverviewOpen] = useState(false)
   const [activeInventoryView, setActiveInventoryView] = useState(
     INVENTORY_VIEW_TABS.BOXES,
   )
@@ -1407,6 +1405,11 @@ function InventoryPage() {
     openModalWithItem('delete', item)
   }
 
+  const openInventoryAction = (modalName) => {
+    setMobileToolsOpen(false)
+    openModal(modalName)
+  }
+
   return (
     <main className="inventory-page page-shell">
       <div
@@ -1558,6 +1561,15 @@ function InventoryPage() {
           />
         </section>
 
+        {mobileToolsOpen && (
+          <button
+            type="button"
+            className="inventory-page__mobile-action-backdrop"
+            onClick={() => setMobileToolsOpen(false)}
+            aria-label="Close inventory actions"
+          />
+        )}
+
         <section
           className={`inventory-page__actions ${
             mobileToolsOpen ? 'inventory-page__actions--open' : ''
@@ -1572,29 +1584,29 @@ function InventoryPage() {
           >
             <span>
               <Wrench size={18} aria-hidden="true" />
-              Inventory Actions
+              {mobileToolsOpen ? 'Part Actions' : 'Actions'}
             </span>
-            <ChevronDown size={18} aria-hidden="true" />
+            {mobileToolsOpen && <X size={19} aria-hidden="true" />}
           </button>
 
           <h2 className="inventory-page__panel-title">Quick Actions</h2>
 
-          <Button fullWidth onClick={() => openModal('add')}>
+          <Button fullWidth onClick={() => openInventoryAction('add')}>
             <PackagePlus size={19} aria-hidden="true" />
             Add Part
           </Button>
 
-          <Button fullWidth onClick={() => openModal('use')}>
+          <Button fullWidth onClick={() => openInventoryAction('use')}>
             <PackageMinus size={19} aria-hidden="true" />
             Use Part
           </Button>
 
-          <Button fullWidth onClick={() => openModal('give')}>
+          <Button fullWidth onClick={() => openInventoryAction('give')}>
             <HandHelping size={19} aria-hidden="true" />
             Give Part
           </Button>
 
-          <Button fullWidth onClick={() => openModal('move')}>
+          <Button fullWidth onClick={() => openInventoryAction('move')}>
             <ArrowRightLeft size={19} aria-hidden="true" />
             Move Part
           </Button>
@@ -1602,7 +1614,7 @@ function InventoryPage() {
           <Button
             variant="secondary"
             className="inventory-count-launch"
-            onClick={() => openModal('count')}
+            onClick={() => openInventoryAction('count')}
           >
             <span className="inventory-count-launch__icon">
               <ClipboardCheck size={22} aria-hidden="true" />
@@ -1620,27 +1632,9 @@ function InventoryPage() {
         </section>
 
         <section
-          className={`inventory-page__summary ${
-            mobileOverviewOpen ? 'inventory-page__summary--open' : ''
-          }`}
+          className="inventory-page__summary"
           aria-label="Inventory summary"
         >
-          <button
-            type="button"
-            className="inventory-page__mobile-section-toggle inventory-page__overview-toggle"
-            onClick={() => setMobileOverviewOpen((isOpen) => !isOpen)}
-            aria-expanded={mobileOverviewOpen}
-          >
-            <span>
-              <Package size={18} aria-hidden="true" />
-              Inventory Overview
-            </span>
-            <span className="inventory-page__overview-total">
-              {inventorySummary.totalParts} parts
-            </span>
-            <ChevronDown size={18} aria-hidden="true" />
-          </button>
-
           <h2 className="inventory-page__panel-title">Inventory Snapshot</h2>
 
           <Card

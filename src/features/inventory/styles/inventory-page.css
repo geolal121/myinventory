@@ -604,11 +604,8 @@
   display: none;
 }
 
-.inventory-page__overview-total {
-  color: var(--color-text-secondary);
-
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+.inventory-page__mobile-action-backdrop {
+  display: none;
 }
 
 .inventory-page__panel-title {
@@ -1586,6 +1583,10 @@
   font-weight: var(--font-weight-bold);
 }
 
+.inventory-page__location-card-arrow {
+  display: none;
+}
+
 /* BOX MODAL */
 
 .inventory-page__box-modal-list {
@@ -2240,9 +2241,10 @@
 @media (max-width: 767px) {
   .inventory-page__container {
     gap: var(--spacing-3);
+
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom));
   }
 
-  .inventory-page__container--searching > .inventory-page__actions,
   .inventory-page__container--searching > .inventory-page__summary,
   .inventory-page__container--searching > .inventory-page__tabs {
     display: none;
@@ -2266,13 +2268,12 @@
     gap: var(--spacing-2);
 
     min-height: 0;
-    padding: var(--spacing-1) 0 var(--spacing-3);
+    padding: var(--spacing-3);
 
     border: 0;
-    border-bottom: 1px solid var(--color-border);
-    border-radius: 0;
+    border-radius: var(--radius-lg);
 
-    background: transparent;
+    background: var(--color-brand-deep);
 
     box-shadow: none;
   }
@@ -2295,12 +2296,24 @@
   }
 
   .inventory-page__header h1 {
+    color: var(--color-text-inverse);
+
     font-size: var(--font-size-2xl);
     letter-spacing: -0.025em;
   }
 
   .inventory-page__header-toolbar {
     gap: var(--spacing-2);
+  }
+
+  .inventory-page__header .inventory-page__sync-status,
+  .inventory-page__header .inventory-page__history-button,
+  .inventory-page__header .inventory-page__sign-out-button.ui-button {
+    border-color: rgba(255, 255, 255, 0.15) !important;
+
+    background: rgba(255, 255, 255, 0.09) !important;
+
+    color: var(--color-text-inverse) !important;
   }
 
   .inventory-page__search-result-heading,
@@ -2379,33 +2392,79 @@
   }
 
   .inventory-page__actions {
+    position: absolute;
+
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--spacing-2);
 
+    width: 0;
+    height: 0;
     padding: 0;
+
+    overflow: visible;
 
     border: 0;
 
     background: transparent;
   }
 
+  .inventory-page__actions--open {
+    position: fixed;
+    z-index: 71;
+    right: var(--spacing-3);
+    bottom: max(var(--spacing-3), env(safe-area-inset-bottom));
+    left: var(--spacing-3);
+
+    width: auto;
+    height: auto;
+    padding: var(--spacing-3);
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+
+    background: var(--color-surface);
+
+    box-shadow: var(--modal-shadow);
+  }
+
+  .inventory-page__mobile-action-backdrop {
+    position: fixed;
+    z-index: 70;
+    inset: 0;
+
+    display: block;
+
+    width: 100%;
+    height: 100%;
+    padding: 0;
+
+    border: 0;
+
+    background: var(--color-overlay);
+  }
+
   .inventory-page__mobile-section-toggle {
+    position: fixed;
+    z-index: 50;
+    right: var(--spacing-4);
+    bottom: max(var(--spacing-4), env(safe-area-inset-bottom));
+
     grid-column: 1 / -1;
 
     display: flex;
     align-items: center;
     gap: var(--spacing-2);
 
-    width: 100%;
-    min-height: 52px;
-    padding: var(--spacing-3) var(--spacing-4);
+    width: auto;
+    min-height: 54px;
+    padding: var(--spacing-3) var(--spacing-5);
 
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
+    border: 0;
+    border-radius: var(--radius-full);
 
-    background: var(--color-surface);
+    background: var(--color-accent);
 
-    color: var(--color-text-primary);
+    color: var(--color-text-inverse);
 
     font: inherit;
     font-size: var(--font-size-sm);
@@ -2413,6 +2472,22 @@
     text-align: left;
 
     cursor: pointer;
+
+    box-shadow: var(--shadow-lg);
+
+    transition:
+      opacity var(--transition-fast),
+      transform var(--transition-fast);
+  }
+
+  .inventory-page__search-section:focus-within
+    ~ .inventory-page__actions:not(.inventory-page__actions--open)
+    .inventory-page__mobile-section-toggle {
+    opacity: 0;
+
+    pointer-events: none;
+
+    transform: translateY(var(--spacing-3));
   }
 
   .inventory-page__mobile-section-toggle > span:first-child {
@@ -2422,25 +2497,40 @@
   }
 
   .inventory-page__mobile-section-toggle > span:first-child svg {
-    color: var(--color-accent);
+    color: currentColor;
   }
 
-  .inventory-page__mobile-section-toggle > svg:last-child {
-    flex: 0 0 auto;
-    margin-left: auto;
+  .inventory-page__actions--open .inventory-page__mobile-section-toggle {
+    position: static;
 
-    color: var(--color-text-muted);
+    width: 100%;
+    min-height: 44px;
+    padding: var(--spacing-1) var(--spacing-1) var(--spacing-3);
 
-    transition: transform var(--transition-fast);
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
+
+    background: transparent;
+
+    color: var(--color-text-primary);
+
+    box-shadow: none;
   }
 
   .inventory-page__actions--open
     .inventory-page__mobile-section-toggle
-    > svg:last-child,
-  .inventory-page__summary--open
+    > span:first-child
+    svg {
+    color: var(--color-accent);
+  }
+
+  .inventory-page__actions--open
     .inventory-page__mobile-section-toggle
     > svg:last-child {
-    transform: rotate(180deg);
+    flex: 0 0 auto;
+    margin-left: auto;
+
+    color: var(--color-text-secondary);
   }
 
   .inventory-page__mobile-section-toggle:focus-visible {
@@ -2492,37 +2582,35 @@
   }
 
   .inventory-page__summary {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
     gap: var(--spacing-2);
 
-    padding: 0;
-  }
+    margin-inline: calc(var(--spacing-3) * -1);
+    padding: 0 var(--spacing-3) var(--spacing-1);
 
-  .inventory-page__summary:not(.inventory-page__summary--open)
-    > .inventory-page__summary-card {
-    display: none;
-  }
-
-  .inventory-page__overview-toggle {
-    justify-content: flex-start;
-  }
-
-  .inventory-page__overview-total {
-    margin-left: auto;
-  }
-
-  .inventory-page__overview-toggle > svg:last-child {
-    margin-left: 0;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: inline proximity;
+    scrollbar-width: none;
   }
 
   .inventory-page__summary-card {
-    min-height: 76px;
+    flex: 0 0 7.5rem;
+
+    min-height: 78px;
     padding: var(--spacing-3);
+
+    scroll-snap-align: start;
   }
 
-  .inventory-page__summary-card::before,
   .inventory-page__summary-card-heading svg {
     display: none;
+  }
+
+  .inventory-page__summary-card::before {
+    inset-block: var(--spacing-3);
+
+    width: 3px;
   }
 
   .inventory-page__summary-card-heading span {
@@ -2548,18 +2636,18 @@
   .inventory-page__tabs {
     position: static;
 
-    padding: var(--spacing-1) 0;
+    padding: var(--spacing-1);
 
-    border-width: 1px 0;
-    border-radius: 0;
+    border-width: 1px;
+    border-radius: var(--radius-lg);
 
-    background: transparent;
+    background: var(--color-surface);
 
     box-shadow: none;
   }
 
   .inventory-page__tab--active {
-    background: transparent;
+    background: var(--color-accent-soft);
 
     box-shadow: none;
   }
@@ -2579,14 +2667,19 @@
   }
 
   .inventory-page__location-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--spacing-3);
+    grid-template-columns: 1fr;
+    gap: var(--spacing-2);
   }
 
   .inventory-page__location-card,
   .inventory-page__location-card.ui-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: var(--spacing-3);
+
     aspect-ratio: auto;
-    min-height: 150px;
+    min-height: 78px;
 
     padding: var(--spacing-3);
 
@@ -2595,6 +2688,14 @@
 
   .inventory-page__location-card::after {
     display: none;
+  }
+
+  .inventory-page__location-card-header {
+    grid-column: 1;
+
+    align-items: center;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
   }
 
   .inventory-page__location-card h3 {
@@ -2606,20 +2707,33 @@
   }
 
   .inventory-page__location-card-icon {
-    width: 34px;
-    height: 34px;
+    width: 38px;
+    height: 38px;
 
     font-size: var(--font-size-md);
   }
 
   .inventory-page__location-card-stats {
-    gap: var(--spacing-2);
+    grid-column: 2;
+
+    display: block;
   }
 
   .inventory-page__location-card-stat {
-    gap: var(--spacing-2);
+    align-items: flex-end;
+    gap: 0;
 
+    padding: 0;
+
+    border: 0;
+
+    color: var(--color-text-secondary);
     font-size: var(--font-size-xs);
+    white-space: nowrap;
+  }
+
+  .inventory-page__location-card-stat:not(:first-child) {
+    display: none;
   }
 
   .inventory-page__location-card-stat-icon {
@@ -2630,7 +2744,19 @@
   }
 
   .inventory-page__location-card-stat strong {
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-lg);
+  }
+
+  .inventory-page__location-card-divider {
+    display: none;
+  }
+
+  .inventory-page__location-card-arrow {
+    grid-column: 3;
+
+    display: block;
+
+    color: var(--color-text-muted);
   }
 
   .inventory-page__box-modal-actions {
@@ -2641,15 +2767,6 @@
 @media (max-width: 479px) {
   .inventory-page__search-section {
     padding: var(--spacing-3);
-  }
-
-  .inventory-page__actions,
-  .inventory-page__summary {
-    padding: 0;
-  }
-
-  .inventory-page__summary-card {
-    min-height: 64px;
   }
 
   .inventory-install {
@@ -2727,31 +2844,26 @@
   .inventory-page__location-card,
   .inventory-page__location-card.ui-card {
     aspect-ratio: auto;
-    min-height: 0;
+    min-height: 78px;
   }
 
   .inventory-page__location-card-stats {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: block;
   }
 
   .inventory-page__location-card-stat {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-1);
+    align-items: flex-end;
+    gap: 0;
 
     min-width: 0;
 
-    padding-right: var(--spacing-2);
+    padding: 0;
 
-    border-right: 1px solid var(--color-border);
+    border: 0;
   }
 
-  .inventory-page__location-card-stat:last-child {
-    padding-right: 0;
-
-    border-right: 0;
+  .inventory-page__location-card-stat:not(:first-child) {
+    display: none;
   }
 
   .inventory-page__location-card-stat-icon {
@@ -2842,7 +2954,7 @@
   .inventory-page__location-card,
   .inventory-page__location-card.ui-card {
     aspect-ratio: auto;
-    min-height: 0;
+    min-height: 78px;
   }
 }
 
@@ -2855,7 +2967,7 @@
   }
 
   .inventory-page__location-list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .inventory-page__summary-card:not(:last-child) {
@@ -2865,7 +2977,7 @@
   .inventory-page__location-card,
   .inventory-page__location-card.ui-card {
     aspect-ratio: auto;
-    min-height: 150px;
+    min-height: 78px;
   }
 }
 

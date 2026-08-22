@@ -58,18 +58,22 @@ test('the inventory dashboard groups search, quick actions, and snapshot panels'
   )
 })
 
-test('phone dashboard uses progressive disclosure and focuses searches', async () => {
-  const [component, styles] = await Promise.all([
+test('phone dashboard uses an action sheet and compact inventory rows', async () => {
+  const [component, locationCard, styles] = await Promise.all([
     readProjectFile('src/features/inventory/pages/InventoryPage.jsx'),
+    readProjectFile(
+      'src/features/inventory/components/InventoryLocationCard.jsx',
+    ),
     readProjectFile('src/features/inventory/styles/inventory-page.css'),
   ])
 
   assert.match(component, /mobileToolsOpen/)
-  assert.match(component, /mobileOverviewOpen/)
+  assert.match(component, /inventory-page__mobile-action-backdrop/)
   assert.match(component, /inventory-page__container--searching/)
+  assert.match(locationCard, /inventory-page__location-card-arrow/)
   assert.match(
     styles,
-    /@media \(max-width: 767px\)[\s\S]*?\.inventory-page__mobile-section-toggle\s*\{[\s\S]*?display: flex;/,
+    /@media \(max-width: 767px\)[\s\S]*?\.inventory-page__actions--open\s*\{[\s\S]*?position: fixed;/,
   )
   assert.match(
     styles,
@@ -77,7 +81,11 @@ test('phone dashboard uses progressive disclosure and focuses searches', async (
   )
   assert.match(
     styles,
-    /\.inventory-page__container--searching > \.inventory-page__actions,[\s\S]*?\.inventory-page__container--searching > \.inventory-page__tabs\s*\{\s*display: none;/,
+    /\.inventory-page__summary\s*\{[\s\S]*?overflow-x: auto;/,
+  )
+  assert.match(
+    styles,
+    /@media \(max-width: 767px\)[\s\S]*?\.inventory-page__location-card,[\s\S]*?grid-template-columns: minmax\(0, 1fr\) auto auto;/,
   )
   assert.match(
     styles,
