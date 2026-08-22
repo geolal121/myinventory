@@ -1591,7 +1591,6 @@ function InventoryPage() {
         <section className="inventory-page__search-section stock-app__finder">
           <div className="inventory-page__panel-heading inventory-page__search-heading">
             <div>
-              <span>Search inventory</span>
               <h2>Find a part</h2>
             </div>
             <p>{inventorySummary.totalParts} parts on file</p>
@@ -1641,7 +1640,7 @@ function InventoryPage() {
 
           <Input
             id="inventory-search"
-            label={
+            aria-label={
               searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION
                 ? 'Search Description'
                 : 'Search Part Number'
@@ -1669,11 +1668,6 @@ function InventoryPage() {
               searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION
                 ? 'Example: pressure valve'
                 : 'Example: 123-4567-89'
-            }
-            helperText={
-              searchMode === INVENTORY_SEARCH_MODES.DESCRIPTION
-                ? 'Search any word from the saved part description.'
-                : 'Numeric parts are formatted automatically. Letters still work.'
             }
           />
         </section>
@@ -1716,8 +1710,8 @@ function InventoryPage() {
             <ClipboardCheck size={22} aria-hidden="true" />
           </span>
           <span className="inventory-count-launch__copy">
-            <strong>Count Inventory</strong>
-            <small>Verify a location, review differences, and save corrections.</small>
+            <strong>Count a Location</strong>
+            <small>Check quantities and save corrections.</small>
           </span>
           <ChevronRight
             className="inventory-count-launch__arrow"
@@ -1729,7 +1723,6 @@ function InventoryPage() {
         <section className="inventory-page__summary stock-app__snapshot" aria-label="Inventory summary">
           <div className="inventory-page__panel-heading">
             <div>
-              <span>Overview</span>
               <h2>Inventory totals</h2>
             </div>
           </div>

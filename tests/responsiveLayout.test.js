@@ -19,9 +19,9 @@ test('inventory workbench uses one clear navigation system across devices', asyn
     /\.stock-app \.stock-app__mobile-nav\s*\{[\s\S]*?position: static;[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/,
   )
   assert.match(styles, /\.stock-app__rail\s*\{\s*display: none !important;/)
-  assert.match(colors, /--color-background:\s*#f3f7f8;/)
-  assert.match(colors, /--color-brand-deep:\s*#142f39;/)
-  assert.match(colors, /--color-utility:\s*#dcecef;/)
+  assert.match(colors, /--color-background:\s*#f5f7f7;/)
+  assert.match(colors, /--color-brand-deep:\s*#193640;/)
+  assert.match(colors, /--color-utility:\s*#e0ebed;/)
   assert.match(colors, /--gradient-page:\s*var\(--color-background\);/)
 })
 
