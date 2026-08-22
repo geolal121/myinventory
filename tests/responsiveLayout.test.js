@@ -5,44 +5,40 @@ import test from 'node:test'
 const readProjectFile = (relativePath) =>
   readFile(new URL(`../${relativePath}`, import.meta.url), 'utf8')
 
-test('inventory workbench has distinct native-style phone and desktop navigation', async () => {
+test('inventory workbench uses one clear navigation system across devices', async () => {
   const [component, styles, colors] = await Promise.all([
     readProjectFile('src/features/inventory/pages/InventoryPage.jsx'),
-    readProjectFile('src/features/inventory/styles/inventory-rebuild.css'),
+    readProjectFile('src/features/inventory/styles/inventory-clean.css'),
     readProjectFile('src/shared/tokens/colors.css'),
   ])
 
-  assert.match(component, /stock-app__rail/)
   assert.match(component, /stock-app__mobile-nav/)
   assert.match(component, /MyInventory \/ 72485/)
   assert.match(
     styles,
-    /\.stock-app \.stock-app__mobile-nav\s*\{[\s\S]*?position: static;[\s\S]*?order: 2;/,
+    /\.stock-app \.stock-app__mobile-nav\s*\{[\s\S]*?position: static;[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/,
   )
-  assert.match(
-    styles,
-    /@media \(min-width: 1120px\) and \(hover: hover\) and \(pointer: fine\)[\s\S]*?grid-template-columns: 17rem minmax\(0, 1fr\)/,
-  )
-  assert.match(colors, /--color-background:\s*#f7f5f2;/)
-  assert.match(colors, /--color-brand-deep:\s*#25211e;/)
-  assert.match(colors, /--color-utility:\s*#ebe6e0;/)
+  assert.match(styles, /\.stock-app__rail\s*\{\s*display: none !important;/)
+  assert.match(colors, /--color-background:\s*#f3f7f8;/)
+  assert.match(colors, /--color-brand-deep:\s*#142f39;/)
+  assert.match(colors, /--color-utility:\s*#dcecef;/)
   assert.match(colors, /--gradient-page:\s*var\(--color-background\);/)
 })
 
-test('phone layout uses compact four-column summaries and actions', async () => {
+test('phone layout uses readable two-column summaries and actions', async () => {
   const [component, styles] = await Promise.all([
     readProjectFile('src/features/inventory/pages/InventoryPage.jsx'),
-    readProjectFile('src/features/inventory/styles/inventory-rebuild.css'),
+    readProjectFile('src/features/inventory/styles/inventory-clean.css'),
   ])
 
   assert.match(component, /data-active-view=\{activeInventoryView\}/)
   assert.match(
     styles,
-    /\/\* SIMPLE PHONE WORKSPACE \*\/[\s\S]*?\.stock-app \.stock-app__task-strip\s*\{[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/,
+    /\.stock-app \.stock-app__task-strip\s*\{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/,
   )
   assert.match(
     styles,
-    /\/\* SIMPLE PHONE WORKSPACE \*\/[\s\S]*?\.stock-app \.stock-app__snapshot\s*\{[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/,
+    /\.stock-app \.stock-app__snapshot\s*\{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/,
   )
   assert.match(
     styles,
@@ -52,12 +48,12 @@ test('phone layout uses compact four-column summaries and actions', async () => 
 
 test('phone navigation stays in normal page flow and never overlays content', async () => {
   const styles = await readProjectFile(
-    'src/features/inventory/styles/inventory-rebuild.css',
+    'src/features/inventory/styles/inventory-clean.css',
   )
 
   assert.match(
     styles,
-    /\.stock-app \.stock-app__mobile-nav\s*\{[\s\S]*?position: static;[\s\S]*?margin: var\(--spacing-3\) var\(--spacing-4\) 0;/,
+    /\.stock-app \.stock-app__mobile-nav\s*\{[\s\S]*?position: static;[\s\S]*?margin-top: var\(--spacing-3\);/,
   )
   assert.doesNotMatch(styles, /mobile-tabbar-height/)
   assert.doesNotMatch(styles, /stock-app__mobile-nav\s*\{[^}]*position: fixed;/)
@@ -65,39 +61,39 @@ test('phone navigation stays in normal page flow and never overlays content', as
 
 test('inventory workbench protects narrow phones and keeps desktop location rows aligned', async () => {
   const styles = await readProjectFile(
-    'src/features/inventory/styles/inventory-rebuild.css',
+    'src/features/inventory/styles/inventory-clean.css',
   )
 
   assert.match(
     styles,
-    /@media \(max-width: 420px\)[\s\S]*?\.stock-app \.stock-app__finder,[\s\S]*?margin-right: var\(--spacing-3\);[\s\S]*?margin-left: var\(--spacing-3\);/,
+    /@media \(max-width: 767px\)[\s\S]*?\.stock-app \.stock-app__finder,[\s\S]*?width: calc\(100% - 1\.5rem\);/,
   )
   assert.match(
     styles,
-    /@media \(max-width: 420px\)[\s\S]*?\.inventory-page__section-heading \.ui-button\s*\{\s*width: 100%;/,
+    /@media \(max-width: 390px\)[\s\S]*?\.inventory-page__section-heading \.ui-button\s*\{\s*width: 100%;/,
   )
   assert.match(
     styles,
-    /@media \(min-width: 1120px\) and \(hover: hover\) and \(pointer: fine\)[\s\S]*?\.inventory-page__location-card-stats\s*\{[\s\S]*?grid-column: 2;[\s\S]*?border-top: 0;/,
+    /@media \(min-width: 1024px\)[\s\S]*?\.inventory-page__location-list\s*\{\s*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);/,
   )
 })
 
-test('tablet layout uses an inline navigation bar and compact action row', async () => {
+test('tablet layout keeps inline navigation and a balanced action row', async () => {
   const styles = await readProjectFile(
-    'src/features/inventory/styles/inventory-rebuild.css',
+    'src/features/inventory/styles/inventory-clean.css',
   )
 
   assert.match(
     styles,
-    /@media \(min-width: 768px\) and \(max-width: 1119px\),[\s\S]*?\.stock-app \.stock-app__mobile-nav\s*\{[\s\S]*?position: static;[\s\S]*?background: var\(--color-surface\);/,
+    /@media \(min-width: 768px\)[\s\S]*?\.stock-app \.stock-app__mobile-nav \.inventory-page__tab\s*\{[\s\S]*?flex-direction: row;/,
   )
   assert.match(
     styles,
-    /@media \(min-width: 768px\) and \(max-width: 1119px\),[\s\S]*?\.stock-app \.stock-app__task-strip\s*\{[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/,
+    /@media \(min-width: 768px\)[\s\S]*?\.stock-app \.stock-app__task-strip\s*\{[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/,
   )
   assert.match(
     styles,
-    /\(min-width: 1120px\) and \(hover: none\),[\s\S]*?\(min-width: 1120px\) and \(pointer: coarse\)/,
+    /@media \(min-width: 768px\)[\s\S]*?\.inventory-page__location-list\s*\{\s*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/,
   )
 })
 

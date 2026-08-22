@@ -111,7 +111,7 @@ import '../styles/inventory-page.css'
 import '../styles/inventory-forms.css'
 import '../styles/inventory-history.css'
 import '../styles/inventory-count.css'
-import '../styles/inventory-rebuild.css'
+import '../styles/inventory-clean.css'
 
 const INVENTORY_VIEW_TABS = {
   BOXES: 'BOXES',
@@ -129,7 +129,7 @@ const INVENTORY_NAV_ITEMS = [
   {
     value: INVENTORY_VIEW_TABS.BOXES,
     label: 'Stock',
-    title: 'Inventory',
+    title: 'My Inventory',
     Icon: Boxes,
   },
   {
@@ -1556,6 +1556,29 @@ function InventoryPage() {
           </div>
         </header>
 
+        <nav className="inventory-page__tabs stock-app__mobile-nav" aria-label="Inventory views">
+          {INVENTORY_NAV_ITEMS.map(({ value, label, Icon }) => (
+            <button
+              key={value}
+              type="button"
+              className={`inventory-page__tab ${
+                activeInventoryView === value
+                  ? 'inventory-page__tab--active'
+                  : ''
+              }`}
+              onClick={() => handleInventoryViewChange(value)}
+              aria-current={activeInventoryView === value ? 'page' : undefined}
+            >
+              <Icon
+                className="inventory-page__tab-icon"
+                size={18}
+                aria-hidden="true"
+              />
+              <span>{label}</span>
+            </button>
+          ))}
+        </nav>
+
         <InstallAppPrompt />
 
         {transactionError && (
@@ -1568,8 +1591,8 @@ function InventoryPage() {
         <section className="inventory-page__search-section stock-app__finder">
           <div className="inventory-page__panel-heading inventory-page__search-heading">
             <div>
-              <span>Part finder</span>
-              <h2>Where is it?</h2>
+              <span>Search inventory</span>
+              <h2>Find a part</h2>
             </div>
             <p>{inventorySummary.totalParts} parts on file</p>
           </div>
@@ -1706,8 +1729,8 @@ function InventoryPage() {
         <section className="inventory-page__summary stock-app__snapshot" aria-label="Inventory summary">
           <div className="inventory-page__panel-heading">
             <div>
-              <span>Truck snapshot</span>
-              <h2>What you have</h2>
+              <span>Overview</span>
+              <h2>Inventory totals</h2>
             </div>
           </div>
 
@@ -1768,78 +1791,6 @@ function InventoryPage() {
             </span>
             <strong>{inventorySummary.outOfStock}</strong>
           </Card>
-        </section>
-
-        <section className="inventory-page__tabs stock-app__mobile-nav" aria-label="Inventory views">
-          <p className="inventory-page__tabs-label">Workspace</p>
-
-          <button
-            type="button"
-            className={`inventory-page__tab ${
-              activeInventoryView === INVENTORY_VIEW_TABS.BOXES
-                ? 'inventory-page__tab--active'
-                : ''
-            }`}
-            onClick={() => handleInventoryViewChange(INVENTORY_VIEW_TABS.BOXES)}
-          >
-            <Boxes
-              className="inventory-page__tab-icon"
-              size={18}
-              aria-hidden="true"
-            />
-            <span>Stock</span>
-          </button>
-
-          <button
-            type="button"
-            className={`inventory-page__tab ${
-              activeInventoryView === INVENTORY_VIEW_TABS.MOST_USED
-                ? 'inventory-page__tab--active'
-                : ''
-            }`}
-            onClick={() => handleInventoryViewChange(INVENTORY_VIEW_TABS.MOST_USED)}
-          >
-            <TrendingUp
-              className="inventory-page__tab-icon"
-              size={18}
-              aria-hidden="true"
-            />
-            <span>Usage</span>
-          </button>
-
-          <button
-            type="button"
-            className={`inventory-page__tab ${
-              activeInventoryView === INVENTORY_VIEW_TABS.HEALTH
-                ? 'inventory-page__tab--active'
-                : ''
-            }`}
-            onClick={() => handleInventoryViewChange(INVENTORY_VIEW_TABS.HEALTH)}
-          >
-            <ShieldCheck
-              className="inventory-page__tab-icon"
-              size={18}
-              aria-hidden="true"
-            />
-            <span>Checkup</span>
-          </button>
-
-          <button
-            type="button"
-            className={`inventory-page__tab ${
-              activeInventoryView === INVENTORY_VIEW_TABS.EXPORT
-                ? 'inventory-page__tab--active'
-                : ''
-            }`}
-            onClick={() => handleInventoryViewChange(INVENTORY_VIEW_TABS.EXPORT)}
-          >
-            <Download
-              className="inventory-page__tab-icon"
-              size={18}
-              aria-hidden="true"
-            />
-            <span>Files</span>
-          </button>
         </section>
 
         <section className="inventory-page__content stock-app__content">
