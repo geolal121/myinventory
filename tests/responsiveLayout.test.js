@@ -21,10 +21,10 @@ test('inventory workbench has distinct native-style phone and desktop navigation
   )
   assert.match(
     styles,
-    /@media \(min-width: 1120px\)[\s\S]*?grid-template-columns: 17rem minmax\(0, 1fr\)/,
+    /@media \(min-width: 900px\) and \(orientation: landscape\), \(min-width: 1120px\)[\s\S]*?grid-template-columns: 17rem minmax\(0, 1fr\)/,
   )
-  assert.match(colors, /--color-brand-deep:\s*#17181a;/)
-  assert.match(colors, /--color-utility:\s*#d9dadc;/)
+  assert.match(colors, /--color-brand-deep:\s*#162a3e;/)
+  assert.match(colors, /--color-utility:\s*#dbe7f3;/)
   assert.match(colors, /--gradient-page:\s*var\(--color-background\);/)
 })
 
@@ -43,7 +43,7 @@ test('inventory workbench protects narrow phones and keeps desktop location rows
   )
   assert.match(
     styles,
-    /@media \(min-width: 1120px\)[\s\S]*?\.inventory-page__location-card-stats\s*\{[\s\S]*?grid-column: 2;[\s\S]*?border-top: 0;/,
+    /@media \(min-width: 900px\) and \(orientation: landscape\), \(min-width: 1120px\)[\s\S]*?\.inventory-page__location-card-stats\s*\{[\s\S]*?grid-column: 2;[\s\S]*?border-top: 0;/,
   )
 })
 
@@ -59,6 +59,10 @@ test('tablet layout uses an inline navigation bar and compact action row', async
   assert.match(
     styles,
     /@media \(min-width: 768px\) and \(max-width: 1119px\)[\s\S]*?\.stock-app \.stock-app__task-strip\s*\{[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/,
+  )
+  assert.match(
+    styles,
+    /@media \(min-width: 900px\) and \(max-width: 1119px\) and \(orientation: landscape\)[\s\S]*?grid-template-columns: 13rem minmax\(0, 1fr\);/,
   )
 })
 
